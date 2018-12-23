@@ -1,0 +1,59 @@
+public class ActiveDirectoryUserMapper
+    {
+        private TwoWayMap<ActiveDirectoryUserName, GithubUserName> mapGitHubToActiveDirectory;
+
+        public ActiveDirectoryUserMapper(TwoWayMap<ActiveDirectoryUserName, GithubUserName> mapGitHubToActiveDirectory)
+        {
+            this.mapGitHubToActiveDirectory = mapGitHubToActiveDirectory;
+        }
+
+        public ActiveDirectoryUserName FromGithub(GithubUserName name)
+        {
+            return mapGitHubToActiveDirectory.Reverse[name];
+        }
+
+        public GithubUserName ToGithub(ActiveDirectoryUserName name)
+        {
+            return mapGitHubToActiveDirectory.Forward[name];
+        }
+    }
+
+    public class TwoWayMap<T1, T2>
+    {
+        private Dictionary<T1, T2> forward = new Dictionary<T1, T2>();
+        private Dictionary<T2, T1> backward = new Dictionary<T2, T1>();
+
+        // Add both values to both dictationaries in reverse
+        public void Add(T1 t1, T2 t2)
+        {
+            forward.Add(t1, t2);
+            backward.Add(t2, t1);
+        }
+
+        // New up our indexers
+        public TwoWayMap()
+        {
+            this.Forward = new Indexer<T1, T2>(forward);
+            this.Reverse = new Indexer<T2, T1>(backward);
+        }
+
+        public class Indexer<T3, T4>
+        {
+            private Dictionary<T3, T4> _dictionary;
+
+            public Indexer(Dictionary<T3, T4> dictionary)
+            {
+                _dictionary = dictionary;
+            }
+
+            // overload the indexer
+            public T4 this[T3 index]
+            {
+                get { return _dictionary[index]; }
+                set { _dictionary[index] = value; }
+            }
+        }
+
+        public Indexer<T1, T2> Forward { get; private set; }
+        public Indexer<T2, T1> Reverse { get; private set; }
+    }

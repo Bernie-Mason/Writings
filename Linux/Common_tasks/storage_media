@@ -1,0 +1,248 @@
+Storage Media
+// From the Linux Command Line: Chapter 15
+
+Here we will consider data at the device level. Linux has some amazing capabilities for handling storage devices, whether physical storage such as hard disks, network storage, or virtual storage devices like RAID (redundant array of independent disks) and LVM (logical volume manager).
+
+This is not a book about system admin! We will only be concerned with USB stuff here.
+
+mount - Mount a filesystem
+unmount
+fdisk - Partition table manipulator
+fsck - Check and repair a filesystem
+mkfs - Create a filesystem
+dd = Write block-oriented data directly to a device
+genisoimage (mkisofs) - Create an ISO 9660 image file
+wodim - Write data to optical storage media
+md5cum - Calculate an MD5 checksum
+
+Mounting and Unmounting storage media
+
+The first step in managing a storage device is attaching the device to the filesystem tree. This process, called mounting, allows the device to participate with the operating system. Unix-like operating systems, like Linux, maintain a single filesystem tree with devices attached at various points. This contrasts with other operating systems such as MS-DOS and Windows that maintain separate trees for each device
+
+A file named etc/fstab lists the devices (typically hard disk partitions) that are to be mounted at boot time.
+
+Typing:
+
+$ mount
+
+Yields a long list of all mounted filesystems. The format of the listing is 'device "on" mount_point "type" filesystemtype'
+
+Unmounting
+Why it is important
+If you look at the output of the free command, which displays statistics about memory usage, you will see a statistic called buffers. Computer systems are designed to go as fast as possible. One of the impediments to system speed is slow devices. Printers are a good example. Even the fastest printer is extremely slow by computer standards. A computer would be very slow indeed if it had to stop and wait for a printer to finish printing a page. IN the early days of PCs (before multitasking), this was a real problem. If you were working on a spreadsheet or text document, the computer would stop and become unavailable every time you printed. This problem was solved by the advent of the printer buffer, a device containing some RAM memory, that would sit between the computer and the printer. With the printer buffer in palce, the computer would send the printer output to the buffer, and it would quickly be stored in RAM so the computer could go back to working without waiting. Meanwhile, the printer buffer would slowly spool the data to the printer from the buffer's memory at a speed which the printer could accept.
+This idea of buffering is used extensively in computers to make them faster. Don't let the need to occasionally read or write data to or from slow devices impede the speed of the system. Operating systems store data that has been read from, and is written to, storage devices in memory for as long as possible before actually having to interact with the slower device. On a Linux system you will notice that the system seems to fill up memory the longer it is used. This does not mean that Linux is "using" all the memory but that Linux is taking advantage of all available memory to do as much buffering as it can.
+This buffering allows writing to storage devices to be done very quickly, because the writing to the physical device is being deferred to a future time. In the meantime, the data destined for the device is piling up in memory. From time to time, the operating system will write this data to the physical device.
+Unmounting a device entails writing all the remaining data to the device so that it can be safely removed. If the device is removed without first being unmounted, the possibility exists that not all the data destined for the device has been transferred. In some cases, this data may include vital directory updates, which will lead to filesystem corruption, one of the worst things that can happen on a computer.
+
+Determining Device Names
+It's sometimes difficult to determine the name of a device. In the old days this wasn't too hard but in recent years it's become tricky as typical desktop hardware configuration has become quite dynamic, and Linux has evolved to become more flexible than its ancestors.
+
+To look at how the system names it's devices we can use:
+
+ls /dev
+
+/dev/fd - floppy disk drives. 
+/dev/hd - IDE (PATA) disks on older systems
+/dev/sd - SCSI disks. The kernel treats all disk-like devices (including PATA/SATA hard disks), flash drives and USB mass storage devices as portable music devices as SCSI disks. 
+/dev/sr - optical drives
+
+The contents of this listing reveal some patterns of device naming. In addition, we often see symbolic links such as /dev/cdrom, /dev/dvd
+
+If you're working with a system that doesn't automatically mount removeable devices, you can use the following technique to determine how the removable device is named when it is attached. First, start a real time view of the var/log/messages file
+
+[bernie@angergos_vb log]$ tail -f /var/log/messages.log
+tail: cannot open '/var/log/messages.log' for reading: Permission denied
+tail: no files remaining
+[bernie@angergos_vb log]$ sudo tail -f /var/log/messages.log
+Apr 18 19:50:31 angergos_vb kernel: sd 3:0:0:0: [sdb] 7839744 512-byte logical blocks: (4.01 GB/3.74 GiB)
+Apr 18 19:50:31 angergos_vb kernel: sd 3:0:0:0: [sdb] Write Protect is off
+Apr 18 19:50:31 angergos_vb kernel: sd 3:0:0:0: [sdb] Write cache: disabled, read cache: enabled, doesn't support DPO or FUA
+Apr 18 19:50:31 angergos_vb colord[723]: /usr/lib/colord/colord-sane: error while loading shared libraries: libsane.so.1: cannot open shared object file: No such file or directory
+Apr 18 19:50:31 angergos_vb kernel:  sdb: sdb1
+Apr 18 19:50:31 angergos_vb kernel: sd 3:0:0:0: [sdb] Attached SCSI removable disk
+Apr 18 19:50:31 angergos_vb kernel: FAT-fs (sdb1): Volume was not properly unmounted. Some data may be corrupt. Please run fsck.
+Apr 18 19:50:31 angergos_vb dbus-daemon[433]: Activating service name='org.gnome.Shell.HotplugSniffer'
+Apr 18 19:50:31 angergos_vb udisksd[633]: Mounted /dev/sdb1 at /run/media/bernie/Transcend on behalf of uid 1000
+Apr 18 19:50:31 angergos_vb dbus-daemon[433]: Successfully activated service 'org.gnome.Shell.HotplugSniffer'
+
+These two lines are particularly interesting
+Apr 18 19:50:31 angergos_vb kernel:  sdb: sdb1
+Apr 18 19:50:31 angergos_vb kernel: sd 3:0:0:0: [sdb] Attached SCSI removable disk
+
+This tells us that sdb is the name of our device and sdb1 is the first partition of that device.
+
+With our device name in hand, we can now mount the flash drive elsewhere:
+
+[bernie@angergos_vb mnt]$ sudo mkdir flash
+[bernie@angergos_vb mnt]$ ls
+flash
+[bernie@angergos_vb mnt]$ sudo mount /dev/sdb1 /mnt/flash
+[bernie@angergos_vb mnt]$ df
+Filesystem     1K-blocks    Used Available Use% Mounted on
+dev              4085688       0   4085688   0% /dev
+run              4090132     992   4089140   1% /run
+/dev/sda2       14536016 7016176   6761724  51% /
+tmpfs            4090132       0   4090132   0% /dev/shm
+tmpfs            4090132       0   4090132   0% /sys/fs/cgroup
+/dev/sda1         248775   79139    152484  35% /boot
+tmpfs            4090132       4   4090128   1% /tmp
+tmpfs             818024      36    817988   1% /run/user/1000
+/dev/sr0         1811520 1811520         0 100% /run/media/bernie/ANTERGOS
+/dev/sdb1        3915808      80   3915728   1% /mnt/flash
+
+
+Creating new filesystems
+Let's say that we want to reformat a flash drive with a Linux native filesystem, rather than the FAT 32 system that it has now. This involves two steps: first (optionally) creating a new partition layout if the existing one is not to our liking and second, creating a new, empty filesystem on the drive.
+
+Manipulating partitions with fdisk
+This fdisk  program allows us to interact directly with disk-like devices (such as hard disks and disk drives) at a very low level. With this tool we can edit, delete and create partitions on the device. To work with our flash drive we must first unmount it (if needed) and then invoke the fdisk program as follows..
+
+[bernie@antergos_vb ~]$ sudo umount /dev/sdb1
+[bernie@antergos_vb ~]$ sudo fdisk /dev/sdb
+
+Notice that we specify the device in terms of the entire device and not the partition number. After the program starts up, we'll see the following prompt:
+
+Welcome to fdisk (util-linux 2.29.2).
+Changes will remain in memory only, until you decide to write them.
+Be careful before using the write command.
+
+Command (m for help): m
+
+Help:
+
+  DOS (MBR)
+   a   toggle a bootable flag
+   b   edit nested BSD disklabel
+   c   toggle the dos compatibility flag
+
+  Generic
+   d   delete a partition
+   F   list free unpartitioned space
+   l   list known partition types
+   n   add a new partition
+   p   print the partition table
+   t   change a partition type
+   v   verify the partition table
+   i   print information about a partition
+
+  Misc
+   m   print this menu
+   u   change display/entry units
+   x   extra functionality (experts only)
+
+  Script
+   I   load disk layout from sfdisk script file
+   O   dump disk layout to sfdisk script file
+
+  Save & Exit
+   w   write table to disk and exit
+   q   quit without saving changes
+
+  Create a new label
+   g   create a new empty GPT partition table
+   G   create a new empty SGI (IRIX) partition table
+   o   create a new empty DOS partition table
+   s   create a new empty Sun partition table
+
+The first thing that we'll do is examine the existing partition layout using the p command.
+
+Command (m for help): p
+Disk /dev/sdb: 3.8 GiB, 4013948928 bytes, 7839744 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x00000000
+
+Device     Boot Start     End Sectors  Size Id Type
+/dev/sdb1         256 7839743 7839488  3.8G  b W95 FAT32
+
+In this example, the partition is identified as a Windows 95 FAT32 (file allocation table) partition. Some programs will use this identifier to limit the kinds of operations that can be done to the disk, but most of the time changiing the identifier is not critical. Here, we will change it to indicate a linux partition. To do this, we must find out what ID is used to identify a Linux partition. In the listing above, we see that the ID  b is used to specify the existing parition. Typing l into our fdisk prompt yields a large list of possible partition types.
+
+Command (m for help): l
+
+ 0  Empty           24  NEC DOS         81  Minix / old Lin bf  Solaris        
+ 1  FAT12           27  Hidden NTFS Win 82  Linux swap / So c1  DRDOS/sec (FAT-
+ 2  XENIX root      39  Plan 9          83  Linux           c4  DRDOS/sec (FAT-
+ 3  XENIX usr       3c  PartitionMagic  84  OS/2 hidden or  c6  DRDOS/sec (FAT-
+ 4  FAT16 <32M      40  Venix 80286     85  Linux extended  c7  Syrinx         
+ 5  Extended        41  PPC PReP Boot   86  NTFS volume set da  Non-FS data    
+ 6  FAT16           42  SFS             87  NTFS volume set db  CP/M / CTOS / .
+ 7  HPFS/NTFS/exFAT 4d  QNX4.x          88  Linux plaintext de  Dell Utility   
+ 8  AIX             4e  QNX4.x 2nd part 8e  Linux LVM       df  BootIt         
+ 9  AIX bootable    4f  QNX4.x 3rd part 93  Amoeba          e1  DOS access     
+ a  OS/2 Boot Manag 50  OnTrack DM      94  Amoeba BBT      e3  DOS R/O        
+ b  W95 FAT32       51  OnTrack DM6 Aux 9f  BSD/OS          e4  SpeedStor      
+ c  W95 FAT32 (LBA) 52  CP/M            a0  IBM Thinkpad hi ea  Rufus alignment
+ e  W95 FAT16 (LBA) 53  OnTrack DM6 Aux a5  FreeBSD         eb  BeOS fs        
+ f  W95 Ext'd (LBA) 54  OnTrackDM6      a6  OpenBSD         ee  GPT            
+10  OPUS            55  EZ-Drive        a7  NeXTSTEP        ef  EFI (FAT-12/16/
+11  Hidden FAT12    56  Golden Bow      a8  Darwin UFS      f0  Linux/PA-RISC b
+12  Compaq diagnost 5c  Priam Edisk     a9  NetBSD          f1  SpeedStor      
+14  Hidden FAT16 <3 61  SpeedStor       ab  Darwin boot     f4  SpeedStor      
+16  Hidden FAT16    63  GNU HURD or Sys af  HFS / HFS+      f2  DOS secondary  
+17  Hidden HPFS/NTF 64  Novell Netware  b7  BSDI fs         fb  VMware VMFS    
+18  AST SmartSleep  65  Novell Netware  b8  BSDI swap       fc  VMware VMKCORE 
+1b  Hidden W95 FAT3 70  DiskSecure Mult bb  Boot Wizard hid fd  Linux raid auto
+1c  Hidden W95 FAT3 75  PC/IX           bc  Acronis FAT32 L fe  LANstep        
+1e  Hidden W95 FAT1 80  Old Minix       be  Solaris boot    ff  BBT 
+
+We enter t at the prompt and enter a new hex ID:
+
+Command (m for help): t
+Selected partition 1
+Partition type (type L to list all types): 83
+Changed type of partition 'W95 FAT32' to 'Linux'.
+
+This completes all the changes that we wished to make. Up to this point, the device has been untouched (all the changes have been stored in memory, not the physical device), so we will write the modified partition table to the device and exit.
+	To do this we enter w at the prompt:
+
+Command (m for help): w
+The partition table has been altered.
+Calling ioctl() to re-read partition table.
+Re-reading the partition table failed.: Device or resource busy
+
+The kernel still uses the old table. The new table will be used at the next reboot or after you run partprobe(8) or kpartx(8).
+
+Creating a new filesystem with mkfs
+With our partition editiing done (lightweight though it may have been), it's time to create a new filesystem on our flashdrice. To do this, we will use mkfs (short for make filesystem), which can create filesystems in a variety of formats. To create an ext3 filesystem on the device, we use the -t option to specify the ext3 system type, followed by the name of the device containing the partition we wish to format:
+
+[bernie@antergos_vb ~]$ sudo mkfs -t ext3 /dev/sdb1
+mke2fs 1.43.4 (31-Jan-2017)
+/dev/sdb1 contains a vfat file system labelled 'Transcend'
+Proceed anyway? (y,N) y
+Creating filesystem with 979936 4k blocks and 245280 inodes
+Filesystem UUID: 803a4cbc-e76d-4643-b730-84b312d51f22
+Superblock backups stored on blocks: 
+	32768, 98304, 163840, 229376, 294912, 819200, 884736
+
+Allocating group tables: done                            
+Writing inode tables: done                            
+Creating journal (16384 blocks): done
+Writing superblocks and filesystem accounting information:     
+
+To reformat the device to its original FAT32 filesystem, specify vfat as the filesystem type:
+$ sudo mkfs -t vfat /dev/sdb1
+
+This process of partitioning and formatting can be used anytime additional storage devices are added to the system. While working with a tiny flash drive, the same process can be applied to internal hard disks and other removable storage devices.
+
+Testing and repairing filesystems
+
+$ fsck
+
+In our earlier discussion of the /etc/fstab file, we saw some mysterious digits at the end of each line. Each time the system boots, it routinely checks the integrity of the filesystems before mounting them. This is done by the fsck program (filesystem check). The last number in each fstab entry specifies the order in which the devices are to be checked. In our example above, we see that that the root filesystem is checked first, followed by the home and boot filesystems. Devices with a zero as their last digit are not routinely checked.
+
+
+Moving data directly to and from devices
+While we usually think of data on our computers as being in files, it is also possible to think of data in its raw form. If we look at a disk drive we see that it consists of a large number of blocks of data that the operating system sees as directories and files. If we could treat a disk drive as simply a large collection of data blocks, we could perform useful tasks, such as cloning devices. 
+
+$ dd
+
+This program performs this task. It copies blocks of data from one place to another. It uses a unique syntax (for historical reasons) and is usually used this way:
+
+$ dd id=input_file of=output_file [bs=block_size [count=blocks]]
+
+If we had two flash drives of the same size and we wanted to exactly copy the first drive to the second. If we attached both drives to the computer and they were assigned to the devices /dev/sdb and /dev/sdc respectively, we would copy everything on the first drive to the second drive with the following:
+
+$ dd if=/dev/sdb of=/dev/sdc
+

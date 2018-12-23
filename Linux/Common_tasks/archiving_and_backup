@@ -1,0 +1,180 @@
+Archiving and backup
+
+One of the primary tasks of a computer system's administrator is to keep the system's data secure. One way this is done is by performing timely backups of the system's files. Even if you're not a system administrator it's useful to make copies of things and to move large collections of files from place to place and from device to device.
+
+gzip - compress or expand files
+bzip2 - A block sorting file compressor		 
+tar - tape-archiving utility
+zip - package and compress files
+rsync - remote file and directory synchronization
+
+Compressing files
+Throughout the history of computing, there has been a struggle to get the most data onto the smallest available space, whether the space be memory, storage devices, or network bandwidth. Many of the data services we use today owe their existence to effective data compression.
+Data compression is the process of removing redundancy from data.
+Compression algorithms fall into two catagories, lossless and lossy. Lossless compression preserves all the data contained in the original. Lossy compression, removes data as the compression is performed, to allow more compression to be applied. JPEG and MP3 are examples of lossy compression. As most data files on our computer cannot tolerate any data loss, the discussion here will be of lossless compression.
+
+gzip 
+This program is used to compress one or more files.
+
+[bernie@antergos_vb Writings]$ ls -l /dev > foo.txt
+[bernie@antergos_vb Writings]$ ls -l foo.*
+-rw-rw-r-- 1 bernie users 8500 Apr 20 10:44 foo.txt
+[bernie@antergos_vb Writings]$ gzip foo.txt
+[bernie@antergos_vb Writings]$ ls -l foo.*
+-rw-rw-r-- 1 bernie users 1293 Apr 20 10:44 foo.txt.gz
+[bernie@antergos_vb Writings]$ gunzip foo.txt
+[bernie@antergos_vb Writings]$ ls -l foo.*
+-rw-rw-r-- 1 bernie users 8500 Apr 20 10:44 foo.txt
+
+In this example we created a file called foo.txt and compressed it using gzip which added .gz to the name. We can see that the zipped file has the same permissions as the original file and the same timestamp. Then we ran gunzip to uncompress the file. Post uncompression we can see that the file size is the same as the original file.
+
+To view compression stats on an already compressed file:
+[bernie@antergos_vb Writings]$ gzip -l foo.txt
+         compressed        uncompressed  ratio uncompressed_name
+               1293                8500  85.1% foo.txt
+
+To write compression to standard output (keeps original file extant)
+[bernie@antergos_vb Writings]$ gzip -c foo.txt
+
+To force write compression even if a file exists with the compressed file name.
+[bernie@antergos_vb Writings]$ gzip -f foo.txt
+
+To verbose some messages during compression:
+[bernie@antergos_vb Writings]$ gzip -v foo.txt
+foo.txt:	 85.1% -- replaced with foo.txt.gz
+
+To test the integrity of a compressed file:
+[bernie@antergos_vb Writings]$ gzip -tv foo.txt
+foo.txt.gz:	 OK
+
+Note that it isn't nescessary to specify the .gz when working with compressed files.
+
+gzip can also be used in interesting ways via standard input and output
+
+Finally we can use an equivalent of gzip -c called zcat which and can be used like the cat command on gzip-compressed files.
+
+Do not try to compress files that have already been compressed (like a .jpg) chances are you'll end up making the file larger! Each time a compression is done there needs to be an overhead that describes the compression performed on the file.
+
+The bzip2 - higher compression at the cost of speed
+This is similar to gzip but uses a different compression algorithm, which achieves higher levels of compression at the cost of speed. bzip2 and bunzip2 work in much the same way as gzip and gunzip. All options (except -r) are available meaning that you can't recursively zip a directories contents.
+
+Archiving files.
+This is a common file-management task used in conjunction with compression. Archiving is the process of gathering up many files and bundling them into a single large file. This is often done  as part of system backups.
+
+tar - Tape Archiving Utility
+In the Unix-like world of software, the tar program is the classic tool archiving files. Its name, short for tape archive, reveals its roots as a tool for making backup tapes. While it is still used for that task, it is equally adept on other storage devices. We often see filenames that end with the extension .tar and .tgz which indicate a "plain" tar archive and gzipped tar archive respectively. A tar archive can consist of a group of separate files, one or more directory hierarchies, or a mixture of both. The command syntax works like this:
+
+tar mode[options] pathname...
+
+Where modeis one of the operating modes shown below
+
+Mode 	Description
+c 		Create an archive from a list of files and/or directories
+x 		Extract an archive
+r 		Append specified pathnames to the end of an archive
+t 		List the contents of an archive
+
+tar uses a slightly odd way of expressing options, so we'll need some examples to show how it works.
+
+[bernie@antergos_vb ~]$ tar cf playground.tar playground
+[bernie@antergos_vb ~]$ ll
+total 2216
+   4 drwxrwxr-x   3 bernie users    4096 Apr 18 12:33 aur
+   4 drwxr-xr-x   2 bernie users    4096 Apr 18 10:53 Desktop
+   4 drwxr-xr-x   3 bernie users    4096 Apr 18 12:34 Documents
+   4 drwxr-xr-x   2 bernie users    4096 Apr 18 10:53 Downloads
+   4 -rw-rw-r--   1 bernie users    3808 Apr 19 13:15 index.php
+   4 drwxr-xr-x   2 bernie users    4096 Apr 18 10:53 Music
+   4 drwxr-xr-x   2 bernie users    4096 Apr 18 10:53 Pictures
+   4 drwxrwxr-x 103 bernie users    4096 Apr 20 10:21 playground
+2172 -rw-rw-r--   1 bernie users 2222080 Apr 20 11:29 playground.tar
+   4 drwxr-xr-x   2 bernie users    4096 Apr 18 10:53 Public
+   4 drwxr-xr-x   2 bernie users    4096 Apr 18 10:53 Templates
+   4 drwxr-xr-x   2 bernie users    4096 Apr 18 10:53 Videos
+
+
+This command creates a tar archive named playground.tar which contains the entire playground directory hierarchy. We can see that the mode and the f option, which is used not to force but to specify the name of the tar archive, may be joined together and not require a leading dash. Note, however, that the mode must always be specified first, before any other option.
+
+To list the contents of an archive
+[bernie@antergos_vb ~]$ tar tf playground.tar
+
+Now let's extract the playground in a new location. 
+
+[bernie@antergos_vb ~]$ mkdir foo
+[bernie@antergos_vb ~]$ cd foo
+[bernie@antergos_vb foo]$ tar xf ../playground.tar
+[bernie@antergos_vb foo]$ ll
+total 4
+4 drwxrwxr-x 103 bernie users 4096 Apr 20 10:21 playground
+
+
+There is one caveat to this process, unless you're operating as a superuser, files and directories extracted from archives take on the ownership of the suer performing the restoration, rather than the orginal owner. 
+Another interesting behavior of tar is the way it handles pathnames in archives. The default for pathnames is relative, rather than absolute. tar does this by simply removing any leading slash from the pathname when creating the archive. To demonstrate, we will recreate our archive, this time specifying an absolute pathname:
+
+[bernie@antergos_vb ~]$ tar cf playground2.tar ~/playground
+
+
+[bernie@antergos_vb ~]$ cd foo
+[bernie@antergos_vb foo]$ tar xf ../playground2.tar
+[bernie@antergos_vb foo]$ ls
+home  playground
+[bernie@antergos_vb foo]$ ls home
+bernie
+[bernie@antergos_vb foo]$ ls home/bernie
+playground
+[bernie@antergos_vb foo]$ 
+
+Here we can see that when we extracted our second archive, it re-created the directory home/me/playground relative to our current working directory, ~/foo, not relative to the root directory, as would have been the case with an absolute pathname. This allows us to extract archives to any location rather than being forced to extract them to their original locations. Repeating the exercise using the -v option will give a clearer idea of what's going on.
+
+Let's consider a hypothetical, yet practical, example of tar in action. Imagine we want to copy the home directory and its contents from one system to another and we have a large USB hard drive that we can use for the transfer. On our modern Linux system, the drive is "automagically" mounted in the /media directory. Let's also imagine that the disk has a volume name of BigDisk when we attack it. To make the tar archive, we can do the following.
+
+[bernie@antergos_vb ~]$ sudo tar cf /media/BigDisk/home.tar /home
+
+After the tar file of your home folder is written the usb disk can be unmounted, removed and mounted on a new machine. To extract the archive on the new machine we can use:
+
+[bernie@antergos_vb /]$ sudo tar xf /media/BigDisk/home.tar 
+
+What's important to see here is that we must first change directory to / so that the extraction is relative to the root directory, since all pathnames within the archive are relative.
+
+We can limit what is extracted by using 
+
+tar xf archive.tar pathname
+
+Multiple pathnames can be specified. Note that the pathname must be the full, exact relative pathname as stored in the archive. When specifying pathnames, wildcards  are not normal supported; however, the GNU version of tar (the most common version) supports them with the --wildcards option. 
+
+
+tar is often used in conjunction with find to produce archives. In this example, we will use find to produce a set of files to include in an archive:
+
+[bernie@antergos_vb ~]$ find playground -name 'file-A' -exec tar rf playground.tar '{}' '+' 
+
+tar is a good way to create incremental backups of a directory tree or an entire system. By using find to match files newer than a time-stamp file, we could create an archive that contains only files never than the last archive, assuming that the timestamp file is updated right after each archive is created.
+
+tar can also make use of standard input and output:
+
+[bernie@antergos_vb ~]$ find playground -name 'file-A' | tar cf - --files-from=- | gzip > playground.tgz
+
+In this example, we used the find program to produce a list of matching files and piped them into tar. If the filename - is specified, it is taken to mean standard input or output as needed. This convention of  using - to represent standard input/output is used by a number of other programs. The --files-from option (which may also be specified as -T) causes tar to read its list of pathnames from a file rather than the command line. Lastly, the archive produced by tar is piped into gzip to create the compressed archive playground.tgz.
+
+
+
+zip 
+The zip program is both a compression tool and an archiver. The file format used by the program is familiar to Windows users, as it reads .zip files. In Linux, however, gzip is the prodominant compression tool with bzip2 being a close second and only really uses zip to exchange files with Windows.
+
+Synchronizing files and directories
+A common strategy for maintaining a backup copy of system involves keeping one or more directories synchronized with another directory (or directories) located on either the local system (usually a removable storage device of some kind) or a remote system. 
+
+rsync
+Remote file and directory synchronisation
+In the Unix-like world, the preferred tool for this task is rsync. This program can synchronize both local and remote directories by using the rsync remote update protocol, which allows rsync to quickly detect the differences between two directories and perform the minimum amount of copying required to bring them into sync. This makes rsync very fast and economical to use, compared to other kinds of copy programs. rsync is invoked like this:
+
+rsync options source destination
+
+Where source and destination are each one of the following:
+A local file or directory
+A remote file or directory in the form [user@]host:path
+A remote rsync server specified with a URI of rsync://[user@]host[:port]/path
+
+[bernie@antergos_vb ~]$ rsync -av playground foo
+
+
+The real beauty of rsync is that it can be used over a network. The first is with another system that has 

@@ -1,0 +1,294 @@
+The reality is that users will often data that isn't valid and cannot be used. Model validation is the process of ensuring the data received by the application is suitable for binding to the mode and, when this is not the case, providing useful information to the user that will help explain the problem.
+The first part of the process, checking the data received, is one of the key ways to preserve the integrity of the domain model. Rejecting data that doesn't make sense in the context of the domain can prevent odd and unwanted states arising in the application.
+The second part, helping the user correct the problem, is equally important. Without the information and feedback that they need to interact with the application, users become frustrated and confused.
+Fortunately, the MVC Framework has a lot of support for model validation!
+
+Consider the following model class:
+
+public class Appointment
+{
+    public string ClientName { get; set; }
+
+    [DataType(DataType.Date)]
+    public DateTime Date { get; set; }
+    public bool TermsAccepted { get; set; }
+}
+
+The Appointment model class defines three properties and we have used the DataType attribute to indicate that the Date property should be expressed as a date without a time component. We have also created a Home controller for the example project and defined action methods that operate on the Appointment class:
+
+public class HomeController : Controller
+{
+    // GET: Home
+    public ActionResult MakeBooking()
+    {
+        return View(new Appointment {Date = DateTime.Now});
+    }
+
+    [HttpPost]
+    public ViewResult MakeBooking(Appointment appt)
+    {
+        //statements to store new Appointment in a repository would go here
+        return View("Completed", appt);
+    }
+}
+
+We have defined two versions of the MakeBooking action method. The one that is of most interest is the version to which the HttpPost attribute has been applied, since this is the version where model binding will be used to construct the Appointment parameter object.
+
+One way that we can validate our model is explicitly in the Controller:
+[HttpPost]
+public ViewResult MakeBooking(Appointment appt)
+{
+
+    if (string.IsNullOrEmpty(appt.ClientName))
+    {
+        ModelState.AddModelError("ClientName", "Please enter your name");
+    }
+
+    if (ModelState.IsValidField("Date") && DateTime.Now > appt.Date)
+    {
+        ModelState.AddModelError("Date", "Please enter a valid date");
+    }
+    if (!appt.TermsAccepted)
+    {
+        ModelState.AddModelError("TermsAccepted", "Please accept the terms!");
+    }
+    if (ModelState.IsValid)
+    {
+        //statements to store new Appointment in a repository would go here
+        return View("Completed", appt);
+    }
+    else
+    {
+        return View();
+    }
+}
+
+Specifying Validation Rules Using Metadata
+The MVC Framework supports the use of metadata to express model validation rules. The advantage of using metadata is that the validation rules are enforced anywhere that the binding process is applied throughout the application, not just in a single action method. The validation attributes are detected and enforced by the built-in default model binder class, DefaultModelBinder.
+Here's an example of using model validation rules:
+public class Appointment
+{
+    [Display(Name = "Your Name: ")]
+    [Required(ErrorMessage = "Please enter your name")]
+    public string ClientName { get; set; }
+
+    [Display(Name = "Date of Appointment: ")]
+    [DataType(DataType.Date)]
+    [Required(ErrorMessage = "Please enter a date")]
+    public DateTime Date { get; set; }
+
+    [Range(typeof(bool), "true", "true", ErrorMessage = "You must accept the terms")]
+    public bool TermsAccepted { get; set; }
+}
+
+The Required attribute (unsurprisingly) specifies that it is a validation error if the user doesn't submit a value for the property. The Range attribute specifies a subset of acceptable values. False is not an acceptable value for our checkbox so we specify that between "true" and "true" is acceptable.
+
+All of the validation attrbutes support specifying a custom error message by setting a value for the ErrorMessage property. If there is no custom error message, then default messages will be used
+
+Creating a Custom Property Validation Attribute
+The trick of using the Range attribute to validate the checkbox is a little clunky. Fortunately, we can create our own custom attribute derived from the ValidationAttribute class and implementing validation logic. This is a lot more useful:
+
+public class MustBeTrueAttribute : ValidationAttribute
+{
+    public override bool IsValid(object value)
+    {
+        return value is bool && (bool) value; // If both are true (the object passed in is a bool and value is equal to true) then we return true and the object is validated.
+    }
+}
+
+This class defines a new attribute which overrides the IsValid method of the base class. The validation logic is simple; a value is valid if it is a bool that has a value of true. I indicate that a value is valid by returning true from the IsValid method. We can now apply this attribute to our model property:
+...
+[MustBeTrue(ErrorMessage = "You must accept the terms")]
+public bool TermsAccepted { get; set; }
+...
+
+
+Deriving from the Built-in Validation Attributes
+Aside from building new classes from scratch we can also derive new classes from the built-in attributes, which gives me the ability to extend their behavior.
+
+For example:
+
+public class FutureDateAttribute : RequiredAttribute
+{
+    public override bool IsValid(object value)
+    {
+        return base.IsValid(value) && ((DateTime)value) > DateTime.Now;
+    }
+}
+
+Creating a Model Validation Attribute
+We can use attributes to validate the entire model allow us to raise entire model level errors.
+
+public class NoJoeOnMondaysAttribute : ValidationAttribute
+{
+
+    public NoJoeOnMondaysAttribute()
+    {
+        ErrorMessage = "Joe cannot book on Mondays";
+    }
+
+    public override bool IsValid(object value)
+    {
+        Appointment app = value as Appointment;
+        if (app == null || string.IsNullOrEmpty(app.ClientName) || app.Date == null)
+        {
+            // I don't have a model of the right type to validate, or I don't have
+            return true;
+        }
+        else
+        {
+            return !(app.ClientName == "Joe" && app.Date.DayOfWeek == DayOfWeek.Monday);
+        }
+    }
+}
+
+Which is applied to the whole Appointment class:
+
+namespace ModelValidation.Models
+{
+    [NoJoeOnMondays]
+    public class Appointment
+    {
+        [Display(Name = "Your Name: ")]
+        [Required(ErrorMessage = "Please enter your name")]
+        public string ClientName { get; set; }
+
+        [Display(Name = "Date of Appointment: ")]
+        [DataType(DataType.Date)]
+        [FutureDate(ErrorMessage = "Please enter a date")]
+        public DateTime Date { get; set; }
+
+        //[Range(typeof(bool), "true", "true", ErrorMessage = "You must accept the terms")]
+        [MustBeTrue(ErrorMessage = "You must accept the terms")]
+        public bool TermsAccepted { get; set; }
+    }
+}
+
+Note that property level validation is applied before model level validation. If there is an property validation error then you will not see any potential model level errors.
+
+Defining Self-Validating Models
+This is where the validation logic is part of the model class
+
+[NoJoeOnMondays]
+public class Appointment : IValidatableObject
+{
+    public string ClientName { get; set; }
+
+    [DataType(DataType.Date)]
+    public DateTime Date { get; set; }
+
+    public bool TermsAccepted { get; set; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        List<ValidationResult> errors = new List<ValidationResult>();
+        if (string.IsNullOrEmpty(ClientName))
+        {
+            errors.Add(new ValidationResult("Please enter your name"));
+        }
+
+        if (DateTime.Now > Date)
+        {
+            errors.Add(new ValidationResult("Please enter a valid date"));
+        }
+        if (!TermsAccepted)
+        {
+            errors.Add(new ValidationResult("Please accept the terms!"));
+        }
+        return errors;
+    }
+}
+
+One benefit of the model approach is that the model and property level validation is combined in one place, which means that all of the error are displayed together.
+
+Performing Client-Side validation
+So far all the validation has been server side, meaning that the user submits their data to the server, and the server validates the data and sends back the results of the validation (either success in processing the data or a list of errors that need to be corrected).
+In web applications, users typically expect immediate feedback. Client side validation can be carried out using JavaScript. The data that the user has entered is validated before being sent to the server, providing the user with immediate feedback and an opportunity to correct any problems.
+The MVC Framework supports unobtrusive client-side validation. The term unobtrusive means that validation rules are expressed using attributes to the HTML elements that views generate. These attributes are interpreted by a JS library that is included as part of the MVC Framework that, in turn, configures the jQuery Validation library, which does the actually validation work.
+Note that client side validation is focused on validating individual properties and that it is difficult to set up model level client side validation.
+
+Client side validation is enabled in the Web.Config file:
+
+<configuration>
+  <appSettings>
+    <add key="webpages:Version" value="3.0.0.0"/>
+    <add key="webpages:Enabled" value="false"/>
+    <add key="ClientValidationEnabled" value="true"/>
+    <add key="UnobtrusiveJavaScriptEnabled" value="true"/>
+  </appSettings>
+
+We also need some jquery script libraries:
+
+<script src="~/Scripts/jquery-3.1.1.js"></script>
+<script src="~/Scripts/jquery-validate.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
+
+The simplest way of doing client side validation is to apply metadata attribute like we did for server side validation:
+
+public class Appointment
+{
+    [Required]
+    [StringLength(10, MinimumLength = 3)]
+    public string ClientName { get; set; }
+
+    [DataType(DataType.Date)]
+    public DateTime Date { get; set; }
+
+    public bool TermsAccepted { get; set; }
+}
+
+This is all we have to do get to get basic client side validation working. Now the feedback presented in the browser occurs immediately when the user makes an error and the feedback is also immediate when the error is corrected.
+
+One of the benefits of using client side validation is that we don't actually have to write any JavaScript! Instead the validation rules are expressed using HTML attributes. The MVC client-side validation doesn't generate any JS or  JSON data to direct the validation process; like much of the rest of the MVC Framework, validation relies on convention. The first attribute added is data-val. The jQuery validation library identifies those fields that require validation by looking for this attribute.
+Individual validation rules  are  specified using an attribute in the form data-val-<name> e.g. the Required attribute we applied to the model class resulted in data-val-required in the HTML. The value associated with the attribute is the error message associated with the rule.
+
+Avoiding conflicts with browser validation
+Some of the current generation of HTML5 browers support simple client side validation based on attributes applied to input elements. The general idea is that, say, an input element to which the required attribute has been applied, for example, will cause the browser to display a validation error when the user tries to submit the form without providing a value.
+
+Performing Remote Validation
+This is a client-side validation technique that invokes an action method on the server to perform validation. A common example of this is to check whether a username is available in applications when such names must be unique; the user submits the data, and the client-side validation is performed. As part of this process, an Ajax request is made to the server to validate the username that has been requested. If the username has been take, a validation error is displayed so that the user can enter another value.
+This may seem like regular server-side validation, but there are some additional benefits to this approach.
+    First, only some properties will be remotely validated; the client-side validation benefits still apply to all the other data values that the user has entered.
+    Second, the request is relatively lightweight and is focused on validation, rather than processing an entire model object.
+    The third difference is that remote validation is performed in the background. The user doesn't have to click the submit button and then wait for a new view to be rendered and returned. It makes for a more responsive user experience, especially when there is a slow network between the browser and the server.
+
+All that said, remote validation is a compromise. It strikes a balance between client-side and server-side validation, but it does require requests to the application server, and it is not as quick as normal client-side validation.
+
+First, let's make an action method that can validate one of the model properties:
+
+public JsonResult ValidateDate(string Date)
+{
+    DateTime parsedDate;
+
+    if (!DateTime.TryParse(Date, out parsedDate))
+    {
+        return Json("Please enter a valid date (dd/mm/yyyy)", JsonRequestBehavior.AllowGet);
+    }
+    else if (DateTime.Now > parsedDate)
+    {
+        return Json("Please enter a date in the future", JsonRequestBehavior.AllowGet);
+    }
+    else
+    {
+        return Json(true, JsonRequestBehavior.AllowGet);
+    }
+}
+
+Action methods that support remote validation must return the JsonResult tpye, which tells teh MVC Framework that I am working with JSON data. In addition to the result, validtion action methods must define a parameter that has the same name as the data field being validated: this is Date in the above example.
+
+public class Appointment
+{
+    [Required]
+    [StringLength(10, MinimumLength = 3)]
+    public string ClientName { get; set; }
+
+    [DataType(DataType.Date)]
+    [Remote("ValidateDate", "Home")]
+    public DateTime Date { get; set; }
+
+    public bool TermsAccepted { get; set; }
+}
+
+The arguements for the attribute are the name of the action and the controller that should be used to generate the URL that the JS validation library will call to perform the validation. The actual URL used will be created according to the application routing configuration.
+
+Caution, the validation action method will be called when the user submits the form and then again each time he or she edits the data. In essence, every keystroke will lead to a call to the server. For some application, this can be a significant number of requests and must be taken into account when specifying the server capacity.

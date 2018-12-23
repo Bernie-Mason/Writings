@@ -1,0 +1,42 @@
+
+Umbraco is company that provides a variety of web services. 
+
+The main such service is a web content management system (called Umbraco) but in addition, they also offer a cloud service.
+
+Their CMS is designed  to make it easy for site owners to manage their site and focus on creating good content. However,
+
+
+BackOffice terminology:
+Here is a list of common terms and concepts that are used throughout the Umbraco back office.
+
+BackOffice: This is the CMS part of the site.
+
+Login screen: When you go to BackOffice for the first time you'll be asked to Login.
+Section: A section in Umbraco is where you do specific tasks related to that section. For example, content settings and developer are all sections.
+Tree: This is a hierarchical list of items related to a specific concept, which could be something like a content tree or a media tree.
+Node: A node is an item in a tree. The images and folders in the Media section are shown as nodes in the Media tree, page and content in the Content tree etc.
+Dashboard. This is the main view you are presented with when entering a section within the backoffice. 
+Document type. Defines the types of pages/nodes that backoffice users can create in the content tree. Each document type contains different properties or fields.
+Properties. Each document type has properties. These are the fields that the content editor is allowed to edit for the node.
+
+Data type. Each document property has a data type which defines the type of input of that property. Data types reference a property editor and are configured in the Umbraco backoffice in the developer section. A datatype can be something very simple (string, int, bool) or more complex (image cropper, multi-node tree picker).
+
+Property editors
+A property editor is a way to insert content into Umbraco. 
+
+Template: where you define the HTML markup
+
+Package: Umbraco term for a module or plug-in used to extend Umbraco.
+Macro: a reusable piece of functionality. Can be configured with parameters and inserted into a Rich Text Editor.
+
+A User is someone who has access to the Umbraco backoffice. Not to be confused with Member.
+
+DATA
+Defining content. 
+Before a piece of content can be created it needs to be defined. It's not possible to initally create content in a blank installation of Umbraco. All content needs a blueprint that holds information about what kind of data can be stored on the content node, which editors are used, how it is organised, where in the structure it is allowed and so forth. This blueprint or definition is called a Document Type.
+
+The most basic form of a document type is a form containing fieldsets (or tabs) where you can apply rules about where the content can be created, which template(s) are allowed, backoffice icon and so forth.
+
+Document types can define entire pages or more limited content that can be reused on other nodes.
+
+We need three basic things for an Umbraco site.  A document type, a template and a content node. The content node is where an editor can add content which Umbraco will use along with the Document Type and , to serve up an HTML page to web visitors.

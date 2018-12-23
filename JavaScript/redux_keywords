@@ -1,0 +1,89 @@
+Redux keywords
+
+The State
+
+The state of your whole application is stored in an object tree within a single store (state and store are often used interchangeably)
+
+In Redux, all the application state is stored as a single object. You'll often find that you need to store some data, as well as some UI state, in the state tree (although if you're using React you might want to store the UI state in the React component state). This is fine, but try to keep the data separate from the UI state.
+
+This makes it easy to create universal apps, as the state from your server can be serialized and hydrated into the client with no extra coding effort. 
+
+State is readonly and the only way to change it is to dispatch an action, an object describing what happened. This ensures that neither the views or network callbacks will ever write directly to the state. Instead, they express an intent to transform the state. Because all changes are centralized and happen one by one in a strict order, there are no subtle race conditions to watch out for. As actions are just plain objects, they can be logged, serialized, stored, and later replayed for debugging or testing purposes.
+
+Actions
+
+	Actions are payloads of information that send data from your application to your store. They are the only source of information for the store. You can send them using store.dispatch(). Actions are plain JS objects. They must have a type property that indicates the type of action being performed. Types should typically be defined as string constants. 
+
+	Other than the type, the structure of the action is up to you. 
+
+	Action creators: functions that create actions. 
+
+	function addTodo(text) {
+	  return {
+	    type: ADD_TODO,
+	    text
+	  }
+	}
+
+Reducers
+
+	To specify how the state tree is transformed by actions, you write pure reducers.
+
+	Actions describe the fact that something happened, but don't specify how the application's state changes in response. This is the job of reducers. The reducer is a pure function that takes the previous state and an action and returns the next state:
+		(previousState, action) => newState
+	It's called a reducer because it's the type of function that you would pass to Array.prototype.reduce(reducer, ?initialValue). 
+	Never:
+		Mutate the arguments of a reducer
+		Perform side effects like API calls and routing transitions
+		Call non-pure functions, e.g. Date.now()
+
+	Reducers are just pure functions that take the previous state and an action, and return the next state. Remember to return new state objects, instead of mutating the previous state.
+
+
+Data Flow
+
+	Redux architecture revolves around a strict unidirectional data flow.
+	This means all the data in an application follows the same lifecycle pattern, making the logic of your app more predictable and easier to understand. It also encourages data normalisation, so that you don't end up with multiple, independent copies of the same data that are unaware of one another. 
+
+	There are four steps in any redux app lifecycle:
+
+	1. Your call store.dispatch(action)
+
+		An action is a plain object describing what happened:
+
+		 { type: 'LIKE_ARTICLE', articleId: 42 }
+		 { type: 'FETCH_USER_SUCCESS', response: { id: 3, name: 'Mary' } }
+		 { type: 'ADD_TODO', text: 'Read the Redux docs.' }
+
+		You can think of an action as a very brief snippet of news. You can call store.dispatch(action) from anywhere in your app, including components and XHR callbacks, or even at scheduled intervals.
+
+	2. The Redux store calls the reducer function you gave it 
+
+		The store will pass two arguments to the reducer: the current state tree and the action. Note that the reducer is a pure function. It only computes the next state. It should be completely predictable: calling it with the same inputs many times should produce the same outputs. It shouldn't perform any side effects like API calls or router transitions. These should happen before the action is dispatched.
+
+	3. The root reducer may combine the output of multiple reducers into a single state tree.
+
+		How you structure the root reducer is completely up to you. Redux ships with a combineReducers() helper function, useful for "splitting" the root reducer into separate functions that each manage one branch of the state tree. Here's how combineReducers() works. Let's say you have two reducers, one for a list of todos, and another for the currently selected filter setting:
+
+		 function todos(state = [], action) {
+		   // Somehow calculate it...
+		   return nextState
+		 }
+
+		 function visibleTodoFilter(state = 'SHOW_ALL', action) {
+		   // Somehow calculate it...
+		   return nextState
+		 }
+
+		 let todoApp = combineReducers({
+		   todos,
+		   visibleTodoFilter
+		 })
+
+		 When you emit an action, todoApp returned by combineReducers will call both reducers.
+
+	4. The Redux store saves the complete state tree returned by the root reducer.
+
+Dispatchers
+
+	Redux does not have the concept of dispatchers

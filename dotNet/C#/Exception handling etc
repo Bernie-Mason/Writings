@@ -1,0 +1,21 @@
+<h2>Exception handling</h2>
+
+<p>It's challenging to make sure that a piece of code <em>always</em> works as expected. The person responsible for writing the code often does not have complete control over whether or not the code will fail. Handling of such errors must be performed either by taking appropriate action to correct the situation or, if not possible, to log and indicate the failure to the user in the clearest way possible.</p>
+
+<h3>The try block</h3>
+<p>The C# language gives us the try block for exception handling. If any code in the block fails during runtime it is caught by a catch block. try and catch are both C# keywords</p>
+
+<pre>
+	<code>
+try
+{
+	// code
+}
+catch (Exception e)
+{
+	// Handle the exception
+}
+	</code>
+</pre>
+
+<p>The purpose of the catch handler is to match the exception to issue that arose thereby giving a meaningful response to the consumer of the application. In the above, generic, example, the catch block is catching the most senior of exceptions, Exception, which all other exceptions inherit from. Although this means that any issue with the code will be caught, it won't tell us (or the user) what specifically went wrong. Therefore, if certain errors are expected, it's better to catch the corresponding expected exceptions.</p>

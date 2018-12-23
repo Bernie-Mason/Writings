@@ -1,0 +1,153 @@
+IdentityServer4 - Getting Started
+
+From GitHub docs:
+	Identity server is a framework and a hostable component that allows implementing single sign-on and access control for modern web applications and APIs using protocols like OpenID Connect and OAuth2.	
+		OpenID Connect: Is a simple identity layer on top of the OAuth 2.0 protocol, which allows computing clients to verify the identity of an end-user based on the authentication performed by an authorization server, as well as to obtain basic profile information about the end-user in an inter operable and REST-like manner.
+		OAuth2: The OAuth 2.0 specification defines a delegation protocol that is useful for conveying authorization decisions across a network of web-enabled applications and APIs. OAuth is used in a wide variety of applications, including providing mechanisms for user authentication.
+
+From: https://www.scottbrady91.com/Identity-Server/Getting-Started-with-IdentityServer-4
+
+Identity Server 4 is the newest iteration of IdentityServer, the popular OpendID Connect and OAuth Framework for .NET, updated and redesigned for ASP.NET Core and .NET Core. 
+
+The concepts of Identity Server 4 are the same as 3, it is still and OpenID Connect provider built to spec, however, most of its internals and extensibility points have changed. When we integrate a client application with IdentityServer, we are not integration to an implementation. Instead we are integrating using the OpenID Connect or OAuth specs. This means any app that currently works on 3 with work with 4.
+
+Identity Server is designed to run as a self-hosted component, which was difficult to achieve with ASP.NET 4.x with MVC still being tightly coupled to IIS, and System.Web, resulting in an internal view engine served up by the katana component. With IS4 running on ASP.NET Core, we can now use any UI technology and host IS in any environment ASP.NET Core can run in. This also means we can now integrate with existing login forms/systems, allowing for in place upgrades.
+
+The IS IUserService that was used to integrate your user store is also now gone and replaced with a new user store abstraction in the form of IProfileService and IResourceOwnerPasswordValidator
+
+IS3 isn't going anywhere, just as the .NET Framework isn't going anywhere. Just as Microsoft has shifted most active development to .NET Core, it can be speculated that IS will eventually do the same.
+
+Implementing IdentityServer4 on ASP.NET and .NET Core
+For our initial implementation we'll use the In-Memory services reserved for demos and lightweight implementations. Later we'll switch to entity framework for a more realistic representation of a production instance of IdentityServer 
+
+OpenID Connect Discovery Document
+The OpenID Connect Discovery Document is available on every OpenID Connect provider at this well known endpoint. The document provides information as to the location of various endpoints (like token and end session endpoints). By having this standardized document, we have the possibility of automatic integration. This can viewed here: https://localhost:44308/.well-known/openid-configuration
+
+Signing Certificate
+A signing certificate is a dedicated certificate used to sign tokens, allowing for client applications to verify that the contents of the token have not been altered in transit. This involves a private key used to sign the  token and a public key to verify the signature. This public key is accessible to the client applications via the jwks_uri in the OpenID Connect discovery document.
+
+Now we have an application set up. Let's add some data to it.
+
+Client, Resources and Users
+
+First we need:
+	1. Client applications that are allowed to use IdentityServer, 
+	2. Resources that these clients can use 
+	3. Users that are allowed to authenticate on them
+
+We are currently using the InMemory stores and these stores accept a collection of their respective entities, which we can now populate using some static methods.
+
+Clients
+	IdentityServer is all like: I need to know what client applications are allowed to use me! Otherwise I'm going to nope everything that comes my way. GIVE ME A WHITELIST. Each client application is registered and configured to be allowed to do certain things. For instance, can only ask for tokens to be returned to certain URLs, or only request certain information. Put another way, they have scoped access.
+
+internal class Clients {
+	public static IEnumerable<Client> Get() {
+		return new List<Client> {
+            new Client {
+                ClientId = "oauthClient",
+                ClientName = "Example Client Credentials Client Application",
+                AllowedGrantTypes = GrantTypes.ClientCredentials,
+                ClientSecrets = new List<Secret> {
+                    new Secret("superSecretPassword".Sha256())},                         
+                AllowedScopes = new List<string> {"customAPI.read"}
+            }
+        };
+    }
+}
+
+Here we've added a custom client that uses the Client Credentials OAuth grant type. This grant type requires a client id and client secret to authorize access. With the secret being hashed (.sha256) using an extension method provided by Identity Server (passwords should never be stored in plain text right!). The allowed scopes is a list of scopes that this client is allowed to request, in this case customAPI.read which is coooooommmmming.........
+
+Resources and Scopes
+Scopes say want the client (application) is allowed to do. In IdentityServer 4 scopes are modelled as resources, which come in two flavors: Identity and API. An identity resource allows you to model a scope that will return a certain set of claims, whilst an API resource scope allows you to model access to a protected resource (typically an API). What the fuck does that all mean? Let's find out -->
+
+internal class Resources
+{
+    // Resources method to return a list of Identity resources
+    public static IEnumerable<IdentityResource> GetIdentityResources()
+    {
+        return new List<IdentityResource>
+        {
+            new IdentityResources.OpenId(),
+            new IdentityResources.Profile(),
+            new IdentityResources.Email(),
+            new IdentityResource
+            {
+                Name = "role",
+                UserClaims = new List<string> {"role"}
+            }
+        };
+    }
+
+    // Resources method to return a list of API resources
+    public static IEnumerable<ApiResource> GetApiResources()
+    {
+        return new List<ApiResource>
+        {
+            new ApiResource
+            {
+                Name = "customAPI",
+                DisplayName = "Custom API",
+                Description = "Custom API Access",
+                UserClaims = new List<string>{"role"},
+                ApiSecrets = new List<Secret>{new Secret("scopeSecret".Sha256())},
+                Scopes = new List<Scope>
+                {
+                    new Scope("customAPI.read"),
+                    new Scope("customAPI.write")
+                }
+            }
+        };
+    }
+       
+}
+
+Our Resoures class is pretty much just static. It's got a couple of static methods that return either a list of Identity resources or API resources. 
+The first three identity resources represent some standard OpenID Connect defined scopes we wish IdentityServer to support. For example the email scope allows the email and email_verified claims to be returned. We are also created a custom identity resource in the form of role which returns role claims for authenticated user.
+
+The openid scope is alllllways required when using OpenID Connect flows.
+
+ApiResources: We're modeling a single API that we wish to protect using customApi. This API has two scopes that can be requested: customAPI.read and customAPI.write. By setting claims within the scope like this we are ensuring that these claim types will be added to any tokens that have this scope (if the user has a value for that type, of course). In this case we're ensuring that a users role claims will be added to any tokens with this scope. The scope secret will be used later during token introspection
+.
+
+Scope vs Resource
+OpenID Connect and OAuth scopes now being modeled as resources, is the biggest conceptual change between IdentityServer 3 and IdentityServer 4. The offline_access scope, used to request refresh tokens, is now supported by default with authorization to use this scope controlled by the Client property AllowOfflineAccess.
+
+Users
+In the place of a fully fledged User Store such as ASP.NET Identity we can use TestUsers:
+internal class Users
+{
+    public static List<TestUser> Get()
+    {
+        return new List<TestUser>
+        {
+            new TestUser
+            {
+                SubjectId = "5BE86359-073C-434B-AD2D-A3932222DABE",
+                Username = "Bernie",
+                Password = "password",
+                Claims = new List<Claim>
+                {
+                    new Claim(JwtClaimTypes.Email, "bernie@gnupp-ltd.com"),
+                    new Claim(JwtClaimTypes.Role, "admin")
+                }
+            }
+        };
+    }
+}
+
+A users subject (or sub) claim is their unique identifier. This should be something unique to your identity provider, not something like an email address. We now need to update our DI container with this information (instead of the empty collections):
+
+public class Startup
+{
+    // This method gets called by the runtime. Use this method to add services to the container.
+    // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddIdentityServer()
+             .AddInMemoryClients(Clients.Get())
+             .AddInMemoryIdentityResources(Resources.GetIdentityResources())
+             .AddInMemoryApiResources(Resources.GetApiResources())
+             .AddTestUsers(Users.Get())
+             .AddTemporarySigningCredential();
+    }
+

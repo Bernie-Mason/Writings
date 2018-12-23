@@ -1,0 +1,2 @@
+Automapper
+If you have an App.Config file and you install a specific version of automapper over your old one, check that this has changed the App.Config file : at least an hour wasted on this

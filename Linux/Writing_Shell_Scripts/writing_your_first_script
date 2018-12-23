@@ -1,0 +1,87 @@
+WRITING SHELL SCRIPTS!!!!!
+
+Wouldn't it be great if we could get the shell to do more of the work? By joining our tools together into programs of our own design, the shell can carry out complex sequences of tasks all by itself!
+
+What are shell scripts?
+	A file containing a series of commands! The shell reads this file and carries out the commands as though they had been entered directly on the command line.
+
+The shell is distinctive, in that it is both powerful command-line interface to the system and a scripting language interpreter. Most of the things that can be done on the command-line can be done in scripts and vice versa.
+
+How to write a shell script!
+
+	1. Write a script. Ordinary text file. We need a text editor to write them. The best text editors will provide syntax highlighting, allowing us to see a color-coded view of the elements of the script. Syntax highlighting will help us spot certain kinds of common errors. vim, gedit, kate and many others are good candidates
+
+	2. Make the script executable. The system is fussy about not letting any old text file as a program. We need to set the script file's permissions to allow execution
+
+	3. Put the scrip somewhere the shell can find it. The shell automatically searches certain directories for executable files when no explicit pathname is specified. For max convenience, this is where we'll place our files.
+
+Let's make a hello world script (obv)
+
+	#!/bin/bash
+
+	# This is our first script
+
+	echo 'Hello World!'
+
+We've called this hello_world and put it in our home directory. The #! character sequence at the start of the file is, in fact, a special construct called a shebang. The shebang tells the system the name of the interpreter that is to be used to execute the script that follows. Every shell script should include this as its first line.
+
+The next thing we have to do is to make our script executable. At the moment it isn't. Observe:
+
+	[bernie@antergos_vb ~]$ ls -l hello_world
+	-rw-rw-r-- 1 bernie users 165 May 24 09:25 hello_world
+	[bernie@antergos_vb ~]$ chmod 755 hello_world 
+	[bernie@antergos_vb ~]$ ls -l hello_world
+	-rwxr-xr-x 1 bernie users 165 May 24 09:25 hello_world
+
+And boom goes the dynamite. Our old friend chmod is used to modify the file permissions so that user can do everything to it. groups can read and execute and the same applies to the world.
+
+Now let's execute this bad boy:
+
+	[bernie@antergos_vb ~]$ ./hello_world
+	Hello World!
+
+Awesome but we still can't just write hello_world yet as the location of our program is not one that the system searches to look for programs. The list of directories that are searched are stored in the environmental variable PATH
+
+	[bernie@antergos_vb ~]$ echo $PATH
+	/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl
+
+A good location for scripts is a folder called bin in your home directory (~/bin).
+
+	[bernie@antergos_vb ~]$ mkdir bin
+	[bernie@antergos_vb ~]$ mv hello_world bin
+	[bernie@antergos_vb ~]$ export PATH=~/bin:"$PATH"
+	[bernie@antergos_vb ~]$ . .bashrc
+	[bernie@antergos_vb ~]$ hello_world
+	Hello World!
+
+More formatting tricks
+
+One of the key goals of serious script writing is ease of maintenance, that is, modification and adaptation. 
+
+Long option names
+Many of the commands have both long and short options. 
+	
+	Short options are often better for the command line as they're easier to type.
+
+	Long option names are often better for scripting as they give a more informative description of what the script is doing. 
+
+Indentation and line continuation
+Through the use of line continuations (backslash-linefeed sequences) and indentation, the logic of a command becomes much clearer to the reader.
+
+
+Configuring vim for script writing
+
+The vim text editor has many, many configuration settings. Several common options facilitate script writing.
+
+	:syntax on  - turns on syntax highlighting. With this setting, different elements of shell syntax will be displayed in different colors when viewing a script. 
+	:set hlsearch turns on the option to highlight search results. Say we search for the word echo. With this option on, each instance of the word will be highlighted
+	:set tabstop=4 sets the number of columns occupied by a tab character. The default is eight columns. Setting the value to 4 (which is common practice) allows lines to fit more easily on the scrren
+	:set autoindent turns on the auto indent feature. This causes vim to indent a new line the same amount as a line previously indented
+
+These changes are made  permanent by adding these commands to /.vimrc (which I've done!)
+
+Final note
+
+In this chapter about scripting, we have looked at how scripts are written and made to execute on our system. We also saw how we can use various formatting techniques to improve readability.
+
+

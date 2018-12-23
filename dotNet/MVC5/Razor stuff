@@ -1,0 +1,8 @@
+MVC applications use Razor to generate HTML. Razor expressions can be used to tailor response to the user based on data values.
+
+The Razor view engine is responsible for dynamically inserting content into the output sent to a browser. Razor views are compiled into C# classes in an MVC application where the base class it uses defines the layout property.
+
+In a good MVC application, there is a well defined separation in the work that the controller's action methods and the views carry out.
+An action method can pass a model object to the view but NOT formatted data. A view can use a the object that it's been pass to present data to the user but CANNOT change the nature of the view model object.
+
+The difference between processing and formatting data. Views format data by taking the model object data and displaying it. Controllers process data, performing operations on the data to modify it.

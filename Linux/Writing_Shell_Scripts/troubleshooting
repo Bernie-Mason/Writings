@@ -1,0 +1,153 @@
+As our scripts become more complex, it's time to take a look at what happens when things go wrong and they don't do what we want.
+
+Syntatic errors
+One of the most common types of errors are syntatic i.e. mistyping one or more elements of shell syntax.
+
+Here is a example script with some issues:
+
+
+#!/bin/bash
+
+# trouble: demonstrate some common errors
+
+number=1
+
+if [ $number = 1 ]; then
+	echo "Number is equal to one"
+else
+	echo "Number is not equal to one"
+fi
+
+As written this script runs fine. But what about a missing quotation mark?
+
+#!/bin/bash
+
+# trouble: demonstrate some common errors
+
+number=1
+
+if [ $number = 1 ]; then
+	echo "Number is equal to one
+else
+	echo "Number is not equal to one"
+fi
+
+Now we'll have issues right? Sure enough...
+
+[bernie@antergos_vb bin]$ trouble
+/home/bernie/bin/trouble: line 10: unexpected EOF while looking for matching `"'
+/home/bernie/bin/trouble: line 12: syntax error: unexpected end of file
+
+This generates two errors. Interestingly, the line numbers reported are not where the missing quote was removed but rather later in the program. We can see why is we follow the program after the missing quote. bash will continue looking for the closing quote until it finds one, which it does immediately after the second echo command. bash becomes confused after that and the syntax of the if command becomes broken as the closing fi statement is now inside a quoted (but open) string.
+In long scripts, this kind of error can be quite hard to find. Using an editor with syntax highlighting will help.
+
+Missing or unexpected tokens
+How about a missing ';' after the if expression?
+
+#!/bin/bash
+
+# trouble: demonstrate some common errors
+
+number=1
+
+if [ $number = 1 ] then
+	echo "Number is equal to one"
+else
+	echo "Number is not equal to one"
+fi
+
+[bernie@antergos_vb bin]$ trouble
+/home/bernie/bin/trouble: line 9: syntax error near unexpected token `else'
+/home/bernie/bin/trouble: line 9: `else'
+
+Sure enough we get another error message. Again this is pointing to a point later on the code than where the error occured. if accepts a list of commands and evaluates the exit code of the last command in the list. In our program, we intend this list to consist of a single command, [, a synonym for test. The [ command takes what follows it as a list of arguments. With the semicolon removed the word then is then added to the list of arguments which is syntactically legal. The following echo command is legal to. It's interpreted as another command for if to evaluate. The else is encountered next, but it's out of place, since the shell recognizes the it as a reserved word and not the name of a command.
+
+Unanticipated Expansions
+
+It's possible to have errorss that occur only intermittently in a script. Sometimes the script will run fine, and other times it will fail because of the results of an expansion. If we return our missing semicolon and change the value of number to an empty variable, we can demonstrate.
+
+#!/bin/bash
+
+# trouble: demonstrate some common errors
+
+number=
+
+if [ $number = 1 ]; then
+	echo "Number is equal to one"
+else
+	echo "Number is not equal to one"
+fi
+
+/home/bernie/bin/trouble: line 7: [: =: unary operator expected
+Number is not equal to one
+
+The error message we get is rather cryptic. When the command [ $number = 1 ] undergoes expansion the result is [  = 1 ] which is invalid and the error is generated. The operator is a binary operator (it values a value on each side but the first is missing, so the test commmand  expects a unary operator (like -z) instead. Further, since the test failed, the if command receives a non-zero exit  cod and acts accordingly, and the second echo command is executed.
+
+This problem can be corrected by adding quotes around the first argument in the test command:
+
+[ "$number" = 1 ]
+
+Logical errors
+
+Unlike syntactic errors, logical errors do not prevent a script from running. The script will run, but it will not produce the desired result. The most common kinds are as follows:
+	Incorrect conditional expressions. 
+	"Off by one" errors - coding loop[s that employ counters, it's possible to overlook that the loop may require starting at 0 rather than 1. These kinds errors can result a loop "going off the end" or missing the last iteration
+	Unanticipated situations. The program encounters data or situations that were unforeseen by the programmer. These can include unanticipated expansions, such as a filename that contains embedded spaces that expands into multiple command arguments.
+
+Defensive programming
+It's important to verify assumptions when programming. This means a careful evaluation of the exit status of programs and commands that are used by a script. 
+
+Verifying input
+A good general rule of programming is that if a program accepts input, it must be able to deal with anything that it receives. This usually means that input must be carefully screened to ensure that only valid input is accepted.
+
+Testing 
+Testing is an important step in every kind of software development, including writing scripts. There is asaying in the open source world, "release early, release often" that reflects this fact. By releasing early and often, software gets more exposure to use and testing. 
+
+Test cases
+To perform useful testing, it's important to develop and apply good test cases. This is  done by carefully choosing input data or operating conditions reflect edge or corner cases. In our code fragment (which is very simple), we want to know how the code performs under three specific conditions:
+
+	1. dire_name contains the name of an existing directory
+	2. dir_name contains the name of a non-existent directory
+	3. dir_name is empty
+
+Debugging
+A well-designed script can help with the detective work that needs to be done during debugging. It should be programmed defensively to detect abnormal conditions and provide useful feedback to the user. Sometimes, however, problems are strange and unexpected, and more involved techniques are required.
+
+Finding the Problem Area
+
+In some scripts, particularly long ones, it is sometimes useful to isolate the area of the script that is related to the problem. This won't always be the actual error, but isolation will often provide insights into the actual cause. One technique that can be used to isolate code is "commenting out" sections of a script. 
+
+Tracing
+Bugs are often cases of unexpected logical flow within a script. That is, portions of the script are either never executed or are executed in the wrong order or at the wrong time. To view the actual flow of the program, we use a technique called tracing. 
+
+One tracing method involves placing informative messages in a script that display the location of execution. bash also provides a way of tracing, implemented by the -x option and the set command with the -x option. For our trouble script:
+
+#!/bin/bash -x
+
+[bernie@antergos_vb bin]$ trouble
++ number=1
++ '[' '1 = 1' ']'
++ echo 'Number is equal to one'
+Number is equal to one
+
+With tracing enabled, we see the commands performed with expansions applied. The leading plus signs indicate the display of the trace to distinguish them from lines of regular output. The plus sign is the default character for trace output. It is contained in the PS4 (prompt string 4) shell variable. We can make it even more useful:
+
+[bernie@antergos_vb bin]$ export PS4='$LINENO + '
+[bernie@antergos_vb bin]$ trouble
+5 + number=1
+7 + '[' '1 = 1' ']'
+8 + echo 'Number is equal to one'
+Number is equal to one
+
+Note that the single quotations are necessary to stop the expression expanding until the prompt is actually used.
+
+Sections of the code can be marked as traced by:
+
+set -x # tracing turned on
+
+... code
+
+set +x # tracing turned off
+
+Exanmie values during execution. 
+echo is very useful. Go figure.

@@ -1,0 +1,5 @@
+What is the Document Object Model?
+
+The DOM is a programming API for HTML and XML docs. It defines the logical structure of documents and the way a document is accessed and manipulated. The term document is used in a broad sense.
+
+With the DOM, programmers can create and build documents, navigate their structure, and add, modify, or delete elements and content. Anything found in an HTML or XML document can be accessed

@@ -1,0 +1,27 @@
+Pillars of Object Oriented Programming
+
+Encapsulation, Inheritance and Polymorphism
+
+Encapsulation is the key component. It allows us to hide complexity. Class's are one way to encapsulate but so are methods. It is about building models that logically group together functionality.
+
+Inheritance and Polymorphism are both techniques that allow you to avoid duplication of code.
+
+Inheritance. Class's can inherit from base class's allowing members to not be duplicated.
+	We have to be careful as this can make our code more tightly bound.
+
+Polymorphism == "many shapes"
+	One variable can point to different types of objects
+	Objects can behave differently depending on their type.
+
+Inheritance can make software harder to extend, understand and can make it strongly coupled. So we need to be careful with it.
+
+Abstract classes
+Abstract classes cannot be instantiated.
+	Can contain abstract members that have to be defined in inheriting types. Abstract methods are good when the behavior is not defined in the calling code.
+
+Interface contain no implementation details
+	Defines only the signatures of methods, events and properties.
+	You're defining the API for a type
+	A type can implement multiple interfaces.
+	It's similar to an abstract type except that with classes we can only inherit from a single base class however we can implement as many interfaces as we want.
+	These are generally favored over abstract classes. Interfaces have a less rigid inheritance tree.

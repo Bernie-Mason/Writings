@@ -1,0 +1,72 @@
+﻿
+@{
+    ViewBag.DefaultPageHeader = "HTTP";
+    ViewBag.DefaultPageSubHeader = "The Communication Language of the Web";
+}
+
+
+<p>
+	HTTP (Hypertext Transfer Protocol) is used to transfer almost all data on the World Wide Web. HTTP is a network protocol and uses a client-server model. HTTP clients, like browsers, send <strong>requests</strong> to HTTP servers which send <strong>responses</strong> with attached data (called resources) back. Such resources are most commonly the HTML files, image files and data that make up most web pages that you browse!
+</p>
+
+<p>
+	Both <strong>request</strong> and <strong>response</strong> messages have a similar format. They both start with an initial line and follow with any number of header lines. This initial line states the location of the desired resource in a request. For a response this initial line will give the status of the request (i.e. most commonly whether it was successful or not). Finally comes the message body which can contain any response or request data. In a response, this is the resource returned to the client and in a request it could be user submitted files or information. 
+</p>
+
+<h2>The Request</h2>
+<p><strong>
+    Let's look at the three parts of a HTTP request. To start, let's look at a typical request line:
+</strong></p>
+
+<code>GET /filepath/index.html HTTP/1.0</code>
+
+<p>The first part, here with GET, is the HTTP method. GET states that a resource is wanted by the client and that the server should get it. GET is by far the most common HTTP. Other common HTTP methods are POST and HEAD. HEAD is similar to GET, however it asks the server to return only the response headers and not the message body (the resource). It is thus a way of checking the resource characteristics without having to download it. The POST method is used to send at to server. If the POST method is used then the message body must contain some data and there will be likely be headers to describe it. A HTTP response to a POST is often a redirect rather than a file resource.</p>
+
+<p>The second part is the path, which is the fragment of the uniform resource locater (URL) after the hostname.</p>
+
+<p>For clarity let's define the parts of the URL that defines the location of this page on our web server:</p>
+
+<code>https://bernie.gnupp-ltd.com/Post/Programming/httpWebServer</code>
+
+<ul>
+    <li>https: - the network protocol</li>
+    <li>bernie - third level domain</li>
+    <li>gnupp-ltd - second level domain</li>
+    <li>com - first level domain</li>
+    <li>bernie.gnupp-ltd.com - all domain names together gives the hostname</li>
+    <li>Post/Programming - directory (or filepath)</li>
+    <li>MVCTesting - filename</li>
+</ul>
+<p>The final part of the request line is the version of HTTP that you're using.</p>
+<p><strong>The next part of the request are the headers</strong></p>
+<p>
+The headers give information about the HTTP message. They are vital for helping server developers debug issues. They might for example, state the length or type of the content given in the message body. The "From: abc@somecompany.com" gives the email dress of the requester and the "User-Agent: Program.exe" specifies the program doing the requesting. 
+</p>
+<p><strong>The final part of the request is the request body</strong></p>
+<p>For any GET request this will be empty as the server doesn't need any supplemental data in a GET request. However, when you wish to submit data to the server in a POST request, the body region will contain the desired data.</p>
+
+<h2>The Response</h2>
+<p>
+    Now we've seen the request, let's take a look at what the server answers with. 
+</p>
+<p><strong>The first line in the response line is called the status line:</strong></p>
+
+<code>HTTP/1.0 200 OK</code>
+<p>Here the first part is the same as the last part of the request line which states the HTTP version. The second and third parts give machine and human readable messages regarding the status of the request. </p>
+
+<p>
+    Common status codes include:
+</p>
+<ul>
+    <li>200 - Successful request. Resource is returned to the client</li>
+    <li>404 - The specified resource didn't exist.</li>
+    <li>301 - The user is redirected permanently</li>
+    <li>302 - The user is temporarily redirected</li>
+    <li>500 - Server error. This is most commonly because a server-side script has failed.</li>
+</ul>
+
+<p>Any request that starts with a particular number indicates a particular status. A 1 indicates a message only, a 2 that some degree of success occurred, a 3 indicates a redirect of the client to another URL, a 4 indicates a client error and a 5 indicates a server error. </p>
+
+<p>
+    After the response has been delivered by the server, it closes the connection. This means that HTTP is a stateless protocol as no information about the state of the request is inherently maintained.
+</p>

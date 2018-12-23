@@ -1,0 +1,22 @@
+Enumerations and Structures
+
+Enumerations and structures are both value types. Remember that this means that their values are stored on the execution stack and are disposed of as soon as they go out of scope. 
+
+<p>An enumeration, or enum, has values that are limited to a set of symbolic names. An enum is somewhere between a structure and an array or list.</p>
+
+<pre>
+	<code>
+namespace MyNameSpace
+{
+	// to declare
+	enum DayOfWeek = { Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday };
+
+	class Test
+	{
+		DayOfWeek firstDayOfWeek = DayOfWeek.Monday;
+	}
+}
+	</code>
+</pre>
+
+<p>Notice that to assign a DayOfWeek object we have to access the enumeration literal name DayOfWeek.Monday. </p>

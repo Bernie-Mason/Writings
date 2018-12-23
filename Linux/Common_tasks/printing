@@ -1,0 +1,5 @@
+printing
+
+He'll we'll look at the command-line tools that are used to print files and control printer operation.
+
+PostScript is a PDL or page description language. It was invented as a solution for the fact that early computer networks struggled to pass the nearly 1 mb of data required for a 300dpi page to their printers. The PostScript language is tailored for typography and other kinds of graphics and imaging

@@ -1,0 +1,67 @@
+<h2>Interfaces</h2>
+
+<p>We've already seen how inheriting from a class is a useful way of encapsulating and reusing functionality across common classes. Inheritance is great when you have many complex but similarly functioning classes whose common functionality can be captured in single classes. This makes your code tidier, shorter, keeps your hands free of RSI and your code more readable to another programmer.</p>
+<p>Interfaces have a similar goal. As with inheritance, you could write all of your code without them and it would likely function exactly the same. Interfaces do not allow you do anything that you couldn't do without them. What they allow you do is to separate the properties and methods of a class from their implementation:</p>
+
+<p>Interfaces are very similar to abstract classes. Abstract classes are written to be inherited from and abstract methods are written to be overwritten. The difference between an abstract class and an interface is that an abstract class must have it's own implementation of any methods that it has.</p>
+<p>Interfaces differ to abstract classes in that they don't contain <em>any</em> implementation. They are pure abstractions and only contain definitions for methods. Any class that inherits an interface <em>must</em> implement all of the methods and properties defined by that interface. In this way an interface defines a contract between the class and the rest of the program. It says, in order to be this kind of thing you must be able to do these things.</p>
+<p>Enough blah, what does an interface look like?</p>
+
+<pre>
+	<code>
+interface IDealCards
+{
+	Card DealCard();
+	List<Card> DealAllCards();
+	int GetCardId(Card card);
+}
+	</code>
+</pre>
+<p>By convention we start the interface name with the capital 'I'. Methods are declared exactly the same as in a class except without the access condition (public, private etc) as the method of an interface is never directly called. In addition each method has no body; there is no implementation. Instead we have a return type (int, Card etc), the method name and method input parameters.</p>
+
+<h2>Inheriting from an interface</h2>
+<p>To inherit from an interface we do the following:</p>
+<pre>
+	<code>
+class Dealer : IDealCards
+{
+	private List<Card> cardDeck;
+
+	public Dealer()
+	{
+		// Constructor populates cardDeck
+	}
+}
+	</code>
+</pre>
+
+<p>Inheriting is thus the same as inheriting from a class. However at the moment our code is broken as we're not implementing the methods that our interface demands! In this state our code will not compile so let's add the methods that we need:</p>
+
+<pre>
+	<code>
+class Dealer : IDealCards
+{
+	private List<Card> cardDeck;
+
+	...
+
+	Card DealCard()
+	{
+		// code to return a random card from cardDeck
+	}
+
+	List<Card> DealAllCards()
+	{
+		return cardDeck;
+	}
+
+	int GetCardId(Card card)
+	{
+		// code to get id of card
+	}
+}
+	</code>
+</pre>
+
+<p>That's better! Now our class is a fully functioning CardDealer. This is very useful for many reasons but the main thing is that <strong>we have a place that defines what a CardDealer class should be able to do without caring how it does it</strong>. This means that other parts of your application or project, perhaps being worked on by other people, can look at the contract (the interface) of the class without having to get bogged down with how it actually works.</p>
+<p>The second massive benefit is we can write our code in terms of such interfaces which can then be populated with instances of inheriting objects during runtime. This sounds complicated and, like any abstraction process, it can be hard to wrap your head around. The reason this is great is it allows to write very general code that only defines our dependencies in a few places. Look at the above class again, the only dependency is has is on the Card class type. </p>

@@ -1,0 +1,151 @@
+OAuth 2
+
+What is OAuth 2?
+
+From digitalocean.com
+
+OAuth 2 is an authorization framework that enables applications to obtain limited access to user accounts on an HTTP service, such as Facebook, GitHub and DigitalOcean. It works by delegating user authentication to the service that hosts the user account, and authorizing third-party applications to access the user account. OAuth 2 provides authorization flows for web and desktop applications, and mobile devices.
+
+From Stormpath.com
+
+OAuth is not an API or a service: it is an open standard for authorization and any developer can implement it. OAuth is a standard that applications can use to provide client applications with "secure delegated access". OAuth works over HTTP and authorizes Devices, APIs, Servers and Applications with access tokens rather than credentials.
+
+There are two versions of OAuth: OAuth 1.0a and OAuth2. These specs are completely different and cannot be used together. There is no backwards compatibility between them. OAuth2 is the more widely used out of either of them.
+
+How does it work?
+
+From digitalocean
+
+OAuth defines four roles
+
+1. Resource Owner: User - the resource owner is the user who authorizes an application to access their account. The applications access to the user's account is limited to the "scope" of the authorization granted (e.g. read/write access). 
+
+2. Resource/Authorization Server: API - the resource servers hosts the protected user accounts, and the authorization server verifies the identity of the user then issues access tokens to the application. From an application developer's point of view, a service's API fulfills both the resource and authorization server roles. We will refer to both of these roles combined, as the Service or API role.
+
+3. Client: The client is the application that wants to access the user's account. Before it may do so, it must be authorized by the user, and the authorization must be validated by the API.
+
+The roles interact with each other in the following way:
+
+	1. The application requests authorization from the user to access service resources
+	2. The user authorizes the request, the application receives and authorization grant
+	3. The application requests an access token from the authorization server (API) by presenting authentication of its own identity, and, more importantly, the authorization grant it has received from the user (through them being redirected from your site to the third part auth site).
+	4. The authorization server (API) then spits back an access token to the application. Authorization is complete.
+	5. The application requests the resource from the resource server (API) and presents the access token for authentication.
+	6. If the access token is valid, the resource server (API) serves the resource to the application.
+
+The actual flow of this process will differ depending on the authorization grant type in use, bu this is the general idea.
+
+Application registration.
+Before using OAuth with your application, you must register your application with the service. This is done through a registration form in the "developer" or "API" position of the service's website, where you will provide the following information.
+	1. Application name
+	2. Application website
+	3. Redirect URI or Callback URL
+
+The redirect URI is where the service will redirect the user after they authorize (or deny) your application, and therefore the part of your application  that will handle authorization codes or access tokens.
+
+Client ID and Client Secret
+Once your application is registered, the service will issue "client credentials" in the form of a client identifier and a client secret. The Client ID is a publicly exposed string that is used by the service API to identify the application, and is also used to build authorization URLs that are presented to the users. The Client Secret is used to authenicate the identity of the application to the service API when the application requests to access a user's account, and must be kept private between the application and the API.
+
+Authorization Grant
+The first four steps in our flow above cover obtaining an authorization grant (from the user through a third party login) and access token (from the services authorization server which converts the grant into a token). The grant type depends on the method used by the application to request authorization, and the grant types supported by the API. OAuth 2 defines four grant types:
+
+1. Authorization Code: used with server-side applications
+This is the most common type because it is optimized for server side apps, where the source code is not publicly exposed, and the Client Secret confidentially can be maintained. This is a redirection-based flow, which means that the application must be capable of interacting with the user-agent (i.e. the user's web browers) and receiving API authorization codes that are routed through the user-agent.
+	1. Step 1: User clicks on an Auth Code link.
+		This could look something like: 
+			https://cloud.digitalocean.com/v1/oauth/authorize?response_type=code&client_id=CLIENT_ID&redirect_uri=CALLBACK_URL&scope=read
+		The first part simply states the API auth endpoint.
+	2. Step 2: User Authorizes the application
+		The user logs into the service, to authenticate their identity. Then they will be prompted by the service to authorize or deny the application access to their account.
+	Step 3: Application receives auth code
+		If the user clicks a notification to authorize the application, the service redirects the suer agent to the application redirect URI, which was specified during the client registration, along with an authorization code. The redirect would look something like this:
+		https://dropletbook.com/callback?code=AUTHORIZATION_CODE
+	Step 4: Application requests access token
+		The application requests an access token from the API, by passing the authorization code long with authentication details, including the client secret, to the API token endpoint. Here is an example POST request to DigitalOcean's token endpoint:
+		https://cloud.digitalocean.com/v1/oauth/token?client_id=CLIENT_ID&client_secret=CLIENT_SECRET&grant_type=authorization_code&code=AUTHORIZATION_CODE&redirect_uri=CALLBACK_URL
+	Step 5: Application Receives Access Token
+		If the authorization is valid, the API will send a response containing the access token (and optionally, a refresh token) to the application. The entire response will look something like:
+		{"access_token":"ACCESS_TOKEN","token_type":"bearer","expires_in":2592000,"refresh_token":"REFRESH_TOKEN","scope":"read","uid":100101,"info":{"name":"Mark E. Mark","email":"mark@thefunkybunch.com"}}
+
+Now the application is authorized! It may use the token to acces the user's account via the service API, limited to the scope of access, until the token expires or is revoked. If a refresh token was issued, it may be used to request new access tokens if the original token has expired.
+
+2. Implicit: used with mobile apps or web applications
+The implicit grant type is used for mobile or web apps (i.e. apps that run in a web browser) where the client secret confidentiality is not guaranteed. The implicit grant type is also a redirection-based flow but the access token is given to the user-agent to forward to the application, so it may be exposed to the user and other applications on the user's device. Also, this flow does not authenticate the identity of the application, and relies on the redirect URI.
+
+3. Resource Owner Password Credentials: used with trusted applications, such as those owned by the service itself
+With the resource owner password credentials grant type, the user provides their service credentials (username and password) directly to the application, which uses the credentials to obtain an access token from the service. This grant type should only be enable on the authorization server if other flows are not viable. Also, it should only used if the application is trusted by the user (e.g. it is owned by the service)
+
+4. Client Credentials: used with applications API access
+The application requests an access token by sending its credentials, its client ID and client secret, to the authorization server. An example POST request might look like this:
+https://oauth.example.com/token?grant_type=client_credentials&client_id=CLIENT_ID&client_secret=CLIENT_SECRET
+If the application credentials check out, the authorization server returns an access token to the application. Now the application is authorized to use its own account!
+
+Example Access Token Usage
+Once the application has an access token, it may use the token to access the user's account via the API, limited to the scope of access, until the token expires or is revoked.
+Here is an example of an API request, using curl
+curl -X POST -H "Authorization: Bearer ACCESS_TOKEN""https://api.digitalocean.com/v2/$OBJECT" 
+
+Assuming the access token is valid, the API will process the request according to its API specifications. If the access token is expired or otherwise invalid, the API will return an "invalid_request" error.
+
+Refresh Token Flow
+After an access token expires, using it to make a request from the API will result in an "Invalid Token Error". At this point, if a refresh token was included when the original access token was issued, it can be used to request a fresh access token from the authorization server.
+Here is an example POST request, using a refresh token to obtain a new access token:
+
+https://cloud.digitalocean.com/v1/oauth/token?grant_type=refresh_token&client_id=CLIENT_ID&client_secret=CLIENT_SECRET&refresh_token=REFRESH_TOKEN
+
+	
+From stormpath.com
+There are 4 separate modes of OAuth, which are called grant types. Each mode serves a different purpose, and is used in a different way. Depending on what type of service you're building, you might need to use one or more of these grant types.
+
+The Authorization Code Grant Type
+The authorization code OAuth grant type is meant to be used on web servers. You'll want to use the authorization code grant type if you're building a web application with server-side code that is NOT public. If you want to implement an OAuth flow in a server-side framework like Express.js, Flask, Django, Ruby on Rails, an Authorization code is the way to go.
+
+How it works
+
+	An anonymous user visits your site.
+	They want to log into your site using a third-party identity, stored elsewhere, google, facebook etc or your own OAuth service that you've created
+	They click "Log in" button on your site and are redirected to their identity provider's website and are prompted to accept certain permissions
+	If they accept these permissions, the identity provider will redirect the user back to web application along with an authorization code (step 2 above, getting the authorization grant)
+	Your web server will then make a request to the identity provider's API with the authorization code (step 3) you were just given, which, if successful, will respond with an access token you can use to actually retrieve this user's information. 
+
+To use it then. We create a button on our page with a link
+
+https://login.blah.com/oauth?response_type=code&client_id=xxx&redirect_uri=xxx&scope=email
+
+When the user clicks the button they'll visit login.blah.com where they'll be prompted for whatever permissions you've requested. After they've accepted these permissions, the user will be redirected back to your site, at whichever URL you specified in the redirect_uri parameter, along with an authization code:
+
+https://yoursite.com/oauth/callback?code=xxx
+
+You'll then read the code in the querystring value, and exchange that for an access token using the provider's API:
+
+POST https://api.blah.com/oauth/token?grant_type=authorization_code&code=xxx&redirect_uri=xxx&client_id=xxx&client_secret=xxx
+
+Where client_id and client_secret are provided by the identity provider. A Facebook app, will give you these values when you create it or if you register your application with google, facebook etc you'll receive these values.
+
+Once the POST request has successfully completed, you'll receive an access token which you can use to make real API calls to retrieve the user's information from the identity provider.
+
+The Client Credentials Grant Type
+You'll fire off a single API request to the identity provider that looks something like this:
+
+POST https://login.blah.com/oauth/token?grant_type=client_credentials&client_id=xxx&client_secret=xxx
+
+You'll then receive an access token in the response which you can use to make real API calls to retrieve information from the identity provider's API service.
+
+Is OAuth2 Secure?
+
+Unfortunately no. There are numerous, well documented security issues with the protocol that have yet to be addressed (2015). If you'ld
+
+If you’re building….
+
+	A server-side web app: use authorization code.
+	A client-side web app (or mobile app): use implicit.
+	An integration with an OAuth service you built yourself, use password credentials.
+	An application that doesn’t interact with user data: use client credentials.
+
+
+
+To define:
+
+framework
+secure delegated access
+curl - used to transfer a URL. This is a tool to transfer data from or to a server, using one of the supported protocols (HTTP, HTTPS, IMAP etc). The URL syntax will of course be protocol specific. The command is designed to work without user interaction. curl offers a busload of useful tricks like proxy support, user authentication, FTP upload, HTTP post, SSL connections, file transfer resume, Metalink and more. 

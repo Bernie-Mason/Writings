@@ -1,0 +1,58 @@
+How to configure custom connection options for your SSH client
+
+SSH, or secure shell, is the most common way of connection to Linux hosts for remote admin. Although the basics of connecting to a single host are often rather straight forward, this can become unwieldy and a much more complicated task when you begin working with a large number of remote systems. Fortunately, OpenSSH allows you to provide customized client-side connection options. These can be saved to a configuration file that can be used to define per-host values. This can help keep the different connection options you use for each host separate and organised.
+
+It is always possible to override any values defined in your configuration file at the time of the connection through normal options to the ssh command.
+
+First we need to create a user specific config file:
+
+[bernie@antergos_vb ~]$ > .ssh/config
+or
+[bernie@antergos_vb ~]$ touch .ssh/config
+
+The config file is internally organized by hosts. Each host definition can define connection options for the specific matching host. Wildcards are also available to allow for options that should have a broader scope.
+
+Each of the sections starts with a header defining the hosts that should match the configuration options that will follow. The specific configuration items for that matching host are then defined below. Only items that differ from the values need to be specified, as the host will inherit the defaults for any undefined items. A section is defined from the Host header to the following host header. For readabililty, the options being set for each host are indented.
+
+Host firsthost
+	SSH_OPTION_1 custom_value
+	SSH_OPTION_2 custom_value
+	SSH_OPTION_3 custom_value
+	SSH_OPTION_4 custom_value
+
+Host secondhost
+	Another_OPTION_1 custom_value
+
+Host *host
+	Another_OPTION_1 custom_value
+
+Host *
+	Change_Default custom_value
+
+Interpretation algorithm
+It is very important to understand the way that SSH will interpret the file to apply the configuration values defined within. This has large implications when using wildcards and the Host * generic host definition.
+
+SSH will match the hostname on the command line with each of the Host headers that define configuration sections. It will do this from the top of the file downwards, so order is very important (like with routes in C#; the most general matches have to go last). SSH will interpret each of the Host sections that match the host name (not just the first one!), During this process, it will always use the first value given for each option. There is no way to override a value that has already been given by a previously matched section.
+
+Remember that Ctrl-D will log you out of a SSH session!
+
+Basic connection options
+
+Hostname
+User
+Port
+
+General Tweaks and Connection Items
+Some other tweaks that you way wish to configure on a broad level
+	ServerAliveInterval: This option can be configured to let SSH know when to send a packet to test for a response from the server. This can be useful if your connection is unreliable and you want to know if it is still available.
+	LogLevel: This configures the level of detail in which SSH will log on the client side. This can be used for turning off logging in certain situations or increasing the verbosity when trying to debug. 
+	StrictHostKeyChecking: This option configures whether ssh SSH will ever automatically add hosts to the ~/.ssh/known_hosts file. By default, this will set to "ask" meaning that it will warn you if the host key recieved from the remote server doesn't match the one found in the known-hosts file. 
+	UserKnownHostsFiles: This option specifies the location where SSH will store information about hosts it has connected to. Usually you do not have to worry about this setting, but you wish to set this /dev/null if you have turned off strict host checking
+	VisualHostKey: This option can tell SSH to display an ASCII representation of the remote host's key upon connection		
+
+
+So for our config file we have: /home/bernie/.ssh/config
+
+Host serverus
+	Hostname bernie@serverus.pwnasaur.io 
+	User bernie

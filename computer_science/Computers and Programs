@@ -1,0 +1,37 @@
+// Derived from Python Programming: An Introduction to Computer Science, 3rd ed
+
+The definition of a modern computer:
+A modern computer can used to insert information, transform or change it into useful new forms and then output or display the information for our interpretation. However, they are also able to operate under the control of a changeable program. A computer program is a set of instructions that tells the computer what to do. Changing the program changes the output and makes it perform a different task.
+
+A computer is simply a machine for executing programs.
+
+The roles of hardware and software in computing:
+	Software (the programs) rules hardware (the machine). The software actually determines what a computer can do. Programming is the process of making software.
+
+What computer scientists study and the techniques they use:
+Computer science is NOT the study of computers. Computers are the tools through which computer scientists study the question of 'what processes can we describe, simulate or model? The three main techniques of investigation that computer scientists use are design, analysis and experimentation. 
+	The step-by-step process of design an algorithm can answer the question whether a problem can be solved. The weakness of design is that it depends on human ingenuity and thus can't answer the question of whether the problem is insolvable.
+	Analysis is the process of examining algorithms and problems mathematically. It is possible to show that some simple problems are intractable or altogether unsolvable using an algorithm.
+	Problems that are too complex or poorly defined lend themselves to experimentation. Such experiments implement systems and study the resulting behavior. A computer model of the cloud processes would be a good example of such experimentation.
+
+The number one question is often this: can we build an effective and reliable system. Given the complexity of modern problems and the complexity of the tools which we use to solve them, empirical testing of our newly created system might be vital to determine whether or not it achieves the desired effect.
+
+The basic design of a modern computer:
+All modern computer consists of the some key similar elements. The CPU (central processing unit) is where all simple operations like logic and addition can be performed. The computers memory may be split up into several parts that store programs and data. The RAM (random access memory) is fast but also transient and not suited for long term storage. A second, larger memory location, such as a SSD, is typically employed for such storage. When a program is started up on your machine, instructions for the program are copied from long-term storage into RAM. Once loaded, the CPU starts executing the program. 
+The CPU follows what is known as a fetch-execute cycle. A first instruction is given to it from memory, it is decoded, and then executed. This cycle is then repeated from one instruction to the next at a rate of billions of instructions per second.
+
+
+The form and function of computer programming languages
+A program is simply a sequence of instructions that tell a computer what to do. Such instructions must be provided in a language the computer can read. A programming languages provides an unambiguous way of expressing algorithms that avoids the messy imprecision of normal human languages. Syntax (the form) and semantics (the meaning) of such languages are very well defined meaning that any code we write down in that language is precise. Nearly all languages that have been developed are high level languages; they can be read and understood by humans with relatively little training. They are derived and constructed from common methods of human communication. Computer hardware on the other hand can only understand machine language, which is very low level and very challenging for humans to read.
+
+There are two methods for translating our high-level languages to the machine language that the computer can read, either by compiling or interpreting. 
+	Compilers: This is a computer program that does the translation work from high level to machine language.
+	Interpreters: These are slightly more tricky to understand. They simulate a computer that understand the high level language meaning that the interpreter executes the instruction by instruction.
+The main difference is that the translation that occurs when a program is compiled happens just once and doesn't need to be recompiled to run the program again later down the line. However, the interpreted method requires both the interpreter and source every time.
+
+
+The Python programming language
+
+Chaotic models and their implications for computing
+
+

@@ -1,0 +1,221 @@
+Compiling programs
+
+In this chapter we'll look at how to build programs by compiling source code. The availability of source code is the essential freedom that makes Linux possible. The entire ecosystem of Linux development relies on free exchange between developers. For many  desktop users, compiling is a lost art. It used to be quite common, but today, distribution providers maintain huge repositories of precompiled binaries, ready to download and use. So why compile software? There are two reasons:
+
+	Availability. Despite the number of precompiled programs in distribution repositories, some distributions don't include all the desired applications. In this case, the only way to get the desired program is to compile it from source.
+
+	Timeliness. While some distributions specialise in cutting-edge versions of programs others may not. This means that in order to have the  very latest version of program. Compiling could be necessary.
+
+The only command that we'll introduce in this section is:
+
+make - utility to maintain programs
+
+What is compiling?
+
+Simply put, compiling is the process of translating source code (the human readable description of a program written by a programmer) into the native language of the computer's processor.
+The computer's processor (or CPU) works at a very elemental level, executing programs in what is called machine language. This is a numeric code that describes very small operations, such as "add this byte," "point to this location in memory" or "copy this byte". Each of these instructions is expressed in binary. The earliest computer programs were written using this numeric code!
+
+This problem was overcome by the advent of assembly language, which replaced the numeric codes with (slightly) easier to use character mnemonics such as CPY (copy) and MOV (move). Programs written in assembly language are processed into machine language by a program called an assembler. Assembly is still used today for certain specialised programming tasks, such as device drivers and embedded systems.
+
+We next come to what are called high-level programming languages. They are called this because they allow the programmer to be less concerned with the details of what the processor is doing and more with solving the problem at hand. The early ones (developed in the 1950s) included FORTRAN (designed for scientific and technical tasks) and COBOL (designed for business applications). Both are still in limited use today.
+
+While there are many popular programming languages, two predominate. Most programs written for modern systems are written in C or C++. 
+
+Programs written in high-level programming languages are converted into machine language by processing them with another program called a compiler.
+
+Some compilers translate high-level instructions into assembly language and then use an assembler to perform the final stage of translation into machine language.
+
+A process often used in conjunction with compiling is called linking. Programs perform many common tasks. Like opening a file. Many programs perform this task, but it would be wasteful to have each program implement its own routine to open files. It makes more sense to have a single piece of programming that knows how to open files and to allow programs that need it share it. Providing support for common tasks is accomplished by libraries. They contain multiple such routines. Such libraries are stored in /lib and /usr/lib directories. A program called a linker is used to form the connections between the output of the compiler and the libraries that the compiled program requires. The final result of this process is the executable program file, ready for use.
+
+Are all programs compiled?
+No. As we have seen, some programs, such as shell scripts, do not require compiling but are executed directly. These are written in what are known as scripting or interpreted languages. These languages, which have grown in popularity include Perl, Python, PHP, Ruby, and many others. 
+
+Scripted languages are executed by a special program called an interpreter. An interpreter inputs the program file and reads and executes each instruction contained within it. In general, interpreted programs execute much more slowly than compiled programs because each source code instruction in an interpreted program is translated every time it is carried out, whereas with a compiled program, a source code instruction is translated only once.
+
+So why are interpreted languages so popular? For many programming chores, the results are 'fast enough' but the real advantage is that it is generally faster and easier to develop interpreted programs that compiled programs. 
+
+Compiling a C program
+Let's compile something. Before we do that, however, we're going to need some tools like the compiler, the linker, and make. The C compiler used almost universally in the Linux environment is called gcc (GNU C Compiler), originally written by Richard Stallman. Most distributions do not install gcc by default. We can check using our old friend which:
+
+	[bernie@antergos_vb foo]$ which gcc
+	/usr/bin/gcc
+
+	[bernie@antergos_vb foo]$ whatis gcc
+	gcc (1)              - GNU project C and C++ compiler
+
+
+Obtaining the source code
+For our compiling exercise, we are going to compile a program from the GNU project called diction. This is a handy little program that checks text files for writing quality and style. It's pretty small and easy build as programs go.
+
+	[bernie@antergos_vb foo]$ mkdir src
+	[bernie@antergos_vb foo]$ cd src
+	[bernie@antergos_vb src]$ ftp ftp.gnu.org
+	Connected to ftp.gnu.org.
+	220 GNU FTP server ready.
+	Name (ftp.gnu.org:bernie): anonymous
+	230-Due to U.S. Export Regulations, all cryptographic software on this
+	230-site is subject to the following legal notice:
+	230-
+	230-    This site includes publicly available encryption source code
+	230-    which, together with object code resulting from the compiling of
+	230-    publicly available source code, may be exported from the United
+	230-    States under License Exception "TSU" pursuant to 15 C.F.R. Section
+	230-    740.13(e).
+	230-
+	230-This legal notice applies to cryptographic software only. Please see
+	230-the Bureau of Industry and Security (www.bxa.doc.gov) for more
+	230-information about current U.S. regulations.
+	230 Login successful.
+	Remote system type is UNIX.
+	Using binary mode to transfer files.
+
+Source code is usually supplied in the form of a compressed tar file. Sometimes called a tarball, this file contains the source tree, or hierarchy of directories and files that compose the source code. After arriving at the FTP site, we examine the  list of tar files available and select the newest version for download. Using the get command within ftp, we copy the file from the FTP server to the local machine.
+
+Let's unpack the tarball:
+
+	[bernie@antergos_vb src]$ tar xzf diction-1.11.tar.gz 
+
+And look inside the directory:
+
+	bernie@antergos_vb src]$ cd diction-1.11/
+	[bernie@antergos_vb diction-1.11]$ ls
+	config.guess  COPYING       diction.pot      en_GB      getopt_int.h  misc.h  sentence.c
+	config.h.in   de            diction.spec     en_GB.po   INSTALL       NEWS    sentence.h
+	config.sub    de.po         diction.spec.in  getopt1.c  install-sh    nl      style.1.in
+	configure     diction.1.in  diction.texi.in  getopt.c   Makefile.in   nl.po   style.c
+	configure.in  diction.c     en               getopt.h   misc.c        README  test
+
+README, COPYING, NEWS and INSTALL are all files that contain the description of the program and its licensing terms.
+
+	[bernie@antergos_vb diction-1.11]$ ls *.c
+	diction.c  getopt1.c  getopt.c  misc.c  sentence.c  style.c
+	[bernie@antergos_vb diction-1.11]$ ls *.h
+	getopt.h  getopt_int.h  misc.h  sentence.h
+
+Other interesting files in this directory end with .c; these are the two C programs supplied by the package, divided into modules. It is common practice for  large programs to be broken into smaller, easier-to-manage pieces. The source code files are ordinary text and can be examined with less.
+
+We also have .h files which are header files. These are ordinary text as well and contain descriptions of the routines included in a source code file or library. In order for the compiler to connect the modules, it must receive a description of all the modules needed to complete the entire program. At the beginning of the diction.c file we see:
+
+	#include "getopt.h"
+
+This instructs the compiler to read the file getopt.h as it reads the source code in diction.c in order to "know" what's in getopt.c. The getopt.c file supplies routines that are shared by both the style and diction programs. 
+
+Above these include statements we have some other statements that refer to header files outside of the source tree.
+
+#include <regex.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+They are supplied to the system to support compilation of every program and live in /usr/include
+
+Building the program
+Most programs build with a simple, two command sequence:
+
+	./configure
+	make
+
+The configure program is a shell script that is supplied with the source tree. Its job is to analyze the build environment. Most source code is designed to be portable. That is, it is designed to build  on more than one kind of Unix like system. In order to do that, the source code may need to undergo slight adjustments during the build to accomodate differences between systems. configure also checks to see that the necessary external tools and components are installed.
+
+Since configure is not located where the shell normally expects programs to be located, we must explicitly tell the shell its location:
+
+	[bernie@antergos_vb diction-1.11]$ ./configure
+	checking build system type... x86_64-unknown-linux-gnu
+	checking host system type... x86_64-unknown-linux-gnu
+	checking for gcc... gcc
+	checking for C compiler default output file name... a.out
+	checking whether the C compiler works... yes
+	checking whether we are cross compiling... no
+	checking for suffix of executables... 
+	checking for suffix of object files... o
+	checking whether we are using the GNU C compiler... yes
+	checking whether gcc accepts -g... yes
+	checking for gcc option to accept ISO C89... none needed
+	checking for a BSD-compatible install... /usr/bin/install -c
+	checking for strerror... yes
+	checking for library containing regcomp... none required
+	checking for broken realloc... no
+	checking for msgfmt... yes
+	checking how to run the C preprocessor... gcc -E
+	checking for grep that handles long lines and -e... /usr/bin/grep
+	checking for egrep... /usr/bin/grep -E
+	checking for ANSI C header files... yes
+	checking for sys/types.h... yes
+	checking for sys/stat.h... yes
+	checking for stdlib.h... yes
+	checking for string.h... yes
+	checking for memory.h... yes
+	checking for strings.h... yes
+	checking for inttypes.h... yes
+	checking for stdint.h... yes
+	checking for unistd.h... yes
+	checking libintl.h usability... yes
+	checking libintl.h presence... yes
+	checking for libintl.h... yes
+	checking for library containing gettext... none required
+	configure: creating ./config.status
+	config.status: creating Makefile
+	config.status: creating diction.1
+	config.status: creating diction.texi
+	config.status: creating diction.spec
+	config.status: creating style.1
+	config.status: creating test/rundiction
+	config.status: creating config.h
+
+What's important here are that there are no error messages. We see that configure created several new files in our source directory. The most important one is Makefile. Makefile is a configuration file that instructs the make program exactly how to build the program. Without it, make will refuse to run. The make program takes as input a makefile which describes the relationships and dependencies among the components that compose the finished program.
+
+Running make
+
+	[bernie@antergos_vb diction-1.11]$ make
+	gcc -c -I. -DSHAREDIR=\"/usr/local/share\" -DLOCALEDIR=\"/usr/local/share/locale\" -g -O2 -pipe -Wno-unused -Wshadow -Wbad-function-cast -Wmissing-prototypes -Wstrict-prototypes -Wcast-align -Wcast-qual -Wpointer-arith -Wcast-align -Wwrite-strings -Wmissing-declarations -Wnested-externs -Wundef -pedantic -fno-common diction.c
+	... etc
+
+When it finishes, we see that all the targets are now present in the dictionary. Among the files are diction and style. We've just compiled our first program! 
+
+But what happens when we try to compile again?
+
+	[bernie@antergos_vb diction-1.11]$ make
+	make: Nothing to be done for 'all'.
+
+This is the magic of make. Rather than build everything again, make builds only what needs building. With all the targets present, make determined that there was nothing to do. 
+
+Installing the program
+Well-packaged source code often includes a special make target called installed. This target will install the final product in a system directory for use. Usually, this directory is /usr/local/bin, the traditional location for locally built software. However, this directory is not normally writable by ordinary users so we must become a super user in order to perform the installation:
+
+	[bernie@antergos_vb diction-1.11]$ sudo make install
+	[sudo] password for bernie: 
+	[ -d /usr/local/bin ] || /usr/bin/install -c -m 755 -d /usr/local/bin
+	/usr/bin/install -c diction /usr/local/bin/diction
+	/usr/bin/install -c style /usr/local/bin/style
+	/usr/bin/install -c -m 755 -d /usr/local/share/diction
+	/usr/bin/install -c -m 644 ./de /usr/local/share/diction/de
+	/usr/bin/install -c -m 644 ./en /usr/local/share/diction/en
+	(cd /usr/local/share/diction; rm -f C; ln en C)
+	/usr/bin/install -c -m 644 ./en_GB /usr/local/share/diction/en_GB
+	/usr/bin/install -c -m 644 ./nl /usr/local/share/diction/nl
+	[ -d /usr/local/share/man/man1 ] || /usr/bin/install -c -m 755 -d /usr/local/share/man/man1
+	/usr/bin/install -c -m 644 diction.1 /usr/local/share/man/man1/diction.1
+	/usr/bin/install -c -m 644 style.1 /usr/local/share/man/man1/style.1
+	make install-po-yes
+	make[1]: Entering directory '/home/bernie/foo/src/diction-1.11'
+	for cat in de.mo en_GB.mo nl.mo; do \
+		  dir=/usr/local/share/locale/`basename $cat .mo`/LC_MESSAGES; \
+		  [ -d $dir ] || /usr/bin/install -c -m 755 -d $dir; \
+		  /usr/bin/install -c -m 644 $cat $dir/diction.mo; \
+		done
+	make[1]: Leaving directory '/home/bernie/foo/src/diction-1.11'
+
+We can check that our new program is ready to go!
+
+	[bernie@antergos_vb ~]$ which diction
+	/usr/local/bin/diction
+	[bernie@antergos_vb ~]$ ls -l /usr/local/bin
+	total 140
+	-rwxr-xr-x 1 root root 53064 May 24 09:04 diction
+	-rwxr-xr-x 1 root root 88320 May 24 09:04 style
+
+Final note, we've seen how three simple commands ./configure, make and make install can be used to build many source code packages. We have also seen the important role that make plays in the maintenance of programs. The make program can be used for any task that needs to maintain a target/dependency relationship, not just  for compiling source code.
+
+
+

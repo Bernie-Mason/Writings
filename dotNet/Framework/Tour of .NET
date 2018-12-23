@@ -1,0 +1,60 @@
+Tour of .NET
+file purpose:
+	As o 09/2017 I'm reasonably familiar with C# language but know very little about the workings and jargon of the framework.
+	To explain the basic principles of .NET. It's purpose and basic operation.
+	Each time I don't know a term I'll offer a definition.
+
+What is .NET?
+From https://softwareengineering.stackexchange.com/questions/44810/relationship-between-c-net-asp-asp-net-etc
+
+	.NET is a library of code tht .NET languages (C#, F# and VB) can talk.
+	Such languages compile to the CIL (Common Intermediate Language) which means they all start talking the same language and can therefore interoperate.
+	ASP.NET is the portion (extension) of the .NET library used for making websites. There are other sections of ASP.NET like WebFroms and MVC
+	Forms or WPF are technologies you'd typically use in .NET to create what you know as desktop apps.
+
+The difference between a library and a framework
+
+	A library contains many pieces of functionality that you may pick and choose from. i.e. using one piece of tech doesn't mean you're locked into the rest. 
+	A framework however very much sets out how you work. It provides a workflow that for better or worse is hard to change.  
+
+From the MS docs
+.NET is a general purpose development platform. It has several key features, such as support for multiple programming languages (like C#), asynchronous (async Task) and concurrent (?) programming models, and native interoperability (calling of native code), which enable a wide range of scenarios across multiple platforms.
+
+	A .NET app is developed and runs in one or more implementations of .NET. The implementations are
+		.NET Framework
+		.NET Core
+		MONO
+	There is an API specification common to all implementations called the .NET Standard.
+
+.NET Standard
+The .NET Standard is a set of APIs that are implemented by the Base Class Library of a .NET implementation. More formally, it's a specification of .NET APIs that make up a uniform set of contracts that you compile your code against. These contracts are implemented in each .NET implementation. This enables portability across differenet .NET implementations, effectively allowing your code to run everywhere.
+
+.NET Standard is also a target framework. If your code targets a version of the .NET Standard, it can run on any .NET implementation which supports that version of the .NET Standard.
+
+.NET Implementations
+Each implementation of .NET includes the following components:
+	1. One or more runtimes. CLR for .NET Framework and CoreCLR and CoreTH for .NET Core. .Net Native for Universal Windows Platform and Mono runtime for Xamarin.iOs, Xamarin.Android and Mono desktop framework.
+		Runtime: A runtime is the execution environment for a managed program. The OS is part of the runtime environment but is no tpart of the .NET runtime
+		The runtime system is the gateway through which a running program interacts with the runtime environment, which contains not  only state values that are accessible during program execution, but also active entities that can interact with during program execution like disk drives and people via keyboards.
+		The term runtime and implementation are often use synonymously. For example, the Mono or .NET Framework runtimes refer to the Mon and CLR runtimes respectively.
+	2. A class library that implements the .NET Standard and may implement additional APIs. Examples: .NET Framework Base Class Library, .NET Core Base Class Library
+	3. Optionally, one or more application frameworks. ASP.NET, Windows Forms and Windows Presentation Foundation are included in the .NET Framework
+	4. Optionally, development tools. 
+
+Four major .NET implementations
+	1. .NET Framework
+		This is the original .NET implementation that has existed since 2002. It's the same .NET Framework that existing .NET developers have always used. Versions 4.5 and later implement implement the .NET Standard, so code that targets thet .NET Standard can run on those  version of the .NET Framework. It contains additional Windows-specific APIs, such as APIs for Windows desktop development with Windows Forms and WPF. 
+		The .NET Framework is optimized for building Windows desktop applications
+	2. .NET Core
+		This is a cross platform implementation of .NET and designed to handle server and cloud workloads at scale. It runs on Windows, macOS and Linux. It implements the .NET Standard. ASP.NET Core runs on .NET Core.
+	3. Mono
+		Mono is a .NET implementation that is mainly used when a small runtime is required. It is the runtime that powers Xamarin applications on Android, Mac, iOS, tcOS and watchOS and is focused primarily on small footprint(?)
+	4. Universal Windows Platform (UWP)
+		UWP is an implementation of .NET that is used for building modern, touch-enabled Windows applications and software for the Internet of Things (IoT). It's designed to unify the different types of devices that you may want to target, included PCs, tables, phablets, phones and even the Xbox. When using C#, the .NET APIs are provided by .NET Core.
+
+.NET tooling and common infrastructure
+	The .NET languages and their compilers
+	The .NET project system
+	MS Build, the build engine used to build projects
+	NuGet, MS's package manager for .NET
+	Open-source build orchestration tools, such as CAKE and FAKE

@@ -1,0 +1,68 @@
+Continuous deployment
+Continuous integration	
+reverse proxy
+
+Bootstrapper (object)
+Persistence: In computer science, persistence describes dat that outlives the process that created it.
+Persistent Data denotes information that is infrequently accessed and not likely to be modified.
+Domain entities - All MVC frameworks start with the domain model as everything revolves around it.
+ORM Framework (computer science):  Objects to Relational tables Mapping. Presents the tables, columns and rows of a relational database through regular C# objects.
+    - LINQ can work with different sources of data, and one of these is Entity Framework.
+View model: Not a part of the domain model. It is just a convenient class for passing data between the controller and the view.
+API: Application Programming Interface: This is a set of functions and procedures that allow the creation of applications that access the features or data of an operating system, application or other service.
+
+a set of functions and procedures that allow the creation of applications which access the features or data of an operating system, application, or other service.
+
+Request (MVC, Request/Response chain)
+Routing (MVC, Request/Response chain):
+Controller Factory (MVC, Request/Response chain): Responsible for creating instances of controllers to service requests.
+Controller (MVC, Request/Response chain):
+Action Invoker (MVC, Request/Response chain): Responsible for finding and invoking the action method in the controller class.
+Action Method (MVC, Request/Response chain):
+View (MVC): A mixture of C# and HTML that allows a mixture of dynamic and static content to be passed to the user interface.
+  Dynamic Content: Generated at runtime and can be different for each request
+    Inline code: For small, self contained pieces of logic like foreach  and if statements. Very common. (@code)
+    HTML helper: For generating single HTML elements or small collections of them, typically based on view or model data (@Html.HelperMethod)
+    Sections: For creating sections of content that will be rendered into the layout at specified locations (@section SectionName)
+    Partial Views: For creating subsections of view markup between views. Can also contain inline code, HTML helpers and references to other partial views.
+    Child actions: For creating  reusable UI controls or widgets that need to contain business logic. When you use a child action (an action method within a view), it invokes an action method, renders a view, and injects the result into the response stream.
+  Static Content: Such as HTML, is created when you write your application and is the same for each request.
+
+concrete (class, oop):
+public (class, oop):
+private (class, oop): the value can be accessed by methods within the class
+protected (class, oop): the value can be accessed by methods within the class and subclasses
+namespace (oop, c#):
+scope (oop, programming):
+child/parent namespace:
+namespace:
+abstract (class, oop): c# class keyword. Denotes that this class is not used to create instances
+
+interface (c#, oop): An interface is used to represent a contract that a class may decide to support. It is basically a class with nothing but abstract methods. Interfaces commonly have names that are adjectives as adjectives modify nouns (or objects) like IDriveable
+
+reference type:
+value type:
+
+member (c#): A catch-all term for any entity that resides in a class. This could be a field, a property, a method, a constant, a constructor etc.
+
+thread (computing): In computer science, a thread of execution is the smallest sequence of programmed instructions that can be managed independently by a scheduler, which is typically a part of the operating system.
+
+Socket: A socket is an endpoint of to and from communication link between two programs (a server and a client). 
+
+TCP/IP communication: Transmission Control Protocol/Internet Protocol.
+UDP/IP communication: User Datagram Protocol/Internet Protocol.
+
+CGI script - (common gateway interface) This is any program that runs on a webserver.
+
+
+class (oop) - defines the properties (as fields and properties) and behaviors (as methods) of the real world or virtual things that we are trying to model. All classes are reference types.
+object (oop) - an instance of a class
+structure (oop) - like a class this defines properties and behaviors of real world or virtual things. However, it is a value type rather than a reference type and therefore can only contain other fields that are value types and methods that use value types.
+method (oop) - the behavioral part of a class or structure
+field (oop) - the property part of a class or structure
+property (oop) - also the property part of a class or structure
+static class (oop) - defines a set of fields and methods that have to be static. Instead of creating an instance of a static class, you just call the fields and methods of that class directly (kind of like a function)
+static method (oop)
+static field (oop) - A field that is constant and (if contained within a non-static class) has one copy shared  across all object instances of that class.
+
+checksum - a digit representing the sum of the correct digits in a piece of stored or transmitted data, against which later comparisons can be made to detect errors in the data.

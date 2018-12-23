@@ -1,0 +1,14 @@
+Dictionary - Threading
+
+THREAD: The basic unit that an operating system will allocate processing time to. A low level concept. This has it's own stack and kernel resources. 
+
+THREADPOOL (C#): This is a wrapper around a pool of threads maintained by the CLR. Best used for short operations where the caller doesn't need the result. ThreadPool gives you no control at all; you can submit work to execute at some point, and you can control the size of the pool, but you can't set anything else. This avoids the overhead of creating too many threads. 
+
+TASK (C#): Like the ThreadPool, a task doesn't create it's own OS thread. Instead, tasks are executed by a TaskScheduler; the default scheduler simply runs on the ThreadPool. 
+
+AWAIT (C#): The await operator is applied to a task in an async method to insert a suspension point in the execution of the method until the awaited task completes, The task represents ongoing work. This can only be used in an async method modified by the async keyword. Such a method, defined by using the async modifier and usually containing one or more await expressions, is referred to as an async method.
+
+DEADLOCKS: Two threads stop responding while each waits for the other to complete
+
+RACE CONDITIONS: Anomalous result occurs due to a unexpected critical dependence on the timing of two events.
+The system provides synchronization objects that can be used to co-ordinate resource sharing amongst multiple threads. Reducing the number of threads makes it easier to synchornize the resources. These include:

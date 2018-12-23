@@ -1,0 +1,206 @@
+﻿@using System.Web.Mvc.Html
+
+@{
+    ViewBag.DefaultPageHeader = "Programming";
+    ViewBag.DefaultPageSubHeader = "Yep";
+}
+
+<h2>Object-Oriented Programming</h2>
+<p>
+    In the last few months I've been getting to grips with a programming paradigm that I have always slightly feared; 
+    object-oriented programming. 
+    However, after writing this website in part in the 
+    @Html.ActionLink("C#", "Post", "Home", new { Name = "CSharpIntro", FolderName = "Programming" },null) programming language, 
+    I've realised that it really isn't that scary.
+    
+</p>
+
+<p>
+    In this introduction I'll do my best to present on some key features of an object-oriented language:
+    <a href="#Classesandobjects">Classes and objects</a>, <a href="#Inheritance">Inheritance</a>, <a href="#Encapsulation">
+        Encapsulation
+    </a> and <a href="#Polymorphism">Polymorphism</a>. Although the code  here will be using C# syntax,
+    the principles are the same for any object-oriented language. I'll also be covering how C# uses <a href="#Valueandreferencetypes">
+        value and reference types
+    </a>.
+</p>
+
+<h3 id="Classesandobjects">Classes and objects</h3>
+
+<p>
+    Classes are definitions for the data and avaiable functions for a given type or class of object.
+    They are, put another way, a <em>classification;</em> an act of arranging information and behaviour in a meaningful way.
+     Let's take a simple example: all people have common behaviours (breathing, walking, sneezing etc)
+    and common attributes (two legs, two eyes, one heart etc). We use the word <em>people</em> as a classification for an object
+    that shares common attributes and behviours. Without classification, communication could be very complicated!
+   
+</p>
+
+<p>
+    In programming, a <strong>class</strong> will contain fields (attributes) and methods (behaviours) which will define what it is.
+    An <strong>object</strong> is simply an instance of a class and several objects can be instances of the same class.
+</p>
+
+<p>
+    Below, we define a Square class with two fields and two methods. We'll worry about the private and public keywords in
+    <a href="#Encapsulation">Encapsulation</a> but for now we can see that we have an attribute defining the length of the
+    square's side (sidelength) and a static field defining the number of squares. Static fields are a way of sharing a common
+    field amongst all instances of a class.
+</p>
+
+<hr />
+<code>
+    class Square<br />
+    {<br />
+    &nbsp;&nbsp;private int sidelength; // Field declared<br />
+    &nbsp;&nbsp;public static int NumSquares;<br />
+    &nbsp;&nbsp;<br />
+    &nbsp;&nbsp;public Square() // Default constructor method<br />
+    &nbsp;&nbsp;{<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;sidelength = 0; // Field initialised<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;NumSquares += 1; // Field incremented<br />
+    &nbsp;&nbsp;}<br />
+    &nbsp;&nbsp;<br />
+    &nbsp;&nbsp;public double Area() // Method<br />
+    &nbsp;&nbsp;{<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;return sidelength*sidelength;<br />
+    &nbsp;&nbsp;}<br />
+    }
+</code>
+<hr />
+
+<p>
+    The first of our two methods is called a default constructor and can be called to
+    instantiate a new Square object. The second is a method that can be called on an
+    existing Square object in order to calculate it's area. Now we can create an instance
+    of the square object:
+</p>
+
+<hr />
+<code>
+    Square s;  // Declare a Square variable<br />
+    s = new Square(); // Initialise it using a default construcotor<br />
+    int area = Square.Area(); // Invoke the Area method of the square class
+</code>
+<hr />
+
+<blockquote>A class is a definition of a type, an object is an instance of that type. </blockquote>
+
+<h3 id="Encapsulation">Encapsulation</h3>
+<p>
+    This is a very important principle when defining a class. A program that uses a class
+    should not know how the class works internally. The program should be able to create
+    an instance of a class (an object) and call the methods of that class on the object
+    without caring how they actually are implemented. The main purpose of encapsulation
+    (aside from supporting classification) is to control the accessibility of methods and data.
+</p>
+
+<p>Let's see how encapsulation  works in our Square class</p>
+<hr />
+<code>
+    ...<br />
+    &nbsp;&nbsp;private int sidelength = 10;<br />
+    &nbsp;&nbsp;<br />
+    &nbsp;&nbsp;public double Area(){...}<br />
+    ...
+</code>
+<hr />
+<p>
+    For example, in our Square class code a program can create an instance of the Square class and
+    calculate the Area of the new object using the public method 'Area'. However, it cannot change
+    or view the sidelength attribute as it is private to the class.
+</p>
+
+<h3 id="Valueandreferencetypes">Value and reference types</h3>
+<p>
+    The value types in C# all have a fixed size. When a variable is declared,
+    the compiler allocates a memory block on the stack big enough to hold a value of that type.
+    Value types include int, float, double, bool, decimal and char (these are primative types)
+    but not string which, although a primitive type, is a reference type.
+</p>
+
+<p>
+    References types, like class types, are treated differently. When you declare a class variable
+    the compiler doesn't allocate enough memory for an instance of that class. Instead, it allocates
+    a small amount of memory that can store a reference to a block of memory on the heap containing
+    the class instance. Reference types hold references to blocks of memory.
+</p>
+
+<p>
+    To understand why C# does this, it's worth taking a moment to look at how computer memory is organised.
+    The runtimes and operating systems that use C# divide the memory used for holding data into two areas;
+    the stack and the heap.
+</p>
+
+<p>
+    <b>The Stack</b> memory, we can imagine neatly stacked boxes. When a method is called,
+    each parameter is placed within a box on top of the stack. When the method finishes,
+    these boxes are removed from the stack.
+</p>
+
+<p>
+    With <b>Heap</b> memory our boxes are generally larger and placed around the room.
+    Boxes are identified by a reference which is stored as a local variable on the stack.
+    When all references to a box have been removed from the stack, the runtime marks the box as unused.
+</p>
+
+<h3 id="Inheritance">Inheritance</h3>
+<p>
+    Inheritance is a useful tool to keep your code simple and short when writing code that has
+    different classes that share a number of common features but where the classes are obviously
+    linked. We can start by defining a base class:
+</p>
+
+<hr />
+<code>
+    class Bird // Base_Class<br />
+    {<br />
+    &nbsp;&nbsp;...<br />
+    &nbsp;&nbsp;public void fly()<br />
+    &nbsp;&nbsp;{<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;...<br />
+    &nbsp;&nbsp;}<br />
+    }
+</code>
+<hr />
+
+<p>In C# you can define a class that inherits from another class using the following syntax: </p>
+
+<hr />
+<code>
+    class Eagle : Bird // Derived_Class : Base_Class<br />
+    {<br />
+    &nbsp;&nbsp;...<br />
+    &nbsp;&nbsp;public void CatchRodent()<br />
+    &nbsp;&nbsp;{<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;...<br />
+    &nbsp;&nbsp;}<br />
+    }
+</code>
+<hr />
+
+<p>
+    Now if we create a new instance of Eagle it will be able to perform it's
+    own methods and fields plus any others that it inherits from it's base class of Bird.
+</p>
+
+<hr />
+<code>
+    Eagle myEagle = new Eagle();<br />
+    myEagle.Fly();<br />
+    myEagle.CatchRodent();<br />
+    ...<br />
+    Bird myBird = new Bird();<br />
+    myBird.Fly();<br />
+    myBird.CatchRodent(); // error - CatchRodent is not part of the Bird class
+</code>
+<hr />
+
+<h3 id="Polymorphism">Polymorphism</h3>
+<p>The word polymorphism comes from Greek roots of Poly, meaning many, and Morph, which means change or form. Polymorphism thus means having many forms. Within object oriented programming, polymorphism refers to the fact can have multiple definitions (or forms) for underlying types (both value and reference). </p>
+<p>If we revisit the encapsulation of our bird class we can demonstrate polymorphism in effect</p>
+<p>Primative value types such as doubles and integers are also polymorphic in as they can be added, multiplied and subtracted from one another despite being different types.</p>
+
+<h3>Summary</h3>
+<p>Encapsulation, polymorphism and inheritance are concepts that share some overlap in their definitions and, together, build the picture of what the object oriented programming paradigm is. </p>
+@*@Html.Partial("_CSharpLinks")*@

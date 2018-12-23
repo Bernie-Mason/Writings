@@ -1,0 +1,75 @@
+﻿@using System.Web.Mvc.Html
+
+@{
+    ViewBag.DefaultPageHeader = "Programming";
+    ViewBag.DefaultPageSubHeader = "Yep";
+}
+<h2>Dependency Injection</h2>
+
+<p>Dependency injection (DI) is core concept in making a large MVC application. It sounds scary but it's really quite simple. However, in order to understand why it's useful we should first introduce the concept of loosely coupled components in programming.</p>
+
+<h3>Loosely coupled components</h3>
+<p>
+    Each piece of MVC architecture is well defined and self contained. The view alone is responsible for displaying data, the model alone is responsible for data manipulation within the model and controller alone is responsible for handling user requests and inputs.
+</p>
+<p>Ideally, each component will know nothing about the specifics of any other components and only communicates with other areas of the application through interfaces that abstract the information of the components. This is known as <em>loose coupling</em> and it makes updating and extending applications much easier.</p>
+
+<p>Let's consider an example. Let's say that I have an in-browser card game. I have a part of the domain model that is concerned with dealing out playing cards (DealPlayingCard). I could use an interface that defines all the functions required to deal out a card (IDealPlayingCard). Any other component of the application that needs to deal out a card, for example a 'play solitaire' helper called PlaySolitaire, can then deal out a card (or multiple) referring only to methods in the interface. </p>
+<p>By creating IDealPlayingCard, there is no depency between the PlaySolitaire helper and the DealPlayingCard. I could change DealPlayingCard with a new method that deals out differnet types of cards without having to change PlaySolitaire.</p>
+<h4>Dependency Injection (DI)</h4>
+<p>We are now faced with an issue. C# doesn't have a way to create objects that implement interfaces. We need to make an instaqnce of the component and end up with the following:</p>
+<hr />
+<code>
+    class PlaySolitaire <br />
+    {<br />
+    &nbsp;&nbsp;...<br />
+    &nbsp;&nbsp;public void StartGame()<br />
+    &nbsp;&nbsp;{<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;IDealPlayingCard dealCard = new DealPlayingCard();<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;...<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;dealCard.DealOutCard();<br />
+    &nbsp;&nbsp;}<br />
+    }
+</code>
+<hr />
+
+<p>This is a serious problem! The PlaySolitaire class is configured correctly; it can deal cards through the IDealPlayingCard interface. However! In order to create an object that implements the interface, it had to create an instance of DealPlayingCard. Now PlaySolitaire depends on both the class AND the interface!</p>
+<p><em>We need to implement the interface without having to creat the object directly. The solution to this is called dependency injection, a design pattern that is a very important concept and central to effective MVC developement.</em></p>
+<p>We need to break the depency to any concrete classes. We can do this by creating a class constructor that accepts the implementation of the interfaces we need as arguments:</p>
+<hr />
+<code>
+    class PlaySolitaire <br />
+    {<br />
+    &nbsp;&nbsp;private IDealPlayingCard dealCard;<br />
+    &nbsp;&nbsp;<br />
+    &nbsp;&nbsp;public void PlaySolitaire(IDealPlayingCard dealPlayingCardParam)<br />
+    &nbsp;&nbsp;{<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;dealCard = dealPlayingCardParam;<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;// This constructor has declared a dependency on the IDealPlayingCard interface<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;// It now can't be created and used unless it receives an object that implements this interface<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;// Our PlaySolitaire class no longer has any knowledge of DealPlayingCard <br />
+    &nbsp;&nbsp;&nbsp;&nbsp;// Our PlaySolitaire class also doesn't care how the IDealPlayingCard interface is implemented<br />
+    &nbsp;&nbsp;}<br />
+    &nbsp;&nbsp;<br />
+    &nbsp;&nbsp;public void StartGame()<br />
+    &nbsp;&nbsp;{<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;dealCard.DealOutCard();<br />
+    &nbsp;&nbsp;}<br />
+    }
+</code>
+<hr />
+<p>The final step is the actual injection of a dependency. We need to decide which class that implements the IDealPlayingCard interface (for there may well be more than one) we are going to use. We need to create an object of that class and then pass the object as an argument to the PlaySolitaire constructor.</p>
+<p>Dependencies are injected at runtime, meaning that we can decide which interface implementations are going to be used when we run the application.</p>
+<h4>Dependency injection containers</h4>
+<p>Also known as a IoC (Inversion of Control) container, this is component that links dependencies that a class like PlaySolitaire states (through it's constructor) to the bits of the model that can be used to resolve those dependencies (like DealPlayingCard).</p>
+<p>Using a DI container we can set which classes should be instantiated to satisfy dependencies. For example, we could register the IDealPlayingCard interface with the container and specify that an instance of DealPlayingCard  should be created whenever an instance of IDealPlayingCard is required.</p>
+<p>The DI container also knows that PlaySolitaire has a dependency on the IDealPlayingCard interface. When we want to create a PlaySolitaire object, we tell the IoC container to make one. It creates a DealPlayingCard object and then uses it as an argument to make a PlaySolitaire object.</p>
+<p><strong>A good DI container may have some clever features:</strong></p>
+<ul>
+    <li><em>Config of param. values for constructors:</em> DI containers should allow you to set a value for additional constructor parameters.</li>
+    <li><em>Management of object lifetime:</em> DI containers should  let you adjust component lifetime.</li>
+    <li><em>Dependency chain resolution:</em> Requesting a component (like DealPlayingCard) that has it's own depencies will result in the container resolving those dependencies too.</li>
+</ul>
+
+@*@Html.Partial("_MVCLinks")*@

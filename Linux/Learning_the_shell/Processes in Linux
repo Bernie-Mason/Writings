@@ -1,0 +1,172 @@
+Processes in Linux
+// From "The Linux Command Line" - Chapter 10
+
+Processes
+Modern operating systems are usually multitasking, meaning that they create the illusion of doing more than one thing at once by rapdily switching from one executing program to another. The Linux  kernel manages this through the use of processes. Processes are how Linux organises the different programs waiting for their turn at the CPU
+
+Sometimes a computer will become sluggish, or an application will stop responding. In this chapter, we will look at some of the tools available at the command line that let us examine what programs are doing and how to terminate processes that are misbehaving.
+
+This chapter will include the following commands:
+ps - report a snapshot of current processes
+top - display tasks
+job -  list active jobs
+bg - place a job in the background
+fg - place a job in the foreground
+kill - send a signal to a process
+killall - kill processes by name
+
+How a process works
+1. When a system starts up, the kernel initiates a few of its own activities as processes and launches a program called init. 
+2. init, in turn, runs a series of shell scripts (located in /etc) called init scripts, which start all the system services.
+3. Many of these services are implemented as daemon programs, programs that just sit in the background and do their thing without having any user interface. 
+
+So even if we're not logged in, the system is at least a little busy performing routine stuff.
+The fact that a program can launch other programs is expressed in the process scheme as a parent process producing a child process.
+The kernel maintains information about each process to help keep things organised. For example, each process is assigned a number called a process (PID). PIDs are assigned in ascending order, with init always getting a PID of 1. The kernel also keeps track of the memory assigned to each process, as well as the processes' readiness to resume execution.
+Like files, processes also have owners and user IDs, effective user IDs and so on.
+
+Viewing processes with ps
+The most commonly used command to view processes is ps. The ps program has a lot of options but in it's simplest form:
+
+[bernie@antergos-vbox ~]$ ps
+PID 	TTY 		TIME CMD
+3141 	pts/1	00:00:00 bash
+4166 	pts/1	00:00:00 bash
+4211 	pts/1	00:00:00 ps
+
+The result in this example lists three processes. TTY stands for teletype and refers to the controlling terminal for the process. Unix is showing its age here. The TIME field is the amount of CPU time consumed by the process. As we can see, neither process makes the computer work very hard!
+
+As we can see, the default ps doesn't show us very much, just the processes associated with the current terminal session. To see more, we need to add some more options. Adding the x option tells ps to show all processes regardless of what terminal (if any) they are controlled by. The presence of ? in the TTY column indicate no controlling terminal. Using this option, we see a list of every process that we own.
+
+A new column, STAT, also now appears. This is short for state and reveals the current status of the process:
+
+R - Running. The process is running or ready to run.
+S - Sleeping.The process is not running; rather, it is waiting for an event, such as a keystroke or a network packet
+D - Uniterrupible sleep. Process is waiting for I/O such as a disk drive
+T - Stopped.
+Z - A defunct or "zombie" process. This is a child process that  has been terminated but not been cleaned up by its parent
+< - A high-priority process. It's possible to grant more importance to a process, giving it more CPU time.
+N - low-priority process.
+
+The process state may be followed by other characters. These indicate various exotic process characteristics. See the ps man page for more detail. Another popular set of options is aux. This gives us even more information.
+
+This set of options displays the processes belonging to every user. Using the options without the leading dash invokes the command with "BSD-style" behavior. The Linux version of ps can emulate the behavior of the ps program found in several Unix implementations. With these options, we get the additional columns:
+
+USER: User ID. The owner of the process
+%CPU - CPU usage as a percentage
+%MEM - Memory usage as a percentage
+VSZ -  Virtual memory size
+RSS - Resident Set Size. The amount of physical memory (RAM) the process is using in kb
+START - Time when the process started
+
+Viewing processes dynamically with top
+
+While the ps command can reveal a lot about what the machine is doing, it provides only a snapshot of the machines state at the moment that the command is executed. To see a dynamic view of the machines state we use the top command. This updates (by default) every 3 seconds.
+
+The first row in of the top program gives many information fields:
+top - name of program
+11:14:05 - current time of day
+up 3:20 - uptime
+1 user - number of users logged in
+load average -  refers to the number of processes that are waiting to run; that is, the number of processes that are in a runnable state and are sharing the CPU. Three values are shown, each for a different period of time. The first is the average for the last 60 seconds, the next the previous 5 minutes, and finally the previous 15 minutes. Values under 1.0 indicate that the machine is not busy.
+
+The second  row summarises the number of process and their various process states. The third row describes the character of the activities that the CPU is performing. The 4th row shows how much RAM is begin used and the final row how much swap space (virtual memory is being used).
+
+The top program accepts a number of keyboard commands include h (help) and q (quit). Although GNOME provides a graphical version of top (like the Task Manager in windows), top can be better as it consumes fewer resources.
+
+Controlling processes
+Now we can see an monitor processes, let's gain some control over them. xlogo is a sample program supplied with the X Window System (the underlying engine that makes the graphics on our display go), which simply displays a resizable window containing the X logo. On GNOME we can run gedit (the GNOME text editor). We can verify that the program is running by resizing its window. If the logo is redrawn in the new size, the program is still running.
+Notice how our shell prompt has not returned? This is because the shell is waiting for the program to finish, just like all other programs we've used so far. If we close the gedit window, then the prompt returns.
+
+Interrupting a Process
+Let's observe what happens when we run gedit again. First, enter the gedit command and verify that the program is running. We can then make the terminal active again and type ctrl C. This interrupts the program and closes it.
+
+Putting a process in the background.
+In order to get the shell prompt back without terminating the process we can place the program in the background. Think of the terminal as having a foreground (with stuff visible on the surface, like the shell prompt) and a background (with hidden stuff below the surface). To launch a program so that it is immediately placed in the background, we follow the command with an ampersand:
+
+[bernie@antergos-vbox ~]$ gedit &
+[1] 28234
+[bernie@antergos-vbox ~]$
+
+After the command was entered, the gedit window appear and the shell prompt returned, but we also some numbers. The message is part of a shell feature called job control. With this message, the shell is telling us that we have started job number 1 ([1]) and that it has a PID of 28234. If we run ps, we can now see our process.
+
+Running the job command, we can see our jobs
+
+[bernie@antergos-vbox ~]$ jobs
+[1]+ Running 		gedit &
+[bernie@antergos-vbox ~]$ fg %1
+gedit
+
+The fg command followed by the percent sign and the job number pushes this job to the foreground and terminal prompt once again doesn't return.
+
+
+Stopping (pausing) a process
+Sometimes we'll want to stop a process without terminating it. This is often done to allow foreground process to be moved to the background. To stop a foreground process, type CTRL-z. Now the text editor is inactive (paused) and cannot be interacted with. Typing:
+
+[bernie@antergos-vbox ~]$ bg %1
+[1]+ gedit &
+[bernie@antergos-vbox ~]$
+
+Moves the process to the background and allows the prompt to be used.
+
+Moving the process from the foreground to the background is handy if we want to launch a graphical program from the command line but forget to place it in the background with the trailing &.
+
+Why would we want to launch an application from the command line? There are two reasons. First, the program that you wish to run might not be listed on the window manager's menu
+Second, by launching a program from the command line, you be able to see error messages that would be invisible if the program were launched graphically. Sometimes, a program will fail to start up when launched from the graphical menu. By launching it from the command line instead, we may see an error message that will reveal a problem. Also, some graphical programs have many interesting and useful command line options.
+
+Signal
+The kill command is used to kill "terminate" processes. This allows us to end the execution of a program that is behaving badly or otherwise refuses to terminate on its own. When we kill a job we must specify it's PID or jobspec (%1 for example). While this is straightforward, there's more to it. The kill command doesn't exactly "kill" processes; rather it sends them signals. Signals are one of several ways that the operating system communicates with programs. We have already seen signals in action with the use of CTRL-C and CTRL-Z. When the terminal receives one of these keystrokes, it sends a signal  called INT (Interupt) and with CTRL-Z, a signal called TSTP (Terminal Stop) is sent. Programs, in turn, "listen" for signals and may act upon them as they are received. The fact that a program can listen and act upon signals allows it to do things like save work in progress when it is sent a termination signal.
+
+Sending signals to process with kill
+The most common syntax for the kill command is
+kill [-signal] PID...
+
+If no signal is specified on the command line, then the TERM (terminate) signal is sent by default. 
+Common kill command signals:
+
+Number 			Name 		Meaning
+1				HUP			Hang up. This is a vestige of the good old days when terminals where attached to remote computers with phone lines and modems. The signal is used to indicate to programs that the controlling terminal has "hung up". The effect of this signal can be demonstrated by closing a terminal session. The foreground program running on the terminal will be sent the signal and will terminate. The signal is also used by many daemon programs to cause a reinitialisation. This means that when a daemon is sent this signal, it will restart and reread its configuration file. The Apache web server is an example of a daemon that uses the HUP signal this way.
+2				INT 		Interrupt. Performs the same function as CTRL-C sent from the terminal
+3				QUIT 		Quit.
+9				KILL 		Kill. This signal is special. Whereas programs may choose to handle signals sent to them in different ways, including by ignoring them altogether, the KILL signal is never actually sent to the target program. Rather, the kernel immediately terminates the process. When a process is terminated in this manner, it is given no opportunity to "clean up" after itself or save work. For this reason, KILL should only be used as a last resort.
+11 				SEGV 		Segmentation violation. This signal is sent if a program makes illegal use of memory; that is, it tried to write something somewhere it wasn't allowed
+15				TERM 		Terminate. The default signal. Causes the program to terminate if still alive.
+18 				CONT 		Continue. This signal causes a program to continue after a stop signal
+19 				STOP 		Stop. This signal causes a program to pause without terminating. Like the KILL signal, it is not sent to the target process and thus cannot be ignored.
+20 				TSTP 		Terminal stop. This is the signal sent by the terminal when CTRL-Z is pressed. Unlike the STOP command, the TSTP signal is received by the program and so may choose to ignore it.
+28 				WINCH 		Window change. This is a signal sent by the system when a window changes size. Some programs, like top and less, will respond to this signal by redrawing themselves to fit the new window dimensions.
+
+kill -1 3245 &
+[1]+ Hangup  		gedit
+
+In this example, we start the gedit program  in the background and then send it a HUP signal with kill. The gedit program terminates, and the shell indicates that the background process has received a hangup signal. 
+
+Note that either number or name can be used in the kill command options
+
+kill -INT 2342
+which is the same as:
+kill -SIGINT 2342
+
+kill -TERM 2342
+redundant
+
+kill -STOP 2342
+kill -CONT %1
+
+
+A complete list of signals can be viewed using 
+
+kill -l
+
+Sending signals to multiple processes with killall
+It is also possible to send signals to multiple processes matching a specified program or username by using the killall command. Here is the syntax:
+
+killall [-u user] [-signal] name
+
+More process related commands
+
+pstree		Outputs a process list arranged in a tree like pattern showing the parent/child relationships between processes.
+vmstat 		Outputs a snapshot of system resource usage including memory, swap and disk I/O. For continuous use a time delay
+xload 		A graphical program that draws a graph showing the system load over time
+tload 		Similar to xload, but draws the graph in the terminal. Terminate the output with CTRL-C.
+

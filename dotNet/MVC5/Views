@@ -1,0 +1,7 @@
+The most commonly used action result is the ViewResult (convenience is View) which causes a view to be rendered and returned to the client. The MVC Framework handles ViewResults using view engines, where the built in view engine is called Razor.
+View engines implement the IViewEngine interface. The job of the view engine is to translate requests for views into ViewEngineResult objects. The first two methods in the interface, FindView and FindPartialView, are passed parameters that describe the request and the controller that processed it (a ControllerContext object), the name of the view and its layout, and whether the view engine is allowed to reuse a previous result from its cache. These methods are called when a ViewResult is being processed. The final method, ReleaseView, is called when a view is no longer needed.
+The complexity of a view engine comes from the system of view templates that includes code fragments and support layouts, and is compiled to optimise performance. The functionality that most MVC applications require is available in Razor.
+The Razor View Engine compiles the views in your applications to improve performance. The views are translated into C# classes, and then compiled, which is why you're able to include C# code fragments so easily.
+
+Adding dynamic content to a razor view
+The whole point of views is to allow to render parts of your domain model as a user interface. To do that, you need to be able to add dynamic content to views.

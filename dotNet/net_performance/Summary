@@ -1,0 +1,16 @@
+Summary
+
+Garbage collection is the single most important feature that boosts productivity:
+	It avoids a broad class of nasty memory corruption related bugs
+	Allows class libraries to be written without being cluttered with error-prone allocation conventions
+Strong type safety is another important pillar as it captures a broad class of programmer intent (e.g. this List<> is homogeneous) and allows tools to find many bugs well before the program is ever run.
+
+Unfortunately just like you can't expect your program to run correctly the first time you run it, you can't expect high performance to just happen the  very first time your program runs correctly. In the same way that there are tools (GC and type safety) and techniques (asserts, interface contracts) that reduce the occurrence of bugs, there are tools (various profilers) and techniques (perf planning, hot type prototyping, lazy initialization) that reduce the likelihood of performance issues.
+
+Performance follows the 90%-10% rule. Typically, well over 90% of your application is not performance critical and can be written to maximum programmer productivity. The other 10% however needs careful attention. It needs a plan, and it needs it before the code is written. To plan you need data, how fast the various operations, library calls etc are, and for that you need measurement tools (profilers). These are the cornerstones of any high-performance software project. 
+
+The aims of the book are to help the reader with the following .NET concepts:
+	
+	Identifying performance metrics and then measuring application performance to verify whether it meets or exceeds these metrics.
+	Improving application performance in terms of memory management, networking, I/O, concurrency and other areas
+	Understanding CLR and .NET internals in sufficient detail to design high-performance applications and fix performance issues.

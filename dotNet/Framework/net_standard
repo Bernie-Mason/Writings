@@ -1,0 +1,26 @@
+.NET Standard
+
+.NET Standard is a formal specification of .NET APIs that are intended to be available on all .NET implementations. The motivation behind the .NET Standard is establishing greater uniformity in the .NET ecosystem.
+There is no similar spec for the .NET Base Class Libraries (BCL) for .NET library implementations.
+
+THE .NET STANDARD IS ONE BCL TO RULE THEM ALL
+
+The .NET Standard enables the following key scenarios:
+	Defines uniform set of Base Class Library APIs for all .NET  implementations to implement, independent of workload
+	Enables developers to produce portable libraries that are usable across .NET implementations, using this same set of APIs.
+	Reduces or even eliminates conditional compilation of shared source due to .NET APIs, only for OS APIs.
+
+The various .NET implementations target specific versions of .NET Standard. Each .NET implementation version advertises the highest .NET Standard version it supports, a statement that means it also supports previous versions. For example, the .NET Framework 4.6 implements .NET Standard 1.3, which means that it exposes all APIs defined in .NET Standard versions 1.0 through 1.3. Similarly, the .NET Framework 4.6.1 implements .NET Standard 1.4, whilst .NET Core 1.0 implements .NET Standard 1.6.
+
+.NET implementation support
+https://docs.microsoft.com/en-gb/dotnet/standard/net-standard
+
+TRADE OFFS IN VERSION TARGETTING
+	The higher the version the more APIs are available
+	The lower the version, the more platforms (?) implement it.
+
+Therefore use the lowest version possible
+
+.NET Standard versioning rules
+Additive: all higher versions implement the same APIs as previous versions
+Immutable : Once shipped, .NET Standard versions are frozen. New APIs will first become available in specific .NET implementations, such as .NET Core. If the .NET Standard review board believes teh new APIs should be made available everywhere, they'll be added in a new .NET Standard version

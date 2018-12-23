@@ -1,0 +1,166 @@
+Html helper methods are incredibly useful ways of reusing code and markup throughout your application. They keep your views tidy and maintenance easy in the long term (instead of changing the code/markup in all your views you can just modify a helper method)
+We should only use helper methods to reduce the amount of duplication in views, and only for the simplest content. For more complex markup, use partial views and use child actions when you need to perform any manipulation of model data.
+
+Custom helper methods
+
+Two main techniques
+1. Inline helper method
+This helper method is (as suggested by the name) defined in the view using the @helper tag e.g.
+@helper ListArrayItems(string[] items)
+{
+    <ul>
+        @foreach(string str in items)
+        {
+        <li>@str</li>
+        }
+    </ul>
+}
+
+Inline helpers have names and parameter similar to regular C# methods. In the example, I defined a helper called ListArrayItems, which takes a string array as a parameter. Although the helper looks like a method there is no return value.
+The contents of the helper body are processed and put into the response to the client.
+
+Although inlines helpers are convenient, they can only be used from the view in which they are declared and, if they are too complex, they can take over the view and make it hard to read.
+
+2. External Helper method
+The external helper method is expressed as a C# extension method. These are used more widely, but they are a little more awkward to write, because C# doesn't naturally handle HTML element generation elegantly:
+
+using System.Web.Mvc;
+
+namespace HelperMethods.Infrastructure
+{
+    public class CustomHelpers
+    {
+        public static MvcHtmlString ListArrayItems(this HtmlHelper html, string[] list)
+        {
+            /* This helper method takes an array of strings and generates an HTML
+             * ul element, containing a li element for each string in the array. The first
+             * parameter to the helper method is an HtmlHelper object, prefixed with the this keyword
+             * to tell the C# compiler that I am defining an extension method.
+             */
+            TagBuilder tag = new TagBuilder("ul");
+            foreach (string str in list)
+            {
+                TagBuilder itemTag = new TagBuilder("li");
+                itemTag.SetInnerText(str);
+                tag.InnerHtml += itemTag.ToString();
+            }
+
+            return new MvcHtmlString(tag.ToString());
+        }
+    }
+}
+
+The HtmlHelper provides access to useful information when writing content through the RouteCollection, ViewBag and ViewContext properties. The ViewContext in turn has the Controller, HttpContext, IsChildAction, RouteData and View properties.
+This gives a fairly comprehensive information set about the request but for the most part helper methods are simple and used to keep formatting consistent.
+The TagBuilder class is the easiest way of building HTML strings without needing to deal with all of the escaping and special characters. We refer to the helper in our view using the @Html.<helper> syntax:
+
+<div>
+    <h2>Here are the fruits</h2>
+    <ul>
+        @Html.ListArrayItems((string[])ViewBag.Fruits)
+    </ul>
+</div>
+
+Built in Helper Methods
+
+One of the most comomon forms of interaction in a web application is the HTML form, which is the subject of a number of different helper methods.
+
+Template Helper Methods
+Templated helper methods: the property that we want to display is stated and we let the MVC Framework figure out what HTML elements are required. This is a more flexible way of displaying data to the user but requires more care and attention to set up.
+The Html.Editor and Html.EditorFor are the first templated helper methods that we'll look at. The Editor method takes a string as an argument that specifies the property for which editor element is required. The helper follows the search process looking in the ViewBag then in the Model to find the item in question. The EditorFor is (obviously) the strongly-typed equivalent, which allows you to use a lambda expression to specify a model property that you want the editor element for (and thus bypasing looking in the viewbag)
+As templated helpers have no special knowledge about the application and its model data types, the HTML that we end up with is often not what we want. We want the benefits that come with simpler views, but we need to improve the quality of the output that the helper methods generate before we can use them seriously. This is always an issue with any kind of scaffolding! Fortunately, the templated helpers can be improved by using model metadata to provide guidance about how to handle model types.
+Metadata is express using C# attributes, where attributes and parameter values provide a range of instructions to the view helpers. The metadata is applied to the model class, which the helper methods consult when they generate HTML elements.
+
+For example:
+
+public class Person
+    {
+        //[HiddenInput] //  Will make the property readonly but will still allow your view to render a HTML element with it
+        //[ScaffoldColumn(false)] // Will completely exclude the value from the HTML. No details of the property will be included in the generated HTML
+        [HiddenInput(DisplayValue = false)]
+        public int PersonId { get; set; }
+
+        [Display(Name="First Name")]
+        public string FirstName { get; set; }
+
+        [Display(Name = "Last Name")]
+        public string LastName { get; set; }
+
+        [Display(Name="Birth Date")]
+        [DataType(DataType.Date)] // Tells the helper exactly what kind of data it is dealing with
+        public DateTime BirthDate { get; set; }
+
+        public Address HomeAddress{ get; set; }
+
+        [Display(Name="Approved")]
+        public bool IsApproved { get; set; }
+        public Role Role { get; set; }
+    }
+
+Working with Complex Type Properties
+The template process relies on the Object template that I described in the previous section. Each property is inspected, and a template is selected in render HTML to represent the property and its data value. There are a number of templates such as Boolean, Collection, Deciaml, DateTime, Date, EmailAddress, Html, MultilineText, Number, Object, Password, String, Text, Tel, Time and Url. The Object template is a special case and is used by scaffolding helpers to generate HTML for a view model object. The template examines each of the properties of an object and selects the most suitable template for the property type. BUT. The Object template only works on simple types, that is, those types that can be parsed from a string like int, bool and double and common framework types like Guid and DateTime.
+The result is that scaffolding helpers are not recursive. The solution  is a add a strongly typed helper method that considers the complex type individually: E.g.
+@using (Html.BeginRouteForm("FormRoute", new { }, FormMethod.Post, new { @class = "personClass", data_formType = "person" }))
+    {
+        <div class="column">
+            @Html.EditorForModel()
+        </div>
+        <div class="column">
+            @Html.EditorFor(m => m.HomeAddress)
+        </div>
+        <input type="submit" value="Press to submit" />
+    }
+
+Customizing the Templated View Helper System
+We can use metadata to shape the way that the templated helpers render data, but this is the MVC Framework and so there are some advanced options that completely customise the templated helpers.
+Creating a Custom Editor Template.
+Creating a custom template allows me to render exactly the HTML I want for a model property. The MVC Framework looks for custom editor templates in the /Views/Shared/EditorTemplates folder. If, for example we create a Role.cshtml file in this location:
+
+@model HelperMethods.Models.Role
+@Html.DropDownListFor(m => m, new SelectList(Enum.GetNames(Model.GetType()), Model.ToString()))
+
+Then whenever any of the templated helper methods try to generate an editor for the Role type, my template will be used ensuring that we present the user with a consistent and usable representation of the data type (in this case making it a drop down list).
+
+Understanding the template search order:
+The MVC looks for custom templates for a given C# type before it uses one of the built-in templates. There is a specific sequence that the Framework follows to find a suitable template:
+  1. The template passed to the helper. For example, Html.EditorFor(m => m.SomeProperty, "MyTemplate") would lead to MyTemplate being used.
+  2. A template that is specified by UIHint
+  3. The template associated with any data type specified by the metadata, such as the DataType attribute
+  4. Any template that corresponds to the .NET class name of the data type being process
+  5. The built-in String template if the data being processed is of a simple type
+  6. Any template that corresponds to the base classes of the data type.
+  7. If the data type implements IEnumerable, then the built-in collection  template will be used.
+  8. If all else fails, the Object template will be used, subject to the rule that scaffolding is not recursive.
+
+
+Creating a generic template
+We can also create a template that works for all enumerations and then specify that this template be selected using the UIHint attribute. To demonstrate this we have a new view:
+
+@model Enum
+
+@Html.DropDownListFor(m => m, Enum.GetValues(Model.GetType())
+    .Cast<Enum>()
+    .Select(m =>
+    {
+        string enumVal = Enum.GetName(Model.GetType(), m);
+        return new SelectListItem()
+        {
+            Selected = (Model.ToString() == enumVal),
+            Text = enumVal,
+            Value = enumVal
+        };
+    }))
+
+The model type for this template is Enum, which allows me to work with any enumeration. For variety, I have used some LINQ to generate the strings that are required to create the select and option elements. We then apply the UIHint("Enum") to the role property of the person model.
+
+Creating Basic Links and URLs
+One of the most fundamental tasks in a view is to create a link or URL that the user can follow to another part of the application. In previous chapters, we saw most of the helper methods. The benefit of using  such helpers to generate links and URLs is that the output is derived from the routing configuration, which means that a change in routes is automatically reflected in the links and URLs.
+
+AJAX is shorthand for Asynchronous JavaScript and XML. The asynchronous part is what makes Ajax useful. It is a model for requesting data from the server in the background, without having to reload the webpage. The MVC framework contains built-in support for unobtrusive Ajax, which measn that you use helper methods to define your Ajax features, rather than havcing to add blocks of code throughout your views.
+
+Setting AJAX options
+Ensuring graceful degradation
+This is very important when navigating using AJAX. If a user has a javascript disabled in their browser then AJAX will not work. However, it's possible to support synchronous requests as a backup to an asynchronous ones.
+A simple way of using AJAX involves the server rendering fragments of HTML and sending them to the browser. This is great, but it is verbose (as the server is sending the HTML elements along with the data) and it limits what can be done with the data at the browser. One way to address both of these issues is to use the Javascript Object Notation (JSON) format, which is a language independent way of expressing data.
+JSON emerged from the JavaScript language, but has long since taken on a life of its own.
+The MVC framework makes creating an action method that generates JSON data simple.

@@ -1,0 +1,7 @@
+Extension Methods
+
+Extension methods enable you to "add" methods to existing types without the need of creating a new derived type (i.e MyString: String) or otherwise modifying the original type (tricky to do if your type is in a dll!). Extensions methods are a special kind of static method, but they are called as if they they were instance methods on the extended type. 
+
+FOR CLIENT CODE WRITTEN IN C# THERE IS NO APPARENT DIFFERENCE BETWEEN CALLING AN EXTENSION METHOD AND THE METHODS DEFINED IN A TYPE
+
+The most common extension methods are the LINQ standard query operators that add query functionality to the existing IEnumerable and IEnumberable<T> types. 

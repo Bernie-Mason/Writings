@@ -1,0 +1,67 @@
+React plural sight
+
+BENEFITS
+
+Flexibility:
+Web apps, native apps, desktops apps
+
+Developer experience
+Single components in isolation. No need for cognative overhead of separate files
+
+Corporate investment
+Facebook developed it
+
+Community support
+On the most used repositories on github
+
+Performance
+Excellent performance by default
+
+Testability
+Easy to test. Jest and Jasmine.
+
+TRADEOFFS
+
+Framework vs Library
+* Angular and Ember are frameworks but  React is a library. 
+* A framework contains more opinions. Reduces decision fatigue. Can help cross-team consistency.
+
+* React is much smaller than most frameworks. Can easily replace a single component in a page with React. Very lightweight. 
+* Facebook migrated from server side PhP to React this way.
+* Angular comes with many more features built in: Testing, Http library, Routing and Automation
+
+
+Concise vs Explicit
+* React trades concisness for being more explicit
+
+* Two way (Knockout and Ember) vs one way binding (React)
+* Two way binding keeps javascript values and inputs in Sync:
+
+let user = "Cory";
+
+<input
+	type="text",
+	value={user}
+/>
+
+* One way binding - requires more code
+
+state = { user: "Bernie" }
+
+function handleChange(event){
+	this.setState({
+		user: event.target.value
+	});
+}
+
+<input
+	type="text",
+	value={this.state.user},
+	onChange={this.handleChange}
+/>
+
+Benefits: we have control of precisely what happens on every event (can perform validation)
+
+Template-centric vs JavaScript centric
+Angular, View and Ember have JS in HTML
+React has HTML in JS

@@ -1,0 +1,15 @@
+MySQL intro
+
+SQL (Structured Query Language) is a domain-specific language, meaning that it's language is specialised to specific domains (sets of software or programs). SQL is the most common standardized language used to access databases. Depending on your programming environment, you might enter
+
+What is MySQL
+ MySQL is a database management system
+ A database is a structured collection of data. It may be anything from a simple shopping list to a picture gallery or the vast amounts of information in a corporate network. To add, access and process data stored in a computer database, you need a database management system such as MySQL Server. Since computers are very good at handling large amounts of data, database management systems play a central role in computing, as standalone utilities or as parts of other applications.
+
+ MySQL databases are relational
+
+ A relational database stores data in separate tables rathar than putting all the data in one big storeroom. The database structures are organized into physical files optimized for speed. The logical model, with objects such as databases, tables, view, rows, and columns, offer a flexible programming environment.chor
+
+
+
+MySQL is an Open Source Relational SQL program. It is an interactive program that lets you connect ot a MySQL server, run queries, and view the results. mysql may also be used in batch mode: you place your queries in a file beforehand, then tell mysql to execute the contents of the file. Both ways of using mysql are covered here.

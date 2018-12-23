@@ -1,0 +1,17 @@
+POSIX Character Classes
+
+Character Class 	Description
+[:alnum:]			The alphanumeric characters; in ASCII, equivalent to [A-Za-z0-9]
+[:word:] 			The same as [:alnum:] with the addition of the _ character
+[:alpha:] 			Alphabetical, equiv to [A-Za-z]
+[:blank:]			Includes teh space and tab characters
+[:cntrl:] 			The ASCII control codes
+[:digit:] 			Numerals 0 through 9
+[:graph:] 			The visible characters; in ASCII, includes characters 33 through 126
+[:lower:] 			The lowercase letters
+[:punct:] 			The punctuation characters in ASCII
+[:print:] 			The printable characters; all [:graph:] characters plus space
+[:space:] 			The whitespace characters including , space, tab carriage return, newline, vertical tab and form feed.
+[:upper:] 			The uppercase characters
+[:xdigit:]  		Characters used to express hexadecimal numbers; in ASCII, equivalent to [A-Fa-f0-9]
+

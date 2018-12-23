@@ -1,0 +1,118 @@
+﻿@{
+    ViewBag.DefaultPageHeader = "Programming";
+    ViewBag.DefaultPageSubHeader = "Yep";
+}
+
+<h2 class="page-header">LINQ Extension Method Lookup Table</h2>
+<p>This table is directly copied from ASP.NET MVC 5 textbook by Adam Freeman. The following LINQ methods shown below operate on IEnumerable&lt;T&gt;</p>
+<table class="table">
+    <tr>
+        <th>Extension Method</th>
+        <th>Method return</th>
+        <th>Deferred<a href="#deferredExplained">*</a></th>
+    </tr>
+    <tr>
+        <td>All</td>
+        <td>Returns true if all items in the source data match the predicate.</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>Any</td>
+        <td>Returns true if at least one of the items in the data source matches the predicate</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>Contains</td>
+        <td>Returns true if the data contains a specific item or value</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>Count</td>
+        <td>Returns the number of items in the data source</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>First</td>
+        <td>Return the first item in the data source</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>FirstOrDefault</td>
+        <td>Return the first item in the data source or the default value if there are no items</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>Last</td>
+        <td>Return the last item in the data source</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>LastOrDefault</td>
+        <td>Return the last item in the data source or the default value if there are no items</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>Max / Min</td>
+        <td>Returns the largest or smallest value specified by the lambda expression</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>OrderBy / OrderByDescending</td>
+        <td>Sorts the source data based on the value returned by the lambda expression.</td>
+        <td>Yes</td>
+    </tr>
+    <tr>
+        <td>Reverse</td>
+        <td>Reverses the order of the items in the data source</td>
+        <td>Yes</td>
+    </tr>
+    <tr>
+        <td>Select</td>
+        <td>Projects a result from a query</td>
+        <td>Yes</td>
+    </tr>
+    <tr>
+        <td>SelectMany</td>
+        <td>Projects each data item into a sequence of itmes and then concatenates all of those resulting sequences into a single sequence</td>
+        <td>Yes</td>
+    </tr>
+    <tr>
+        <td>Single</td>
+        <td>Returns the first item from the data source or throws an exception if there are multiple matches</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>SingleOrDefault</td>
+        <td>Returns the first item from the data source or the default value if there are no matches, or throws an exception if there are multiple matches</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>Skip / SkipWhile</td>
+        <td>Skips over a specified number of elements, or skips while the predicate matches</td>
+        <td>Yes</td>
+    </tr>
+    <tr>
+        <td>Sum</td>
+        <td>Totals the values selected by the predicate</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>Take / TakeWhile</td>
+        <td>Selects a specified number of elements from the start of the data source or selects items while the predicate matches.</td>
+        <td>Yes</td>
+    </tr>
+    <tr>
+        <td>ToArray / ToDictionary / ToList </td>
+        <td>Converts the data source to an array or other collection type.</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>Where</td>
+        <td>Filters items from the data source that do not match the predicate.</td>
+        <td>Yes</td>
+    </tr>
+</table>
+
+<p id="deferredExplained"><strong>Deferred column explained:</strong> If a query contains only deferred methods, it won't be executed until the items in the result are enumerated. This means that if any new items are added to the IEnumerable collection after the query has been run, then they will be included when the query is finally executed.</p>
+<p>Using any non-deferred extension methods causes a LINQ query to be performed immediately.</p>
+@Html.Partial("_CSharpLinks")

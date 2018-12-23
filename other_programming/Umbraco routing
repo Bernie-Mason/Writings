@@ -1,0 +1,22 @@
+Umbraco routing
+
+What happens in an Umbraco application when a request is made?
+
+
+The inbound request pipeline matches a URl to a content item and determines the rendering engine (MVC or Webforms). 
+
+The inbound process is triggered by the Umbraco (http) Module. The request content process kicks and the UmbracoModule.ProcessRequest(...) method is called. This Process request makes sure that Umbraco and the request document are both ready. It then creates an instance of PublishedContentRequest and runs PublishContentRequestEngine.PrepareRequest() for that instance. It handles any redirects and status messages and forwards missing content to 404. It then forwards to either MVC or WebForms handlers.
+
+Once the request is prepared, the PublishedContentRequest instance now represents the request that Umbraco must handle. It contains everything that will be needed to render it including domain information, the content model to be rendered and the template to be used. This is used in the MVC controller/action selection process (MVC routing).
+
+The rendering engine. Generally MVC is the default and preferred rendering engine when selecting the content however Umbraco also supports Webforms. If there are no matching MVC templates in the default MVC views locations then Umbraco will check the default Webforms master pages folder.
+
+A controller is then selected and an appropriate action (like ViewResult) to handle the request. By default, Umbraco will execute every request via it's built in default controller: Umbraco.Web.MVC.RenderMvcController. The MVC Action method that executes by default for every request is the Index action on the RenderMvcController
+
+The MVC Action is then executed. During this execution you can query for published data to be displayed/rendered.
+	IPublishedContent: The underlying model used in all Umbraco views. 
+	DynamicPublishedContent: This is the dynamic version of the above and can be used in all Umbraco views.
+	UmbracoHelper: Used to query published media and content
+	Members:
+
+Finally content is delivered via HTTP.

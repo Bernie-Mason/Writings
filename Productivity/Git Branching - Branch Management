@@ -1,0 +1,31 @@
+Git Branching - Branch Management
+
+The git branch command can also be used to ls the current branches:
+
+	BAN@BAN-TOP MINGW64 ~/Documents/Git_Test (master)
+	$ git branch
+	  iss53
+	* master
+	  testing
+
+Notice the * character that prefixes the master branch: it indicates the branch that you currently have checked out (i.e. the branch that HEAD points to). This means that if you commit at this point, the master branch will be moved forward with your new work. To see the last commit on each branch, you can run:
+
+	BAN@BAN-TOP MINGW64 ~/Documents/Git_Test (master)
+	$ git branch -v
+	  iss53   da81088 merge issue sorted
+	* master  da81088 [ahead 4] merge issue sorted
+	  testing 3ee2953 made a change
+
+The useful --merged and --no-merged options can filter this list to branches that have been or not been merged yet.
+
+	BAN@BAN-TOP MINGW64 ~/Documents/Git_Test (master)
+	$ git branch  --merged
+	  iss53
+	* master
+
+	BAN@BAN-TOP MINGW64 ~/Documents/Git_Test (master)
+	$ git branch  --no-merged
+	  testing
+
+
+This shows your other branch. You cannot delete a branch that hasn't been merged with -d. To force delete it use -D but be careful!

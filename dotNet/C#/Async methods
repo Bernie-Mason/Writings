@@ -1,0 +1,5 @@
+Asynchronous methods:
+Asynchronous methods work in the background and inform you when they have completed, allowing your code perform other tasks. They are very useful way of removing bottlenecks form code and allowing applications to take advantage of multiple processors and processor cores.
+Async code is often verbose and devs not familiar with parallel programming may struggle with the syntax.
+
+Task - async operation that will be completed at some point. An function that returns a Task will execute SYNCHRONOUSLY. It will simply return a Task immediately that will at some point become the return type of the Task.

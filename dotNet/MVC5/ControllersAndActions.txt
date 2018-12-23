@@ -1,0 +1,49 @@
+Controllers are one of the main building materials of the MVC pattern. There are different methods of receiving input and generating output using controllers. The convenience methods ease unit testing where different kinds of ActionResult make this a simple process.
+
+Every request that your application gets is handled by a controller which it will do any way it sees fit. Ideally though, it's areas of responsibility won't stray into those of the model and view. They do not store data, nor do they generate user interfaces.
+
+Controllers are .NET that contain the logic required to handle a request. Typically:
+Request comes in. Controller gets it. Processes it. Performs operations on a domain model. Select a view to render.
+However controllers can do much more than that!
+
+Controller classes must implement the IController interface which has a sole Execute method that takes a RequestContext object which has HttpContext and RouteData objects:
+HttpContext: Returns a HttpContextBase object provides access to a set of objects that describe the current request, known as the context objects.
+RouteData: Returns a RouteData object that describes the route that matched the request. Contains the following properties:
+  1. Route: Returns the RouteBase implementation that matched the route
+  2. RouteHandler: Returns the IRouteHandler that handled the route
+  3. Values: Returns a collection of segment values, index by name.
+
+System.Web.Mvc.Controller is the class that provides the request handling support that most MVC developers will be familiar with. The controller class provides 3 key features:
+  1. Action method: A controller's behavior is partitioned into multiple methods. Each action method is exposed on a different URL and is invoked with parameters extracted from the incoming request.
+  2. Action results: You can return an object describing the result of an action (like rendering a view or redirecting to a different  URL or action method), which is then carried out on your behalf. The separation between specifying results and executing them simplifies the testing.
+  3. Filters: You can encapsulate reusable behaviors (e.g. authentication) as filters, and then tag each behavior into one or more controllers or action methods by putting an attribute in your source code.
+
+Controllers often need to access data from the incoming request, such as query string values, form values and parameters parsed from the URL by the routing system. There are three main ways to access that data
+  1. Extract it from a set of context objects. These are a set of properties to access information about the request and include the following: Request, Response, RouteData, HttpContext and Server.
+  2. Have the data passed as parameters to your action method.
+  3. Explicitly invoke the framework's model binding feature.
+
+Action Results
+The MVC Framework uses action results to separate stating intentions from executing intentions. Instead of working directly with the Response object, action methods return an object derived from the ActionResult class that describes what the response from the controller will be, such as rendering a view or redirecting to another URL or action method.
+The system of action results is an example of the command pattern, which describes scenarios where you store and pass around objects that describe operations to be performed.
+ When the MVC framework receives an ActionResult object from an action method, it calls the ExecuteResult method defined by that object. The action result implementation then deals with the Response object for you, generating the output that corresponds to your intention.
+Unit testing controllers and actions:
+There are a few very good reasons that we want to support unit testing of actions and controllers.
+1. You can test actions and controllers outside of a web server. The context objects are accessed through their base classes, which are easy to mock.
+2. You don’t need to parse any HTML to test the result of an action method. You can inspect the ActionResult object that is returned to ensure that you received the expected result.
+3. You don’t need to test simultaneous client requests. The MVC Framework model binding system allows you to write action methods that receive input as method parameters. To test an action method, you simply call the action method directly and provide the parameter values that interest you.
+The MVC framework gets the name of the action method from RouteData.Values[“action”] value. The action method name and the routing value will be the same if you  are using the built-in routing classes, but this may not be the case if you have implemented custom routing classes which don’t following the MVC Framework conventions.
+An issue with passing data with the ViewBag is that Visual Studio cannot provide intellisense support for any dynamic objects, including the ViewBag and any errors won’t be revealed until the view is rendered.
+Performing Redirections
+A common result from an action method is not to produce any output directly, but to redirect the user’s browser to another URL. Most of the time, this URL is another action method in the application that generates the output that the user wants to see.
+The POST/Redirect/Get pattern
+The most frequent use of a redirect is in action methods that process HTTP POST requests. POST requests are used when you want to change the state of an application. If you just return HTML following the processing of a request, you run the risk that the user will click the browser’s reload button resubmit the form second time, causing unexpected results.
+To avoid this problem, you can follow the pattern called Post/Redirect/Get. In this pattern, you receive a POST request, process it, and then redirect the browser so that a GET request is made by the browser for another URL. GET requests should not modify the state of your application, so any inadvertent resubmissions of this request won’t cause any problems.
+When you  perform a redirect you send one of two HTTP codes to the browser:
+* Send the HTTP code 302, which is a temporary redirection. This is the most frequently used type of redirection and when using the Post/Redirect/Get pattern, this is the code you want to send.
+* Send the HTTP code 301, which indicates a permanent redirection. This should be used with caution, because it instructs the recipient of the HTTP code not to request the original URL ever again and to use the new URL that is included alongside the redirection code.
+The values that you provide for the action method and controller are not verified before they are passed to the routing system. You are responsible for making sure that the targets you specify actually exist.
+Preserving data across a redirection
+A redirection causes the browser to submit an entirely new HTTP request, which means that you do not have access to the details of the original request. If you want to pass data from one request to the next, you can use the TempData feature. This is similar to Session data, except that TempData values are marked for deletion when they are read, and they are removed when the request has been processed.
+Returning Errors and HTTP Codes
+You can send a specific HTTP status code to the browser using the HttpStatusCodeResult class. There is no controller helper method for this, so you must instantiate the class directly.

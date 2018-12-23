@@ -1,0 +1,15 @@
+Memory management in .NET
+
+.NET uses garbage collection (GC) to provide automatic memory management for programs
+The GC operates a lazy approach to memory management, preferring app throughput to the immediate collection of memory.
+
+Although most resources are automatically maintained by the .NET runtime, not all are. Some objects reference such unmanaged resources. A file handle or database connection for example are unmanaged resources and need to be released when you've finished using them. This can be done using the .Dispose() extension method present on all unmanaged resources. Alternatively:
+
+using (FileStream stream = GetFileStream(context))
+{
+    // Operations on the stream
+}
+
+When the using block completes, the .NET runtime automatically calls the stream objects Dispose() method to release the file handle.
+
+

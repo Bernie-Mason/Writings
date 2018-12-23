@@ -1,0 +1,22 @@
+
+Routing scheme: The ASP.NET routing system is used by MVC to handle incoming requests from clients, but it also generates outgoing URLs that conform to the URL scheme and that can be embedded in Web pages. By using the routing system to handle incoming requests and generate outgoing URLs, we can ensure that all the URLs in the application are consistent.
+Two types of routing: Convention based routing and Attribute routing
+
+Convention based routing: routes are defined as patterns in a route config file in the App_Start folder
+There are two key behaviors of URL patterns:
+  1. URL patterns are conservative. They will only match URLs that have the same number of segment variables as the pattern has.
+  2. URL patterns are liberal. If a URL does have the correct number of segments, the pattern will extract the value for the segment variable, EVEN IF there are no controllers or actions for those variables.
+The MVC can use model binding to convert the values contained in the URL to .NET types to make the values accessible in controllers.
+Optional URL: one that the user doesn't need to specify, but for which no default value is specified
+
+Attribute routing: routes are defined by C# attributes that are applied directly to the controller classes.
+This is done my placing a route attribute over a controller. This stops convention-based routes from targeting an action method even if attribute routing is disabled.
+
+Outbound URL matching
+The routing system process routes in the order that they were added to the RouteCollection object passed to the RegisterRoutes method. Each route is inspected to see if there's a match, which requires three conditions to be met:
+1. A value must be available for every segment variable defined in the URL pattern. First values that have been provided (using  the properties of an anonymous type) and rendered in the HTML, then the variable values for the current request (weird but really important!), and finally the default values.
+2. None of the values provided by the segment variables may disagree with the default-only variables defined in  the route. Default only variables are variables for which default values have been provided, but which do not occur in the URL pattern.
+3. The values for all of the segment variables must satisfy the route constraints.
+
+Note aswell that the routing system will reuse values only for segment variables that occur earlier in the URL pattern rather than any parameters that are supplied to the Html.ActionLink method.
+It is therefore best to always supply values for all of the segment variables in a URL pattern.

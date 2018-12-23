@@ -1,0 +1,22 @@
+
+A JS promise represents the eventual result of an async operation. It's a placeholder into which the successful result value or reason for failure will materialize.
+
+
+WHY USE THEM?
+Promises provide a simpler alternative for executing, composing and managing asynchronous operations commpared to traditional callback-based approaches. 
+They allow you to handle async errors using approaches similar to synchronous try/catch
+
+THE STATES OF A PROMISE
+	1. Pending - the promise's outcome has not yet been determined as the async op that will produce it's result hasn't yet completed...
+	2. Fulfilled - The async operation completed and the promise has a value! Yay!
+	3. Rejected - the async operation failed and the promise will never be fulfilled. This rejected state should include the reason for failure.
+
+When a promise is pending, it can transition to the fulfilled or rejected state. Once a promise is fulfilled or rejected, however, it will never transition to any other state, and its value or failure reason will not change.
+
+Promise have been implemented in many languages, and while promise APIs differ from language to language, JS promises converged to Promises/A+ proposed standard. ES6 is slated to provide promises as a first-class citizen 
+
+USING PROMISES
+The primary API for a promise is its then method, which registers callbacks to receive either the eventual value or the reason why the promise cannot be fulfilled:
+
+var greeting = sayHello();
+    console.log(g)

@@ -1,0 +1,180 @@
+The shell
+
+When we speak of the command line, we are really referring to the shell. The shell is a program that takes keyboard commands and passes them to the operating system to carry out. Almost all Linux distros supply a shell program from the GNU project called bash. The name bash is an acronym for Bourne Again Shell, a reference to the fact that bash is enhanced replacement for sh, the original Unix shell program written by Steve Bourne.
+
+Terminal Emulators
+
+When using a GUI we need another program called a terminal emulator to interact with the shell. 
+
+A mechanism built into the X Window System (the underlying engine that makes the GUI go) supports a quick copy-and-paste technique. If you highlight some text by holding down the left mouse button and dragging the mouse over it (or double clicking a word), it is copied into a buffer maintained by X. Pressing the middle mouse button pastes the text at the cursor location.
+Ctrl-C and Ctrl-V: these control codes have different meanings that were assigned many years before MS windows came into the scene.
+
+You GUI, in an effort to behave more like windows likely has its focus policy set to "click to focus". This means that for a window to become active, you need to click it. This is contrary to the traditional X behavior of "focus follows moust" which means that a window gets focus when the mouse just passes over it. The window won't come to the foreground when the mouse passes UNTIL you click it, but it will be able to receive input.
+
+Navigation
+
+First thing we need to learn is how to navigate the filesystem
+
+These commands be useful:
+	pwd - Print name of  working directory
+	cd - change directory
+	ls - List directory contents
+
+Like Windows, a Unix-like operating system such as Linux organizes its files in what is called a hierarchical directory structure. This means that they are organised in a tree-like pattern of directories (sometimes called folders in other systems), which may contain files and other directories. The first directory in the filesystem is called the root directory. The root directory contains files and subdirectories, which contain more files and subdirectories and so on.
+
+Unlike windows, which has a separate filesystem tree for each storage device, Unix like systems always have a single filesystem tree, regardless of how many devices or drives are attached. Storage devices are attached (or more correctly, mounted) at various points on the tree according to the whims of the system administrator, the person (or persons) responsible for the maintenance of the system.
+
+Absolute paths
+
+cd / 
+Takes us to the root directory
+
+cd/Home/Bernie
+Takes us the default working directory in bash 
+
+cd /usr/bin
+Takes us to a different branch of the rooted
+
+Relative paths
+
+in usr
+cd ./bin
+which is the same as
+cd bin 
+as ./ is implied
+
+cd ..
+Goes to the parent folder
+cd - 
+Changes the working directory to previous working directory
+cd ~username 
+Changes the working directory to the home directory of username. For example, cd ~bob changes the directory to the home directory of user bob.
+
+Important facts about filenames
+
+Filenames that begin with a period character are hidden. This only means that ls will not list them unless you say ls -a. When your account was created, several hidden files were placed in your home directory. These are useful for customising your environment. Some applications like firefox place their configuration and settings files in your home directory as hidden files. 
+
+Filenames and commands in Linux (as with Unix) are case sensitive. 
+
+Linux has no concept of a "file extension". You may name files any way you like. The contents and/or purpose of a file is determined by other means. Although Unix-like operating systems don't use file extensions, some application programs do.
+
+Though Linux supports long filenames that may contain embedded spaces and punctuation characters, limit the punctuation characters in the names of files you create to period, dash (hyphen) and underscore. DO NOT EMBED SPACES IN FILENAMES. It will make many command line tasks more difficult, as we will discover later.
+
+Exploring the system
+
+ls is probably the most used common command!
+
+ls
+lists the directory contents
+
+ls -a
+Lists all the directory contents including the files beginning with a period
+
+ls /usr
+lists the files in the specified directory
+
+ls /usr /opt ~
+Files the files in /usr /opt and the home (~) directories.
+
+ls -l
+More detail! Long option.
+
+Commands (as we've seen) are often followed by one or more options that modify their behavior and, further, by one or more arguments, the items upon which the command acts. Most commands look something like this:
+
+command -options arguments
+
+Most commands use options consisting of a single character preceded by a dash. But many commands also support long options, consisting of a word preceded by two dashes:
+-a 
+--all
+
+-d
+--directory
+
+-F
+--classify
+
+-h
+--human-readable
+
+-l
+No long option
+
+-r
+--reverse
+
+-S 
+Sorts results by file size
+
+-t
+Sort modification by time
+
+Many short options can be strung together. In this example, the  ls command is given two options, the l option and the t option. We have also appended --reverse
+
+[bernie@antergos-vbox ~]$ ls -lt --reverse
+
+
+Let's look at the different fields that are produced when the long (-l) list option is selected:
+
+drwxr-xr-x  5 root root  73728 Apr 6 09:18 bin
+drwxr-xr-x 37 root root  36864 Apr 6 09:18 lib32
+
+the first part are the access rights of the file. Among the different types, a leading dash means a regular file, where a d indicates a directory. The next three characters are the access rights for the file's owner, the , the next three are for members of the file's group, and the final three are for everyone else.
+
+The number (second part) is the file's number of hard links
+
+root: the user name of the file's owner
+root: the name of the group that owns the file
+36864: Size of the file in bytes
+Apr 6 09:18: Date and time of last modification
+lib32: filename
+
+
+To determine a files type we use the file command. When invoked, the command will print a brief summary of the file's contents. The are many kinds of files. In fact, one of the common ideas in Unix like operating systems such as Linux is that "everything is a file". As we proceed with our lessons, we will see just how true that statement is. While many of the files on your system are familiar, many kinds are a little less obvious.
+
+Viewing file contents with less:
+
+The less command is a program to view text files. Throughout our Linux system, there are many files that contain human-readable text. The less program provides a convenient way to examine them. Why examine text files? Because many of the files that contain system settings (called configuration files) are stored in this format, being able to read them gives us insight about how the system works. In addition, many of the actual programs that the system uses (called scripts) are stored in this format. In later chapters, we'll learn how to edit text files in order to modify system settings and write our own scripts.
+
+Throughout the Linux system, many files are stored in text format, and many linux tools work with text files. The text in this files is stored in the ASCII format. This simple encoding scheme was first used on Teletype machines. Text is a simple one to one mapping of characters to numbers. 1 byte to 1 character (7 bits used for the character)
+
+For example if we type:
+
+[bernie@antergos-vbox ~]$ less /etc/passwd
+
+Will run the less program on the file in the etc directory. Once the program less starts, we can view the file contents. We press Q to exit and return to the command line.
+ For help in less just press h.
+
+  Less is more
+  The less program was designed as an improved replacement of an earlier Unix program called more and it's name is a play on words. less falls into the class of program called papers, programs that allow the easy viewing of long text documents in a page-by-page manner. Whereas the more program could only page forward, the less program allows paging both forward and backward and has many other features beside.
+
+A Guided Tour
+The filesystem layout on your Linux system is much like any other Unix system layout. The design is specified in a published standard called Linux Filesystem Hierarchy Standard. Not all Linux distros conform to the standard exactly.
+
+/ - The root directory. Where everything begins
+/bin  - Contains binaries (programs that must be present for the system to boot and run)
+/boot - Contains the Linux kernel, initial RAM disk image (for the drivers needed at boot time), and the boot loader. 
+/boot/grub/grub.conf - used to configure the boot loader
+/boot/vmlinuz-linux - contains the Linux kernel
+/dev - This directory contains the device nodes. Here, the kernel keeps a list of all the devices it understands
+/etc - all the system-wide config files are kept here. Also contains a collection of shell scripts that start each of the system services at boot time. Everything  in this directory should be readable text.
+/home - In normal config, each user is given a directory in /home. Ordinary users can write files only in their home directories
+/lib - Contains shared library files used by the core system programs.
+/lost+found - Each formatted partition or device using a Linux file-system, such as ext3, will have this directory. It is used in the case of a partial recovery from a filesystem corruption event. Unless something really bad has happened to your system, this directory will remain empty.
+/media - On a modern Linux system this directory will contain the mount points for removable media such as USB drives, CD-ROMs etc. that are mounted automatically at insertion.
+/opt - This directory is used to install optional software. This is mainly used to hold commercial software products that may be installed on your system.
+/proc - This is special and isn't a real filesystem in the sense of files stored on your hard drive. Rather, it is a virtual filesystem maintained by the Linux kernel. The "files" it contains are peepholes into the kernel itself. The files are readable and will give you a picture of how the kernel sees your computer
+/root - This is the home directory of the root account
+/sbin - This directory contains "system" binaries. These are programs that perform vital system tasks that are generally reserved for the superuser.
+/tmp - The /tmp directory is intended for storage of temporary transient files created by various programs. Some configurations cause this directory to be emptied each time the system is rebooted.
+/usr - This directory tree is likely to be the largest one on a Linux system. It contains all the programs and support files used by regular users. bash, firefox etc
+/usr/bin - contains all the executable programs installed on your Linux distro. It is not uncommon for this directory to hold thousands of programs.
+/usr/lib - shared libraries for the programs in /usr/bin
+/usr/local - This tree is where programs that are not included with your distribution but are intended for system-wide use are installed. Programs compiled from source code are normally installed in /usr/local/bin. On a newly installed Linux system, this tree exists, but will be empty until the system admin puts something in it.
+/usr/sbin - Contains more system administration programs
+/usr/share - Contains all shared data used by programs in /usr/bin. This includes things like default config files, icons, screen backgrounds, sound files etc.
+/usr/share/doc - Most packages installed on the system will include some kind of documentation. In here, we find documentation files organised by package.
+/var - With the exception of /tmp and /home, the other directories remain mostly static. The /var directory tree is where data that is likely to change is stored. Various databases, spool files, user mail, etc. are located here.
+/var/log - contains log files, records of various system activity. These are very important and should be monitored from time to time. The most useful one is /var/log/messages. Note that for security reasons on some systems, you must be a superuser to view log files.
+
+Symbolic links
+In most Unix-like systems it is possible to have a file reference by multiple names. While the value of this may not be obvious, know that it is a very useful feature.			

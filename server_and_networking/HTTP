@@ -1,0 +1,102 @@
+HTTP (Hypertext Transfer Protocol) is used to transfer almost all data on the World Wide Web. HTTP is a network protocol and uses a client-server model which is common for most network protocols. HTTP clients send requests to HTTP servers which sends data (called resources) back. Most commonly this takes place through TCP/IP.
+
+Such resources can be:
+	HTML files
+	Query results
+	Image files
+	etc
+
+After the response has been delivered by the server, it closes the connection. This means that HTTP is a stateless protocol as no information about the state of the request is inherently maintained.
+
+image: request/response diagram
+
+Both request and response messages have a similar format. They both start with an initial line and follow with any number of header lines. This initial line states the location of the desired resource in a request. For a response this initial line will give the status of the request (i.e. most commonly whether it was successful or not).
+
+The headers give information about the HTTP message. They are vital for helping server developers debug issues. They might for example, state the length or type of the content given in the message body. The "From: abc@somecompany.com" gives the email dress of the requester and the "User-Agent: Program.exe" specifies the program doing the requesting. 
+
+Finally comes the message body which can contain any response or request data. In a response, this is the resource returned to the client and in a request it could be user submitted files or information. 
+
+The initial line for the request and repose (also called status) both have 3 parts but are distinct.
+
+The first request line
+Here is an example of a HTTP request line:
+
+GET /filepath/index.html HTTP/1.0
+
+The first part, here with GET, is the HTTP method. GET states that a resource is wanted by the client and that the server should get it. GET is by far the most common HTTP. Other common HTTP methods are POST and HEAD. HEAD is similar to GET, however it asks the server to return only the response headers and not the message body (the resource). It is thus a way of checking the resource characteristics without having to download it. The POST method is used to send at to server. If the POST method is used then the message body must contain some data and there will be likely be headers to describe it. A HTTP response to a POST is often a redirect rather than a file resource.
+
+The second part is the path, which is the fragment of the uniform resource locater (URL) after the hostname. For clarity let's define the parts of an example URL:
+
+https://bernie.gnupp-ltd.com/Post/Programming/MVCTesting
+
+	https: - the network protocol
+	bernie - third level domain
+	gnupp-ltd - second level domain
+	com - first level domain
+	bernie.gnupp-ltd.com - all domain names together gives the hostname
+	Post/Programming - directory (or filepath)
+	MVCTesting - filename
+
+The final part of the request line is the version of HTTP that you're using.
+
+The status line
+A typical initial response line can look like
+HTTP/1.0 200 OK
+Here the first part is the same as the last part of the request line which states the HTTP version. The second and third parts give machine and human readable messages regarding the status of the request. 
+
+Common status codes include: 
+	200 - Successful request. Resource is returned to the client
+	404 - The specified resource didn't exist.
+	301 - The user is redirected permanently
+	302 - The user is temporarily redirected
+	500 - Server error. This is most commonly because a server-side script has failed.
+
+Any request that starts with a particular number indicates a particular status. A 1 indicates a message only, a 2 that some degree of success occurred, a 3 indicates a redirect of the client to another URL, a 4 indicates a client error and a 5 indicates a server error. 
+
+HTTP 1.1
+One of the major improvements in HTTP 1.1 from HTTP 1.0 was to allow hosting of multiple domains from a single server (IP address). This means that every HTTP 1.1 request must specify the hostname using the Host: header. In addition, server responses must be timestamped with the Date: header expect the 100 (continue) response.
+
+
+
+
+
+By default HTTP servers listen for incoming requests on port 80, but they can be configured to use any port.
+
+Resources are not just files. A resource is a chunk of information that can be identified by a URL. The most common resource is a file, but a resource may also be a dynamically-generated query result, the output of a CGI script etc.
+
+Like most network protocols, HTTP uses the client-server model: An HTTP client opens and sends a request message to an HTTP server; the server then sends a response message, usually containing the resource that was requested. After delivering the response, the server closes the connection making HTTP a stateless protocol.
+
+The format of the request and response messages are similar, and English-oriented. Both kinds of messages consist of:
+1. An initial line
+2. Zero or more header lines
+3. A blank line (i.e a CRLF by itself)
+4. An optional message body (e.g. a file, query data, or query output)
+
+
+A HTTP message could have something to the effect of:
+
+<initial line, different for request vs. response>
+Header1: value1
+Header2: value2
+Header3: value3
+
+<optional message body goes here, like file contents or query data;
+ it can be many lines long, or even binary data $&*%@!^$@>
+
+Initial Request Line
+The initial line is different for the request than for the response
+
+
+Definitions:
+
+Network:
+Protocol:
+URL:
+TCP/IP socket:
+Socket:
+Port:
+Query result:
+CGI Script:
+Stateless: Maintaining no information between transactions
+CRLF: Carriage return (/r/n)
+HTTP proxy: Is a program that acts as an intermediary between client and a server. It receives requests from clients, and forwards those requests to the intended servers. The responses pass back through it in the same way.

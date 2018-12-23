@@ -1,0 +1,62 @@
+Working with Commands
+// The Linux Command Line
+
+Here we will attempt to remove some of the mystery of commands and try and make our own!
+
+Commands we'll learn:
+
+type - Indicate how a command name is interpreted
+which - Display which executable program will be executed
+man - Display a command's manual page (e.g. man less)
+apropos - Display a list of appropriate commands
+info - Display a command's info entry
+whatis - Display a very brief description of a comman
+alias - Create an alias for a command
+
+What are Commands?
+
+A command can fit into any one of four catagories:
+
+A shell function. These are small shell scripts incorporated into the environment. 
+
+A command built into the shell itself. bash supports a number of commands internally called builtins. The cd command, for example is a shell builtin.
+
+An executable program. Like all the files in /usr/bin. Programs can be compiled binaries, such as programs written in C and C++, or programs written in scripting languages such as Ruby, Perl or Python.
+
+An alias. This is a command that we define ourselves, built from other commands.
+
+The manual pages (invoked by the man command) give extensive information about the command. They use less to display text. They can have up to 8 pages but most of the useful info for beginners is on page 1. If you don't specify a page then you'll be put on page one.
+
+man less
+is the same as
+man 1 less
+
+The manual pages are intended as reference documentation and NOT tutorials. Many pages are hard to read but the grand prize for difficulty might go to bash. It's concise and accurate but very difficult for a new user.
+
+The GNU project provides an alternative to man pages called info pages. These pages are displayed with a reader program called info. Info pages are hyperlinked much like web pages. 
+info coreutils
+This will give you information on the coreutils package that most of the command-line programs we've looked at are a part of.
+
+The apropos command can be used to search through all the man pages 
+apropos floppy
+searches through all man pages for the instance of the word floppy
+
+Remember that apropos means 'concerning' or 'about' (same word in French!)
+
+whatis gives the command description from the man page 1
+
+Many software packages installed have documentation files residing in /usr/share/doc directory. Most of these are plaintext and can be viewed with less. Some are HTML and can be viewed by a web browser.
+
+Create your own command lines with alias!
+
+structure:
+alias='string'
+so...
+alias foo='cd /usr; ls; cd -'
+
+Now when we type in foo we'll navigate to the /usr folder, list the contents then return to the original folder. 
+
+to remove:
+unalias foo
+
+The problem with creating aliases on the command line is that they disappear when the session ends.

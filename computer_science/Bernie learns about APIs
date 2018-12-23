@@ -1,0 +1,34 @@
+Bernie learns about APIs
+
+API : Application Programming Interface
+
+Some definitions:
+An API is a set of functions and procedures that allow the creation of applications which access the features or data of an operating system, application, or other service.
+
+Didn't get that? 
+
+Neither did I.
+
+Let's pull back a sec and think about the Web. The Web is a large network of connected servers. A server is nothing fancy, it's simply a part of a computer which has the task of processing requests. You could make a server on your laptop that's able to serve an entire website. When you requested this page by typing a URL into your browser (or clicking a link), a request goes to our server for required information. Once your browser receives the response, it interprets message and displays the page.
+
+As far as the browser is concerned, our server is an API. That said, our server is NOT AN API. Rather there is part of the server that receives requests and sends responses.
+
+APIs are way of serving 
+
+Example: Your buisness's website has a form used to sign clients up for appointments. You  want to give your clients the ability to automatically create a Google calendar event with the details for that appointment. Your website's server will talk directly to Google's server with a request to create an event with the given details. Your server would then receive Google's response, process it, and send back the relevant information to the browser, such as a confirmation message to the user.
+
+Alternatively, your browser can often send an API request directly to Google's server bypassing your server.	
+
+How is this Google Calendar API different from the API of any other remote server??
+
+Well, in technical terms, the difference is the format of the request and response. When your browser renders a webpage it expects, amongst other things, HTML. Google's Calendar API call would just return the data - likely in a format like JSON.
+
+If your website's server is making the API request, then your website's server is the client (similar to your browser being a client when navigating a website).
+
+From your users perspective, they can complete the action without leaving this website. Most modern website consumes third party APIs. It's not uncommon for development teams to break their application into multiple servers that talk to each other via APIs. The servers that perform helper functions for the main application server are commonly referred to as microservices.
+
+Application
+This can refer to many things. A piece of software with a distinct function. The whole server, the whole app, or just a small part of an app.
+
+Shim
+In computer programming a shim is a small library that transparently intercepts API calls and changes the arguments passed, handles the operation itself, or redirects the operation elsewhere. They can also be used for running programs on different software platforms that they were developed for.

@@ -1,0 +1,70 @@
+
+ELEMENTS
+An element describes what you want to see on the screen. React DOM (ReactDOM.Render()) compares the element and its children the previous one (each time it changes due to new data) and only applies the DOM updates necessary to bring the DOM to the desired state. Remember that DOM updates are slow!
+
+RENDER
+To render a React element into a root DOM node, pass both to ReactDOM.render().
+
+const element = <h1>Hello, world</h1>;
+ReactDOM.render(
+  element,
+  document.getElementById('root')
+);
+
+COMPONENTS
+A function is a valid React component when it accepts a single "props" object argument with data and returns a React element (using JSX, React.createElement etc). i.e.
+
+function Welcome(props) {
+  return <h1>Hello, {props.name}</h1>;
+}
+
+However, a class that has a render function (extends React.Component) is equivalent to the function above:
+
+class Welcome extends React.Component {
+  render() {
+    return <h1>Hello, {this.props.name}</h1>;
+  }
+}
+
+RENDERING A COMPONENT
+Elements can also be represented by user-defined components.
+
+ReactDOM.render(
+  <Welcome name="Sara" />;,
+  document.getElementById('root')
+);
+
+
+PROPS
+
+An object passes JSX attributes to a component. Contains data!
+
+function Welcome(props) {
+  return <h1>Hello, {props.name}</h1>;
+}
+
+const element = <Welcome name="Sara" />;
+
+STATE
+
+IF YOU DON’T USE SOMETHING IN RENDER(), IT SHOULDN’T BE IN THE STATE.
+
+3 IMPORTANT THINGS ON STATE
+
+DON'T MODIFY STATE DIRECTLY: use this.setState()
+STATE UPDATES MAY BE ASYNC: use this.setState((prevState, props) if you need current state and props
+STATE UPDATES ARE MERGED: 
+
+use this.setState() - USED TO SCHEDULE UPATES TO THE COMPONENT LOCAL STATE
+
+STATE UPDATES MAY BE ASYNC
+React may batch multiple setState() calls into a single update for performance. Because this.props and this.state may be updated asynchronously, you shouldn't rely on their values for calculating the next state.
+
+Local state. This can be confusing with Redux! Unlike redux, the local component state is not immutable. We can change the component state by calling setState({ myVar: new MyVar }). 
+
+If you call setState within a component, then react will know that it has to call that component's render function again!
+
+Because React will call render() every time we update the state, we should only ever include items in the state that are used in the render function.
+
+LIFECYCLE
+React provides a set of methods in the React.Component Class hierarchy that allows mounting and unmounting of state changes. For example, setting up or tearing down a timer that updates the state (and thus eventually the UI) every second.

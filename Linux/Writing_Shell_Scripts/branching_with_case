@@ -1,0 +1,70 @@
+Flow Control: Branching with Case
+
+Series of if commands are cumbersome and clunky. As in other programming languages case is better for situations where you have multiple choices.
+
+case
+
+The base multiple choice compound command = case. 
+
+	case word in
+			[pattern [| pattern]...) commads ;;]...
+	esac
+
+Let's remake the menu program from earlier chapters to use case to select the right command from the user:
+
+
+#!/bin/bash
+
+# case-menu: a menu driven system information program
+  
+clear
+
+while [[ "$REPLY" != "q" ]]; do 
+
+	cat <<- _EOF_
+		Please Select:
+	
+		1. Display System Information
+		2. Display Disk Space
+		3. Display Home Space Utilisation
+		q. Quit
+	
+	_EOF_
+	read -p "Enter selection [1-3,q] > "
+	
+	case $REPLY in
+		"q") 	echo "Program terminated."
+				exit
+				;;
+		1) 		echo "Hostname: $HOSTNAME"
+				uptime
+				;;
+		2) 		df -h
+				;;
+		3) 		if [[ $(id -u) -eq 0 ]]; then
+					echo "Home Space Utilization (All Users)"
+					du -sh /home/*
+				else
+					echo "Home Space Utilization ($USER)"
+					du -sh $HOME
+				fi
+				;;
+		*) 		echo "Invalid entry" >&2
+				exit 1
+				;;
+	esac	
+done
+echo "Program terminated"
+
+The case command looks at the value of word (REPLY in our example) and attempts to make it against one of the specified patters. When a match is found, the commands associated with the specified pattern are executed. After, a match is found, no further matches are attempted.
+
+Patterns	
+The patterns used by case are the same as those used by pathname expansion. Patterns are terminated with a ')' character.
+	a) 				matches if word equals a
+	[[:alpha:]] 	matches if word is a single alphabetical character
+	???) 			matches if the word is exactly three characters long (unlike regex where . would be used instead of ?).
+	*.txt) 			matches if word ends with characters .txt
+	q|Q) 			matches if the word is q or Q
+	*) 				matches any value of word. Good practise to include this as the last pattern in a case command  to catch any values of word that did not match a previous pattern; that is, to catch any possible invalid values.
+
+

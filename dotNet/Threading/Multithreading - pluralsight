@@ -1,0 +1,121 @@
+Multithreading
+
+A process is an inert container: A virtual address space.
+
+A thread actually runs code
+
+Most resources are not meant to be accessed concurrently.
+Collections, files and integers!
+
+Race conditions can occur when the outcome of your program or method can be affected by timing. e.g. uncontrolled access to a critical section.
+c# => Intermediate Language => processor language
+When multiple threads are trying to access the same part of the processor then the time allocation of the threads can really mess up what you'd expect to happen
+
+Three solutions to potential race conditions
+1. Atomic updates
+Most processors have support for the atomic update of word-sized data (big or small enough to fit into a single register supported by the processor (32 or 64 bit) - int for example is 32 bit). 
+In C# we can use Interlocked e.g. Interlocked.Increment(ref sum);
+
+2. Data partitioning
+Sometimes can partition data to orchestrate multi-threaded access.
+
+3. Wait based synchronisation
+Sometimes data partitioning isn't possible and we need access to the same shared resource. E.g. insert or delete node from a list whilst other thread(s) are navigating the list OR multiple threads trying to manipulate the same file.
+
+Sometimes data dependencies prevent a partitioned approach. E.g. the output of one thread is required as input to another like when computing the Fibonacci sequence.
+Such situations require a wait-based approach to synchronization.
+
+Wait-Based synchronization is based on a voluntary protocol. A handshake model. Elements:
+* A shared resource is identified (that array over there)
+* A synchronization primitive tool is agreed on (Monitor, mutex etc)
+* An agreed upon instance of that primitive is identified.
+** lock X gurads file X, lock Y guards file &
+* Any thread wishing to access the resource agrees to:
+1. acquire ownership of the agreed upon synchronisation primitive
+2. Access the shared resource only after ownership is acquired.
+3. Release ownership once the resource has operated on.
+
+Wait based Synchronization Primitives 
+
+Available in the CLR:
+Monitor
+Mutex
+ReaderWriterLockSlim
+Semaphore
+
+Monitor, Mutex, ReaderWriterLockSlim all have the same basic usage model:
+1. Make a function call to acquire lock ownership
+2. Use the shared resource
+3. Make a function call to release ownership of shared resource.
+
+System.Threading.Monitor
+Monitors models gated access to a resource
+* Threads agree to enter the monitor before accessing shared resource.
+** CLR allows only one thread at a time to enter monitor
+** Other threads attempting to enter monitor while in use are blocked.
+** May be recursively entered by the same thread
+* Threads agree to "exit" the monitor once access to the resource is complete
+** Next thread is waiting for entry to monitor (if any) is allowed in
+** Recursive entrance operations by the same thread require balanced exit operations.
+
+Monitors in the CLR: Implementation
+* Monitor methods operate on object references
+** Every object in the heap can potentially be associated with a lock
+** Lock is demand-initialized by the CLR 
+** Index/reference to lock is stored within the CLR-managed object handler
+** Therefore, any object may effectively be used as a monitor
+
+Monitor.Enter - acquire access to lock on an object
+Monitor.Exit - release access of lock
+
+The lock keyword in C# is sugar over Monitor.Enter and Exit where the Monitor.Exit call is wrapped in a finally block.
+
+Monitor.Wait - blocks the calling thread but also lets go of ownership that was previously acquired. Releases lock.
+Monitor.Pulse/PulseAll
+
+
+DEADLOCK
+This can occur whenever a hold-and-wait situation is possible
+* While holding one lock, a thread attempts to acquire another lock
+
+* Note that the above is rife with caveats
+** Can occur but not necessarily
+** Deadlock is possible but not necessarily probable.
+*** Probability increases at # of threads/processors/cores increases.
+**Deadlock may only be temporary
+*** if timeouts are used in all lock acquisition calls.
+
+Whenever more than one lock is acquired we must make sure that we acquire the locks in a structured way. Hierarchical lock acquisition.
+
+
+Mutex
+Is a Win32 kernel object. There is a wrapper class around the kernel object: System.Threading.Mutex.
+
+Benefits
+* Supports timeout-limited lock acquisition
+* Nameable; enabling cross-process (same machine) thread synchronization.
+* Enables deadlock-free multiple lock acquisition via WaitHandle.WaitAll
+
+Tradeoffs
+* Acquisition & release calls always incur roundtrip to/from kernel mode.
+* Underlying kernel object must be closed when no longer needed.
+* Therefore more overhead! 
+
+```
+Mutex[] locks = { lock1, lock2 }
+
+if( WaitHandle.WaitAll(locks) )
+{
+	try
+	{
+		// Do deadlock safe work
+	}
+	finally
+	{
+		foreach (Mutex m in locks)
+		{
+			m.ReleaseMutex();
+		}
+	}
+}
+```

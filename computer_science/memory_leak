@@ -1,0 +1,5 @@
+Memory Leak
+
+A type of resource leak that occurs when a computer program incorrectly manages memory allocations in such a way THAT MEMORY WHICH IS NO LONGER NEED IS NOT RELEASED. For example: in oop, a memory leak may occur when an object is stored in memory but cannot be accessed by the running code. A memory leak has symptoms similar to a number of other problems and generally can only be diagnosed by a programmer who has access to the program's source code.
+
+	A resource leak, is a type of resource consumption by a computer program where the program doesn't release the resources it has a required commonly resulting in a bug.

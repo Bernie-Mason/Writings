@@ -1,0 +1,32 @@
+Threading
+
+-Threads are the basic unit to which an operating system allocates processing time.- 
+
+Using multiple threads of execution is one of the most powerful ways of keeping your application responsive to the user and at the same time making use of the processor in between or even during user events.
+
+Managing threading
+
+THREADS AND THREADING
+What are threads? Threads are the basic unit to which an operating system allocates processing time. More than one thread can be executing code inside that process (a process can contain multiple threads)
+
+Thread responsibility: Each thread maintains exception handlers, a scheduling priority, and a set of structures the system uses to save the thread context until it is scheduled. 
+
+Thread context: The thread context includes all the information that thread needs to seamlessly resume execution, including the thread's set of CPU registers and stack, in the address space of the thread's host process.
+
+WHEN TO USE MULTIPLE THREADS
+Software that requires user interaction must react to the user's activities as rapidly as possible to provide a rich user experience. At the same time, however, it must do the calculations necessary to present data to the user as fast as possible. If your application uses only one thread of execution, you can combine asynchronous programming with .NET Framework remoting or XML Web services created using ASP.NET to use the processing time of other computers.
+
+ADVANTAGES OF MULTIPLE THREADS: Using more than one thread, however, is the most powerful technique available to increase responsiveness to the user and process the data necessary to get the job done at almost the same time.  On a computer with one processor, multiple threads can create this effect, taking advantage of the small periods of time in between user events to process data in the background. Doing this we can.
+* Communicate over a network, to Web server or database
+* Perform operations that take a large amount of time
+* Distinguish task of varying priority. For example, a high-priority thread manages time-critical tasks, and a low priority thread performs other tasks. 
+* Allow a user interface to remain responsive, while allocating time to background tasks.
+
+DISADVANTAGES OF MULTIPLE THREADS: Providing shared access to resources can create conflicts. To avoid such conflicts, you must synchronize, or control the access to, shared resources. Failure to synchronize access properly (in the same or different application domains) can lead to: 
+* DEADLOCKS: Two threads stop responding while each waits for the other to complete
+* RACE CONDITIONS: Anomalous result occurs due to a unexpected critical dependence on the timing of two events.
+The system provides synchronization objects that can be used to co-ordinate resource sharing amongst multiple threads. Reducing the number of threads makes it easier to synchornize the resources. These include:
+* System resources (such as comms ports)
+* Resources shared by multiple process (such as file handles) 
+* The resources of a single application domain (such as global, static and instance fields) accessed by multiple threads.
+

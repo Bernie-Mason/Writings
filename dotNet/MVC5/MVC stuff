@@ -1,0 +1,17 @@
+The purpose of a web application platform is to build and output dynamic output.
+
+Incoming HTTP requests are handled by controllers, which in ASP.NET MVC, are simply C# classes.
+
+The controller's purpose is to construct some information (data) and then give that data to the view. It needs to process incoming requests, perform operations on any relevant models and then select views to return to the user.
+
+The model is the representation of the real world objects, processes and rules that make up the domain of the application. They contain the data that users work with and be view or domain oriented.
+
+The views and controllers expose the domain objects to the clients in a consistent way. Starting with a model and adding controllers and views is a popular design strategy.
+
+Each piece of MVC architecture is well defined and self contained. The view alone is responsible for displaying data, the model alone is responsible for data manipulation within the model and controller alone is responsible for handling user requests and inputs.
+
+
+Domain model:  Most important part of an MVC application. We start by looking specifications for the application and thus recognising the operations, features and rules that the application must provide. This is known as the domain.
+The software solution to this problem is called the domain model, where for ASP.NET MVC this is a set of C# classes and structures (collectively known as domain types).
+
+Loosely coupled components

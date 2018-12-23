@@ -1,0 +1,5 @@
+Kernel
+
+The kernel is the central component of most computer operating systems; it is a bridge between applications and the actual data processing done at the hardware level. The kernel's responsibilities include managing the system's resources.
+
+The technical definition of an operating system is a "platform that consists of a specific set of libraries and infrastructure for applications to be built upon and interact with each other". A kernel is an operating system in that sense

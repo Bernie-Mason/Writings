@@ -1,0 +1,13 @@
+ASYNCHRONOUS PROGRAMMING WITH ASYNC AND AWAIT (C#)
+
+Asynchronous programming allows you to avoid bottlenecks and enhance the overall responsiveness of your application.
+
+Application area		.NET types with async methods				Windows Runtime types with async methods
+Web access				HttpClient									SyndicationClient
+Working with files		StreamWriter, StreamReader, XmlReader		StorageFile
+Working with images													MediaCapture, BitmapEncoder, BitmapDecoder
+WCF programming			Synchronous and Asynchronous Operations	
+
+Async methods
+
+The async and await keywords in C# are the heart of async programming.

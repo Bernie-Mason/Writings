@@ -1,0 +1,20 @@
+C# compiler
+
+csc.exe
+
+The C#  compiler transforms code into a Microsoft Intermediate Language (MSIL) as an executable. (something.exe)
+
+MISL is consumed by the CLR. Your processor itself cannot transform code into native instrutions. It needs the CLR to transform the MISL into native instructions.
+
+Assemblies are the files that the c# compiler creates for us. We need to use multiple assemblies to create programs.
+
+An assembly can run under the supervision of the .NET CLR.
+
+Assemblies are .exe or .dll. Another program can load a program and use the code inside. For  resuable code make dynamic link libraries.
+	For VS, simply we can create dlls using the class libraries in vs rather than a console app.
+	Note that it is perfectly legal to reference a dll or exe file for use of internal code. You are only not allowed to run a dll directly.
+
+Core libraries live in the Global Assembly Cache (GAC)
+	This is in the WIndows/Assembly folder. Lots of GAC folders here. The assemblies stored here are available to any .NET programs on the machine. One copy for the entire machine.
+
+MSCORElib is a core library. It isn't listed in the assembly refrences as it's such a common assembly that it's usage is implied.

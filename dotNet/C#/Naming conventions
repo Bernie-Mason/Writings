@@ -1,0 +1,6 @@
+Naming conventions
+
+Capitalisation rules for identifiers
+To differentiate words in an identifier, capitalize the first letter of each word.
+Do not use underscores.
+The PascalCasing convention, used for all identifiers except parameter names, capitalises the first character in each word. The camelCasing, convention is only used for parameter names.

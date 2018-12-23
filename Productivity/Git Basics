@@ -1,0 +1,479 @@
+// Derived from Git Professional Chapter 2 Git Basics
+
+There are two main ways of creating a Git project:
+The first takes an existing project or directory and imports it into Git. 
+The second clones an existing Git repository from another server.
+
+1. Initializing a repository in an existing directory
+
+$ git init
+
+This creates a subdirectory called .git that contains all of your necessary repository files - a git repository skeleton. Nothing is tracked at this point yet. If you want to start version-controlling existing files, you should probably begin tracking those files and do an initial commit:
+
+$ git add *.c
+$ git add LICENSE
+$ git commit -m "initial project version"
+
+
+Then to add a remote repo and push to it:
+$ git remote add origin git@github.com:Bernie-Mason/Test_Repo.git
+$ git push -u origin master
+
+2. Cloning an existing repository
+
+The git clone command is quite unique to Git, instead of just getting a copy of the working data, Git receives a full copy of nearly all data that the server has. Every version of every file for the history of the project is pulled down  by default when you run git clone. In fact, if your server disk gets corrupted, you can often use any of the clones on any client to set the server back up to the state that it was in before it was cloned.
+
+$ git clone [url]
+
+$ git clone https....
+$ git clone git@github....
+
+Recording changes
+You now have a Git repository and a working copy of the files for that project. You need to make some changes and commit snapshots of those changes into your repository each time the project reaches a state you want to record. 
+
+Remember that each file in your working directory can be in one of two states; tracked or untracked. Untracked files are all the files that weren't in the last snapshot and not in your staging area. Tracked files are files that were in the last snapshot; they can be unmodified, modified, or staged. Once modified or untracked files are add or staged respectively they can be committed, changing their status to unmodified. A completely up-to-date directory contains the same unmodified as the origin/master directory.
+
+$ git status
+On branch master
+Your branch is up-to-date with 'origin/master'.
+nothing to commit, working directory clean
+
+This means that you have a clean working directory - there are no untracked or modified tracked files. It also says 'origin/master' which is 'server/branch', as the origin of our cloned directory is the git server and we're on the master branch by default. 
+
+
+Untracked: A new file that doesn't appear in any previous snapshots. Git doesn't know about this until the add command captures it
+Tracked: A file that has appeared in a previous snapshot. Can be modified, unmodified or staged. 
+
+Modified: A tracked file that has been modified is marked as modified. Git knows that these files have been modified even before they are staged (the add command run). For example, let's create a couple of files:
+
+$ echo "Bernie's blog" > README
+$ git add README
+$ git commit README
+$ echo "Bernie's blog" > README2
+
+
+
+$ git status
+On branch master
+Your branch is up-to-date with 'origin/master'.
+Changes to be committed:
+ (use "git reset HEAD <file>..." to unstage)
+ new file: README2
+ (use "git add <file>..." to update what will be committed)
+ modified: README
+
+$ echo "bernies blog" > README
+$ echo "bernies blog" > README2
+)
+$ git status
+On branch master
+Your branch is ahead of 'origin/master' by 1 commit.
+  (use "git push" to publish your local commits)
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+        README
+        README2
+
+nothing added to commit but untracked files present (use "git add" to track)
+
+$ git add README
+$ git status
+On branch master
+Your branch is ahead of 'origin/master' by 1 commit.
+  (use "git push" to publish your local commits)
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+        new file:   README
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+        README2
+
+$ git commit -m "playing with git"
+[master d3b3a3b] playing with git
+ 1 file changed, 1 insertion(+)
+ create mode 100644 README
+
+$ git status
+On branch master
+Your branch is ahead of 'origin/master' by 2 commits.
+  (use "git push" to publish your local commits)
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+        README2
+
+nothing added to commit but untracked files present (use "git add" to track)
+
+W<---We then go and modify README to contain some different data...--->
+
+$ git status
+On branch master
+Your branch is ahead of 'origin/master' by 2 commits.
+  (use "git push" to publish your local commits)
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   README
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+        README2
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+Ignoring files
+
+Often, you'll have a class of files that you don't want Git to automatically add or even show you as being untracked. These are generally automatically generated files such as log files or files produced by your build system.
+
+$ cat .gitignore
+*.[oa]
+*~
+
+The first line tells GIt to ignore any files ending in ".o" or ".a" - object and archive files that may be the product of building your code. The second line tells Git to ignore all files whose names end with a tilde (~), which is used by many text editors such as Emacs to mark temporary files. 
+
+Setting up a .gitignore file before you get going is generally a good idea so you don't accidentally commit files that you don't want in your Git repository.
+The rules for patterns you can put in the .gitignore file are as follows:
+	Blank lines or lines starting with # are ignored.
+	Standard glob patterns work
+	You can start patterns with a forward slash (/) to avoid recursivity
+	You can end patterns with a forward slash (/) to specify a directory.
+	You can negate a pattern by starting it with an exclamation point
+
+Glob patterns are like simplified regular expressions that shells use. An asterisk (*) matches zero or more characters; [abc] matches any character in the brackets (a, b or c in this case); a question mark matches a single character; and brackets enclosing characters separated by a hyphen ([0-9]) matches any character between them (in this case 0 through 9). You can use asterisk to match nested directories; a/**/z would match a/z, a/b/z and so on
+
+Viewing staged and unstaged changes
+
+If the git status command is too vague for you, you can use the git diff command. This is used to answer some common questions: What have you changed but not staged, and what have you staged but not commited. Although git status answers these questions very generally by listing the names, git diff shows you the exact lines added and removed - the patch as it were.
+
+Just running git diff command compares what is in your working directory with what is in your staging area. The result tells you that you're made changes that haven't been staged yet in modified files that HAVE NOT yet been staged but NOT modified files that HAVE been staged.
+
+It is important to note that git diff by itself doesn't show all changes made since the last commit then. Only the changes that are unstaged. If all of the changes have been staged, then git diff will show nothing.
+
+The commit
+$ git commit
+or 
+$ git commit -m "git commit message"
+or
+$ git commit -a -m "git commit message"
+
+The last of these skips staging entirely and allows you to commit all tracked files directly. 
+
+When you create a commit you'll get a message
+
+$ git commit -m "playin with git"
+[master 7ef11f1] playin with git
+ 2 files changed, 3 insertions(+)
+ create mode 100644 README2
+
+[master 7ef11f1] - [branch, SHA-1 checksum]
+how many files were changed and statistics about lines added and removed in the commit.
+
+Removing files
+$ git rm README
+
+To remove a file from the staging area we use the rm command. It also removes the file from your working directory so you don't see it as a untracked file the next time around. This deletes the file so be careful.
+
+To remove the file in the staging area but keep it in the working tree run: 
+
+$ git rm --cached README
+
+You can pass files, directories and file-glob patterns to the git rm command. That means you can do things like:
+
+$ git rm log/\*.log
+
+The \ in front of the * is necessary because Git dos its own filename expansion in addition to your shell's filename expansion. This command removes all files that have the .log extension in the log/ directory.
+
+Or, you can do something like this:
+$ git rm \*~
+This command removes all files whose names end with a ~.
+
+
+Moving files
+Unlike many other VCS systems, Git doesn't explicitly track file movement. If you rename a file in Git, no metadata is stored in Git that tells that you renamed the file. However, Git is pretty smart about figuring that out after the fact. 
+
+Thus, it is a bit confusing that Git has a mv command.
+
+Viewing the commit history
+After you have created several commits, or if you have cloned a repository with an existing commit history, you'll probably want to be able to look back and see what has happened. The most basic and powerful tool to do this is the git log command.
+
+$ git log
+
+With no arguments, git log lists the commits made in that repository in reverse chronological order, most recent first. As you see, this command lists each commit with its SHA-1 checksum, the author's name and email, the date written, and the commit message. A huge number and variety of options to the git log command are available to show you exactly what you're looking for
+
+$ git log -p
+
+This shows the difference between each commit
+
+$ git log -2
+
+This shows only the last 2 commits. The --stat option prints below each commit entry a list of modified files, how many files were changed, and how many lines in those files were added and removed. It then also puts summary information at the end.
+
+Another really useful option is --pretty which has to be used in combination with another keyword. For example:
+
+$ git log --pretty=oneline
+ca82a6dff817ec66f44342007202690a93763949 changed the version number
+085bb3bcb608e1e8451d4b2432f8ecbe6306e7e7 removed unnecessary test
+a11bef06a3f659402fe7563abf99ad00de2209e6 first commit
+
+This massively tidies up the log history.
+
+
+BAN@BAN-TOP MINGW64 ~/Documents/Git test (master)
+$ git log --stat
+commit a05855d396352adb67e39a0730b0f36b0f079351
+Author: Bernie <bernie.mason@gmail.com>
+Date:   Fri Apr 21 11:38:48 2017 +0100
+
+    Second commit of test project
+
+ README | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit c22a0fb6fc10f233684768e9f0c3935f59b60ec5
+Author: Bernie <bernie.mason@gmail.com>
+Date:   Fri Apr 21 10:59:18 2017 +0100
+
+    Initial commit
+
+ README | 0
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
+The --stat option prints below each commit a list of modified files
+
+Undoing things
+At any stage, you may want to undo something. One of the common undos takes place when you commit too early and possible forget to add some files, or you mess up your commit message. If you want to try that commit again, you can run the commit with the -amend option:
+
+$ git commit -m 'initial commit'
+$ git add forgotten_file
+$ git commit --amend -m 'amended commit' // commit message isn't nescessary if you don't wish to change it
+
+Unstaging a staged file
+
+$ git reset HEAD filename
+
+This looks a little weird but it works. We'll go into why in a future section.
+
+Unmodifying a modified file
+This is super useful! How do we revert to what a file looked file when you last committed (or initially cloned) it. 
+
+$ git checkout -- filename
+
+It's important to understand that git checkout -- <file> is a dangerous command. Any changes you made to that file are gone. Git just copied another file over it. Don't ever use this command unless you absolutely know that you don't want the file.
+
+Remember that anything that is committed in Git can almost always be recovered. Even commits that were on branches that were deleted or commits that were overwritten with an --amend commit can be recovered. However, anything you lose that was never committed is likely never to be seen again.
+
+Working with remotes
+To be able to collaborate on any Git project, you need to know how to manage your remote repositories. Remote repositories are versions of your projects that are hosted on the Internet or network somewhere. You can have several of them, each of which generally is either read-only  or read/write for you. Collaborating with others involves managing such repositories and pushing and pulling data and from them when you need to share work. Such management involves knowing how to add remote repos, remove them if they're no longer valid, to manage various remote branches and define them as being tracked or not, and more.
+
+Showing your remotes
+What remotes do you already have! If you run the git remote command. It lists the shortnames of each remote handle you've specified. If you've cloned your repo, you should see origin, which is the default name Fit fives to the server you cloned from.
+
+You can also specify the verbose option (-v) to see the URSL that Git has stored for the shortname to be used when reading and writing to that remote:
+BAN@BAN-TOP MINGW64 ~/Documents/Git test (master)
+$ git remote -v
+origin  git@github.com:Bernie-Mason/Test_Repo.git (fetch)
+origin  git@github.com:Bernie-Mason/Test_Repo.git (push)
+
+If you have more than one remote, the command lists them all. 
+
+$ cd grit
+$ git remote -v
+bakkdoor  https://github.com/bakkdoor/grit (fetch)
+bakkdoor  https://github.com/bakkdoor/grit (push)
+cho45     https://github.com/cho45/grit (fetch)
+cho45     https://github.com/cho45/grit (push)
+defunkt   https://github.com/defunkt/grit (fetch)
+defunkt   https://github.com/defunkt/grit (push)
+koke      git://github.com/koke/grit.git (fetch)
+koke      git://github.com/koke/grit.git (push)
+origin    git@github.com:mojombo/grit.git (fetch)
+origin    git@github.com:mojombo/grit.git (push)
+
+This means we can pull contributions from any of the remote repos pretty easily. We may additionally have permission to push to one or more of those, though we can't tell here. Notice that these remotes use a variety of protocols.
+
+
+Adding Remote Repositories
+We've mentioned and given some demonstrations of how the clone command implicitly adds the origin remote for you. Here's how to add a new remote explicitly. To add a new remote Git repository as a shortname you can reference easily, run git remote add <shortname> <url>
+
+For example, if you created your repository on your computer you could've set the remote origin using:
+
+git remote add origin git@github.com:Bernie-Mason/Test_Repo.git 
+
+Or using the HTTPS equivalent. If we added a new one...
+
+BAN@BAN-TOP MINGW64 ~/Documents/Git test (master)
+$ git remote add writings git@github.com:Bernie-Mason/Writings.git
+
+BAN@BAN-TOP MINGW64 ~/Documents/Git test (master)
+$ git remote -v
+origin  git@github.com:Bernie-Mason/Test_Repo.git (fetch)
+origin  git@github.com:Bernie-Mason/Test_Repo.git (push)
+writings        git@github.com:Bernie-Mason/Writings.git (fetch)
+writings        git@github.com:Bernie-Mason/Writings.git (push)
+
+Now we have another repository that we can fetch data from. We can using the string writings in lieu of the full URL. For example, if we wanted to fetch all the info that writings has but that you don't yet have in the repository, we can run:
+
+BAN@BAN-TOP MINGW64 ~/Documents/Git test (master)
+$ git fetch writings
+warning: no common commits
+remote: Counting objects: 235, done.
+remote: Compressing objects: 100% (55/55), done.
+remote: Total 235 (delta 23), reused 0 (delta 0), pack-reused 180
+Receiving objects: 100% (235/235), 194.28 KiB | 0 bytes/s, done.
+Resolving deltas: 100% (82/82), done.
+From github.com:Bernie-Mason/Writings
+ * [new branch]      master     -> writings/master
+
+The writings master branch is now accessible locally as writings/master - you can merge it into one of your branches, or you can check out a local branch at the point that you want to inspect it.
+
+$ git fetch [remote-name]
+
+The command goes out to that remote project and pulls down all the data from that remote project that you don't have yet. After you do this, you should have references to all the branches from that remote, which you can merge in or inspect at any time. 
+
+If you clone a repository, the command automatically adds that remote repository under the name "origin". So, git fetch origin fetches any new work that has been pushed to that server since you cloned (or last fetched from) it. Note that although the files have been downloaded into the repository, git fetch doesn't merge it with any of your work or modify what you're currently working on. You have to merge it manually  into your work when you're ready.
+
+If your current branch is set up to track a remote branch, you can use the git pull command to automatically fetch AND merge that remote branch into your current branch. This may be an easier or more comfortable workflow
+
+Pushing to your remotes
+When you have the project at a point that you want to share, you have to push it upstream. The command for this is simple: git push [remote-name] [branch-name]. If you want to push your master branch to your origin server, then you can run git push origin master. This command works only if you cloned from a server to which you have write access and if nobody has pushed in the meantime. If you and someone else clone at the same time and they push upstream and then you push upstream then your push will be rejected. You'll have to fetch and merge their work first before you'll be allowed to push.
+
+To see more information about a remote we can use git remote show [remote-name]. This lists the URL for that remote repository as well as the tracking branch information. The command helpfully tells you that if you're on the master branch then git pull, will automatically merge in the master branch on the remote after it fetches teh remote references.
+
+BAN@BAN-TOP MINGW64 ~/Documents/Git test (master)
+$ git remote show writings
+* remote writings
+  Fetch URL: git@github.com:Bernie-Mason/Writings.git
+  Push  URL: git@github.com:Bernie-Mason/Writings.git
+  HEAD branch: master
+  Remote branch:
+    master tracked
+  Local ref configured for 'git push':
+    master pushes to master (local out of date)
+
+BAN@BAN-TOP MINGW64 ~/Documents/Git test (master)
+$ git remote show origin
+* remote origin
+  Fetch URL: git@github.com:Bernie-Mason/Test_Repo.git
+  Push  URL: git@github.com:Bernie-Mason/Test_Repo.git
+  HEAD branch: master
+  Remote branch:
+    master tracked
+  Local branch configured for 'git pull':
+    master merges with remote master
+  Local ref configured for 'git push':
+    master pushes to master (up to date)
+
+
+Tagging
+Like most VCSs, Git has the ability to tag specific points in history as being important. Typically people use this functionality to mark release points. In this section, you'll learn how to list the availble tags, create new tags and what the different types of tags are.
+
+Listing your tags
+$ git tag
+
+Can use wildcards to filter tags:
+
+$ git tag -l "v1.8.5*"
+v1.8.5
+v1.8.5-rc0
+v1.8.5-rc1
+v1.8.5-rc2
+v1.8.5-rc3
+v1.8.5.1
+v1.8.5.2
+v1.8.5.3
+v1.8.5.4
+v1.8.5.5
+
+Creating tags
+Git uses two main types of tags:
+Lightweight and annotated
+A lightweight tag is very much like a branch that doesn't change - it's a pointer to a specific commit. Annotated tags, however, are stored as full objects in the Git database. They're checksummed; contain the tagger name, email and data; have a tagging message; and can be signed and verified with GNU Privacy Guard (GPG). Remember that GNU is an operating system that is free - that is, it respects users freedom. The development of GNU made is possible to use a computer without software that would trample your freedom.
+
+It's generally recommended that you create annotated tags so that you can have all this information, but if you want a temporary tag or for some reason don't want to keep the other information, lightweight tags are available too.
+
+Annotated tags
+
+BAN@BAN-TOP MINGW64 ~/Documents/Git test (master)
+$ git tag -a v1.0 -m "my first version"
+
+The -a option creates an annotated tag
+
+BAN@BAN-TOP MINGW64 ~/Documents/Git test (master)
+$ git show v1.0
+tag v1.0
+Tagger: Bernie <bernie.mason@gmail.com>
+Date:   Mon Apr 24 11:12:57 2017 +0100
+
+my first version
+
+commit 13911a83b24069e4f4003121a3c0699ce6ea95d4
+Author: Bernie <bernie.mason@gmail.com>
+Date:   Mon Apr 24 10:14:03 2017 +0100
+
+    tidy up!
+
+diff --git a/bernie2.txt b/bernie2moved.txt
+similarity index 100%
+rename from bernie2.txt
+rename to bernie2moved.txt
+diff --git a/bernie3.txt b/bernie3.txt
+new file mode 100644
+index 0000000..05a682b
+--- /dev/null
++++ b/bernie3.txt
+@@ -0,0 +1 @@
++Hello!
+\ No newline at end of file
+
+
+You can also tag commits after you've moved past them. Suppose your commit history looks like this:
+
+BAN@BAN-TOP MINGW64 ~/Documents/Git test (master)
+$ git log --pretty=oneline
+13911a83b24069e4f4003121a3c0699ce6ea95d4 tidy up!
+f1ae37fe38b6db058e8ac18c2b7956d619b476aa Corrected commit
+a05855d396352adb67e39a0730b0f36b0f079351 Second commit of test project
+c22a0fb6fc10f233684768e9f0c3935f59b60ec5 Initial commit
+
+We can tag an old commit by specifying a part of the checksum from that commit:
+
+BAN@BAN-TOP MINGW64 ~/Documents/Git test (master)
+$ git tag -a v0.1 c22a0f
+
+Sharing 
+By default, the git push command doesn't transfer tags to remote servers. You will have to explicitly push tags to a shared server after you have created them. This process is just like sharing remote branches - you can run git push origin [tagname]. Or we can use the --tags option to push all tags.
+
+BAN@BAN-TOP MINGW64 ~/Documents/Git test (master)
+$ BAN@BAN-TOP MINGW64 ~/Documents/Git test (master)
+bash: syntax error near unexpected token `('
+Counting objects: 2, done.
+Delta compression using up to 8 threads.
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (2/2), 289 bytes | 0 bytes/s, done.
+Total 2 (delta 0), reused 0 (delta 0)
+To github.com:Bernie-Mason/Test_Repo.git
+ * [new tag]         v0.1 -> v0.1
+ * [new tag]         v1.0 -> v1.0
+
+Now when someone clones or pulls from our repo, they will get all the tags as well.
+
+Git aliases
+Git doesn't automatically infer your command if you type it in partially. If you don't want to type the entire text of each Git commands, you can easily set an alias for each command using the git config. Here are a couple of examples you may want to set up.
+
+$ git config --global alias.co checkout
+$ git config --global alias.br branch
+$ git config --global alias.ci commit
+$ git config --global alias.st status
+
+So instead of typing commit, we instead type ci.
+
+We can use the git config --global alias.. commands to set up our aliases or we can go directly into the config file using 
+
+$ git config --global --edit
+

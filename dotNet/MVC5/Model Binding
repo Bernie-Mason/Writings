@@ -1,0 +1,150 @@
+Model binding is an elegant bridge between the HTTP request and the C# methods that define actions. Most MVC Framework applications rely on model binding to some extent.
+
+For example, if we have an action method that takes an input parameter:
+
+public ActionResult Index(int id)
+{
+  Person dataItem = personData.Where(p => p.PersonId == id).First();
+  return View(dataItem);
+}
+
+The process by which the URL segment was converted into the int method argument is an example of model binding. This begins when the request is received and processed by the default MVC routing engine which takes the following url:
+url: "{controller}/{action}/{id}",
+
+If we request the following:
+
+Home/Index/1
+
+The last segment of the URL is assigned to the id routing variable. The action invoker, uses the routing information to figure out that the Index action method was required to service the request, but it can't call the Index method without a useful value for the method argument.
+The default action invoker, ControllerActionInvoker, relies on model binders to generate data objects that are required to invoke the action. Model binders are defined by the IModelBinder interface:
+
+There can be multiple model binders in an MVC application, and each binder can be responsible for binding one or more model types. When the action invoker needs to call an action method, it looks at the parameters that the model defines and finds the responsible model binder for the type of each one.
+
+For our example, the action invoker would examine the Index action method and find that it has one int parameter. It would locate the binder responsible for providing an int values and call its BindModel method. The model binder is responsible for providing an int value that can be used to call the Index method. This usually means transforming one element of the request data.
+
+The Default Model Binder.
+
+By default the default model binder searches in four places, in the following order, to data match the name of the parameter being bound:
+  1. Request.Form - values being passed by the user in an HTML form element
+  2. RouteData.Values - values obtained using the application routes
+  3. Request.QueryString - data included in the query (?...) portion of the request URL
+  4. Request.Files - files that have been uploaded as part of the request
+The search is stopped as soon as a value is found. This means that the query string and names of uploaded files are often not searched at all!
+When relying on the default model binder, it is important that the parameters for your action method match the data property you are looking for.
+
+Culture sensitive binding: The DefaultModelBinder class uses culture-specific settings to perform type conversions from different areas of the request data. The values that are obtained from URLs (the routing and query string data) are converted using culture-insensitive parsing, but values obtained from form data are converted taking culture into account.
+
+Manually invoking model binding.
+The model binding process is performed automatically when an action method defines parameters, but we can take direct control of the process too! This gives more explicit control over how model objects are instantiated, where data values are obtained from, and how data parsing errors are handled.
+For example:
+
+public ActionResult Address()
+{
+    IList<AddressSummary> addresses = new List<AddressSummary>();
+    UpdateModel(addresses);
+    return View(addresses);
+}
+
+The UpdateModel method takes a model object that we previously defined as a parameter and tries to obtain values for its public properties using the standard binding process.
+When we manually invoke the binding process in this way, we are able to restrict the binding process to a single data source (addresses) like so...
+
+public ActionResult Address()
+{
+    IList<AddressSummary> addresses = new List<AddressSummary>();
+    UpdateModel(addresses, new FormValueProvider(ControllerContext));
+    return View(addresses);
+}
+
+This version of the UpdateModel method takes an implementation of the IValueProvider interface, which becomes the sole source of data values for the binding process. Each of the four default data locations is represented by an IValueProvider implementation. Each of these classes takes a ControllerContext constructor parameter, which  we obtain through the property called ControllerContext that is defined by the Controller class.
+The most common way of restricting the source of data is to look only at the form values. There is a neat binding trick that we can use so that we don't have to create an instance of the FormValueProvider:
+public ActionResult Address(FormCollection formData)
+{
+    IList<AddressSummary> addresses = new List<AddressSummary>();
+    UpdateModel(addresses, formData);
+    return View(addresses);
+}
+
+The Formcollection class implements the IValueProvider interface, and if I define the action method to take a parameter of this type, the model binder will provide me with an object that we can pass directly to the UpdateModel method.
+
+Dealing with Binding Errors
+Users will inevitably supply values that cannot be boudn to the corresponding model properties - invalid dates or text for numeric values, for example. When I invoke model binding explicitly, I am responsible for dealing with my own errors.:
+
+public ActionResult Address(FormCollection formData)
+{
+    IList<AddressSummary> addresses = new List<AddressSummary>();
+    try
+    {
+        UpdateModel(addresses, formData);
+    }
+    catch (InvalidOperationException ex)
+    {
+        // provide feedback to the user
+    }
+
+    return View(addresses);
+}
+
+Customising the Model Binding System.
+There are several ways that the model binding system may be customised.
+1. Creating a Custom Value Provider
+By defining a custom value provider, I can add my own source of data to the model binding process. Value providers implement the IValueProvider interface which defines a ContainsPrefix method that returns a bool stating whether the value provider can resolve the data for a given prefix. It also defines a GetValue method that returns a value for a given data key, or null if the provider doesn't have any suitable data.
+
+public class CountryValueProvider : IValueProvider
+{
+    public bool ContainsPrefix(string prefix)
+    {
+        return prefix.ToLower().IndexOf("country") > -1;
+    }
+
+    public ValueProviderResult GetValue(string key)
+    {
+        if (ContainsPrefix(key))
+        {
+            return new ValueProviderResult("USA", "USA", CultureInfo.InvariantCulture);
+        }
+        else
+        {
+            return null;
+        }
+    }
+}
+
+This value provider only responds to requests for values for the Country property and it always returns the value USA. I have to reutrn the data value as a ValueProviderResult class, which has three constructor parameters. The first is the data item that I want to associate with the requested key. The second parameter is a version of the data value that is safe to display as part of an HTML page. The final parameter is the culture information that relates to the value.
+To register the value provider with the application, I need to create a factory class that will create instances of the provider when they are required by the MVC Framework. The factory class must be derived from the abstract ValueProviderFactory class. Once this is made, we can register the factory with the application in the Global.asax file.
+
+ValueProviderFactories.Factories.Insert(0, new CustomValueProviderFactory());
+
+This inserts our custom ValueProviderFactory at the start of the collection. If we don't specify an index then it'll go at the end.
+
+2. Creating a Custom Model Binder
+We can override the default binder's behavior by creating a custom model binder for a specific type. Custom model binders implement the IModelBinder interface:
+
+public class AddressSummaryBinder: IModelBinder
+{
+    public object BindModel(ControllerContext controllerContext, ModelBindingContext bindingContext)
+    {
+        AddressSummary model = (AddressSummary) bindingContext.Model ?? new AddressSummary();
+        model.City = GetValue(bindingContext, "City");
+        model.Country = GetValue(bindingContext, "Country");
+        return model;
+    }
+
+    private string GetValue(ModelBindingContext context, string name)
+    {
+        name = (context.ModelName == "" ? "" : context.ModelName + ".") + name;
+        ValueProviderResult result = context.ValueProvider.GetValue(name);
+        if (result == null || result.AttemptedValue == "")
+        {
+            return "<Not Specified>";
+        }
+        else
+        {
+            return (string) result.AttemptedValue;
+        }
+    }
+}
+
+The MVC Framework will call the BindModel method wehn it wants an instance of the model type that the binder supports. Once registered, the AddressSummaryBinder class will only be used to create instances of the AddressSumarry class, which makes code a lot simpler.
+The custom model binder here is simple. When the BindMethod is called, we check to see if the Model property of the ModelBindingContext has been set. If it has, this is the object that we will generate the data for, and if not, then I create a new instance of the AddressSummary class. We use the GetValue method to retrieve the values for the City and Country properties.
+In the GetValue method, we use the IValueProvider implementation obtained from teh ModelBindingContext.ValueProvider property to get values for the model object properties.
+The ModelName property tells me if there is a prefix I need to append to the property name I am looking for. The action 

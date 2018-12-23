@@ -1,0 +1,124 @@
+Flow Control: Looping with While and Until
+
+In the previous chapter we eveloped a menu-driven program to produce various kinds of system information. The program works, but it still has a bit of usability issue as it only executes a single choice. I think we can see where this is going.
+
+Looping
+Bernie knows all about loops. This is the part of programming I can do and have experience with. Let's learn some syntax!
+
+while loops
+
+bash can express loops
+#!/bin/bash
+
+# while_count: display a series of numbers
+
+count=1
+
+while [ $count -le 5 ]; do
+        echo $count
+        count=$(($count + 1))
+done
+echo "Finished"
+
+
+[bernie@antergos_vb bin]$ while_count
+1
+2
+3
+4
+5
+
+Like if, while evaluates the exit status of a list of commands. As long as the exit status is 0, it performs the commands inside the loop. In the script above, the variable count is created and assigned an initial value of 1. The while command evaluates the exit status of the test command. As long as teh test command returns an exit status of 0, the commands within the loop are executed. At the end of each cycle, the test command is repeated. After 5 iterations through the loop, the value of count has increased to 6 and the test command no longer returns an exit status of 0.
+
+We can use a while loop to improve the read-menu program from that last chapter:
+
+
+#!/bin/bash
+
+# read_menu: a menu driven system information program
+  
+DELAY=3 # Number of seconds to display results
+clear
+
+while [[ "$REPLY" != "q" ]]; do 
+
+	cat <<- _EOF_
+		Please Select:
+	
+		1. Display System Information
+		2. Display Disk Space
+		3. Display Home Space Utilisation
+		q. Quit
+	
+	_EOF_
+	read -p "Enter selection [1-3,q] > "
+	
+	if [[ $REPLY =~ ^[1-3q]$ ]]; then 
+			if (( $REPLY == 1 )); then
+					echo "Hostname: $HOSTNAME"
+					uptime
+					sleep $DELAY
+			fi
+			if (( $REPLY == 2 )); then
+					df -h
+					sleep $DELAY
+			fi
+			if (( $REPLY == 3 )); then
+				if (( $(id -u) == 0 )); then
+						echo "Home Space Utilisation (All users)"
+						du -sh /home/*
+				else
+						echo "Home Space Utilisation ($USER)"
+						du -sh $HOME
+				fi
+				sleep $DELAY
+			fi
+	else
+		echo "Invalid entry" >&2
+		sleep $DELAY
+	fi
+done
+echo "Program terminated"
+
+By enclosing the menu in while loop, we are able to have the program repeat the menu display after each selection. The loop continues as long as REPLY is not equal to 0 and the menu is displayed again, giving the user the opportunity to make another selection. At the end of each action, a sleep command is eecuted so the program pauses for a few seconds allowing the results of the selection to seen
+
+Breaking out of a loop
+bash provides two in built commands that can be used to control program flow inside loops. The break command immediately terminates a loop, and program control resumes with the next statement following the loop. The continue command causes the remainder of the loop to be skipped, and program control resumes with the next iteration of the loop.
+
+until
+The until command is much like while, except that instead of exiting a loop when a non-exit status is encountered, it does the opposite. An until loop continues until it receives a 0 exit status. Our earlier while loop becomes:
+
+
+#!/bin/bash
+
+# while_count: display a series of numbers
+
+count=1
+
+# while [ $count -le 5 ]; do
+until [ $count -gt 5 ]; do
+        echo $count
+        count=$(($count + 1))
+done
+echo "Finished"
+
+
+Reading files with loops
+
+While and until can process standard input. This allows files to be processed with while and until loops. In the following example, we will display the contents of the distros.txt file used in earlier chapters:
+
+
+#!/bin/bash
+
+# while_read: read lines from a file
+
+sort -k 1,1 -k 2n ~/foo/distros.txt | while read distro version release; do
+		printf "Distro: %s\tVersion: %s\tReleased: %s\n" \
+				$distro \
+				$version \
+				$release
+
+done
+
+Here we take the output of the sort command and display the stream of text. However, it is important to remember that since a pipe will execute the loop in a subshell, any variables created or assigned within the loop will be lost when the loop terminates.
+

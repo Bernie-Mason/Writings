@@ -1,0 +1,11 @@
+Arrays
+
+Manage a collection of variables. Arrays have a fixed size. When creating an array we need to specify the size. If we know the size or maximum size of a collection an array is suitable.
+
+Arrays and Lists are both zero indexed. 
+
+Every type is a value type or a reference type
+	Use struct to create a value type
+	Use class to create a reference type
+Arrays and strings are reference types
+	Strings behave like a value type. They are immutable and you can only create new strings.

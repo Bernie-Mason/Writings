@@ -1,0 +1,126 @@
+Arrays
+
+In the last chapter, we looked at how the shell can manipulate strings and numbers. The data types we have looked at so far are known as scalar variables, that is, variables that contain a single value. Arrays area a feature of virtually every programming language. The shell supports them too, though in rather a limited fashion. 
+
+Arrays have cells called elements where each element contains data.  An individual element is accessed using an address called an index or subscript.
+
+Arrays in bash are limited to single dimensions. We can think of them as a spreadsheet with a single coloumn. 
+
+Syntax
+
+[bernie@antergos_vb bin]$ a[1]=foo
+[bernie@antergos_vb bin]$ echo ${a[1]}
+foo
+[bernie@antergos_vb bin]$ echo ${a[0]}
+
+[bernie@antergos_vb bin]$ echo ${a[2]}
+
+[bernie@antergos_vb bin]$ echo ${a[2]=1}
+1
+[bernie@antergos_vb bin]$ echo ${a[2]}
+1
+
+Here we both assignment and access of an array element. With the first command, element 1 of array a is assigned the value of foo. The second command displays the stored value to element 1. The use of braces in the second command is required to prevent the shell from attempting pathname expansion on the name of the array element. 
+
+An array can also be created with the declare command:
+
+$ declare -a a
+
+Assigning Values
+
+name[index]=value
+
+name(value1 value2 ...)
+
+First element is subscript/index = 0.
+
+Accessing array elements.Just as many data-management task can be performed with a spreadsheet program, many programming tasks can be performed with arrays. Let's consider a simple data-gathering and presentation example. We will construct a script that examines the modification times of the files in a specified directory. From this data, our script will output a table showing what hour of the day the files were last modified. Such a script  could be used to determine when a system is most active:
+
+
+#!/bin/bash
+
+# hours : script to count files by modification time
+
+usage () {
+	echo "usage: $(basename $0) directory" >&2
+}
+
+# Check the argument is a directory
+if [[ ! -d $1 ]]; then
+		usage # If argument is not a directory then return help and exit
+		exit 1
+fi
+
+# Initialise array - create an empty array 24 large and fill with zeros
+# We employ brace expansion to easily generate a sequence of words for the for command
+for i in {0..23}; do hours[i]=0; done
+
+# Collect data. We run the stat program on each file in the directory. We use cut to extract the two
+# digit hour from the result. Inside the loop, we need to remove leading zeros from the hour field
+# since the shell will try to interpret values 00 to 09 as octal numbers. 
+# Next we increment the value of the array element corresponding with the hour of the day. Finally
+# we increment the counter to track the number of files in the directory
+for i in $(stat -c %y "$1"/* | cut -c 12-13); do
+		j=${i/#0}
+		((++hours[j]))
+		((++count))
+		echo "$i, $j"
+done
+
+# Display data. We first output a couple of header lines and then enter a loop that produces four 
+# columns of output. Lastly, we output the final tally of files.
+echo -e "Hour\tFiles\tHour\tFiles"
+echo -e "----\t-----\t----\t-----"
+for i in {0..11}; do
+		j=$((i + 12))
+		printf "%02d\t%d\t%02d\t%d\n" $i ${hours[i]} $j ${hours[j]}
+done
+printf "\nTotal files = %d\n" $count
+
+Which outputs to:
+[bernie@antergos_vb bin]$ hours ~/
+Hour	Files	Hour	Files
+----	-----	----	-----
+00	0	12	2
+01	0	13	0
+02	0	14	1
+03	0	15	1
+04	0	16	2
+05	0	17	0
+06	0	18	2
+07	0	19	0
+08	1	20	0
+09	0	21	0
+10	6	22	0
+11	0	23	0
+
+Array Operations
+There are many common array operations. Such things as deleting arrays, determining their size, sorting and so on have many applications in scripting. 
+
+Outputting the Entire Contents of an Array
+The subscripts * and @ can be used to access every element in an array. As with positional parameters, the @ notation is the more useful of the two:
+
+[bernie@antergos_vb bin]$ animals=("a dog" "a cat" "a fish")
+[bernie@antergos_vb bin]$ for i in ${animals[*]}; do echo $i; done
+a
+dog
+a
+cat
+a
+fish
+[bernie@antergos_vb bin]$ for i in ${animals[@]}; do echo $i; done
+a
+dog
+a
+cat
+a
+fish
+[bernie@antergos_vb bin]$ for i in "${animals[@]}"; do echo $i; done
+a dog
+a cat
+a fish
+[bernie@antergos_vb bin]$ for i in "${animals[*]}"; do echo $i; done
+a dog a cat a fish
+
+We create the array animals and assign it three two-word strings. We then execute four loop to see the effect of word-splitting on the array-contents. The behavior of notations ${animals[*]} and ${animals[@]} is identical until they are quoted.
+

@@ -1,0 +1,198 @@
+<head>
+	<style type="text/css">
+		pre {
+   				 -moz-tab-size:    4; /* Firefox 4+ */
+   				 -o-tab-size:      4; /* Opera 11.5 & 12.1 only */
+			    tab-size:         4; /* Chrome 21+, Safari 6.1+, Opera 15+ */
+			}
+	</style>	
+</head>
+<body>
+<p>Writing code takes time. </p>
+
+<p>Rewriting the same, or similar code, over and over really sucks. Often we need a class or method that can work with many different types but writing lots of versions that all do the same thing can be really messy and time consuming.</p> 
+<p><strong>We want to keep the amount of code and the time spent writing it to a minimum</strong></p>
+<p>
+	Consider this simple, type-specific class that allows us to store integers in an array and allows us to set and retrieve values from it:
+</p>
+
+<div>
+	<pre>
+public class IntStorage
+{ 
+	private int[] _data;
+	private int DefaultDataLength = 100;
+
+	public IntStorage()
+	{
+		_data = new int[DefaultDataLength];
+	}
+
+	public void AddInt(int data, int index)
+	{
+		_data[index] = data;
+	}
+
+	public int GetInt(int index)
+	{
+		if (index < _data.Length)
+		{
+			return _data[index];
+		}
+		else
+		{
+			throw new Exception("index out of data range");
+		}
+	}
+}
+	</pre>
+</div>
+<p>To invoke:</p>
+<div>
+	<pre>
+IntStorage intStore = new IntStorage();
+int myInt = 5;
+intStore.AddInt(myInt, 0);
+int myInt2 = intStore(0);
+	</pre>
+</div>
+
+<p>Ok, ok, it's a pretty useless class. We can perform such operations on integer arrays without the need of creating class for them. But what if we want to populate this with a string or objects from a class that we've created like Car?</p>
+<p>Well this won't work:</p>
+<div>
+	<pre>
+IntStorage intStore = new IntStorage();
+string myString = "Hello";
+intStore.AddInt(myString, 0); // Compile time error
+	</pre>
+</div>
+
+<h3>The generalized, <em>object</em> based solution</h3>
+
+<p>Remember that we <em>really</em> don't want to write out a new class. The first solution we'll explore is not to use generics but to write a generalized class using the object type. This has some advantages over our type-specific class above.</p>
+<ul>
+	<li>
+		An object type can be used to store a value of any type. 
+	</li>
+	<li>
+		With methods we can set the parameter that the method will accept as an object to allow it accept any type. A method can also return an object type.
+	</li>
+</ul> 
+
+<p>We can rewrite our IntStorage class to be able to accommodate and access an array of any type:</p>
+
+<div>
+	<pre>
+public class ObjectStorage
+{ 
+	private object[] _data;
+	private int DefaultDataLength = 100;
+
+	public ObjectStorage()
+	{
+		_data = new object[DefaultDataLength];
+	}
+
+	public void AddObject(object data, int index)
+	{
+		_data[index] = data;
+	}
+
+	public object GetObject(int index)
+	{
+		if (index < _data.Length)
+		{
+			return _data[index];
+		}
+		else
+		{
+			throw new Exception("index out of data range");
+		}
+	}
+}
+	</pre>
+</div>
+<p>Now we can create instances with different types!</p>
+<div>
+	<pre>
+// We can still create storage for ints:
+ObjectStorage intStore = new ObjectStorage();
+int myInt = 5; 
+intStore.AddObject(myInt, 0);
+int myInt2 = (int)intStore.GetObject(0);
+
+// But we can also now use our class to store user types:
+ObjectStorage carStore = new ObjectStorage();
+Car car = new Car(); 
+carStore.AddObject(car, 0); 
+Car car2 = new Car(); 
+car2 = (Car)carStore.GetObject(0);
+	</pre>
+</div>
+
+<p>Great! We can now store whatever types we like in a new instance of our ObjectStorage class. Unfortunately, we have a couple of problems. </p>
+<ul>
+	<li>
+		The first, and most glaring, is that we have to cast the object that is returned by the GetObject method to the type that we want. This could easily lead to programmer errors. The error cannot be spotted until runtime as the compiler doesn't have enough information about what type to expect. <strong>This means that the object solution to this problem is not type safe</strong>
+	</li>
+	<li>
+		The second issue is that every time we pass an int to AddObject we box it to an object. Retrieving an int from GetObject requires unboxing. <strong>This increased boxing and unboxing that we do can easily lead to a large increase in processor overhead.</strong>
+	</li>
+</ul>
+
+<h3>The generics solution</h3>
+<p>Alright. Here it is. The solution. Let's make our class extensible (more reusable) whilst keeping it type safe whilst keeping down the amount of boxing and unboxing that we have to do.</p>
+<div>
+	<pre>
+public class GenericStorage&lt;T&gt;
+{
+    private T[] _data;
+    private int DefaultDataLength = 100;
+
+    public GenericStorage()
+    {
+        _data = new T[DefaultDataLength];
+    }
+
+    public void AddItem(T data, int index)
+    {
+        _data[index] = data;
+    }
+
+    public T GetItem(int index)
+    {
+        if (index < _data.Length)
+        {
+            return _data[index];
+        }
+        else
+        {
+            throw new Exception("index out of data range");
+        }
+    }
+}
+	</pre>
+</div>
+
+<p>Now we're cooking with gas! Instead of a specific type (like int) or the unified 'super' type (object) we instead don't specify the type at all. Instead we define our class as: GenericStorage&lt;T&gt; where T is our generic type and can be any legal C# identifier, although 'T' or identifiers beginning with 'T' are often used. This &lt;T&gt; tells the compiler that it should expect the type to be specified when an instance of this object is created. We can see the generic 'T' placeholder for the data array type and in the AddItem and GetItem methods. Let's look at creating instances of this class and using them:</p>
+
+<div>
+	<pre>
+// As before, we can create int storage:
+GenericStorage<int> intStore = new GenericStorage<int>();
+int myInt = 5;
+intStore.AddItem(myInt, 0);
+int myInt2 = intStore.GetItem(0);
+
+// And use our class to store user types:
+GenericStorage<Car> carStore = new GenericStorage<Car>();
+Car car = new Car();
+carStore.AddItem(car, 0);
+Car car2 = new Car();
+car2 = carStore.GetItem(0);
+	</pre>
+</div>
+
+<p>That's better! Now that we've defined the type that will be used when we create the instance of the class, the compiler knows what type it should expect back when executing the methods AddItem and GetItem methods and a cast is no longer needed for the latter. Much more type safe!</p>
+<p><strong>Using generics when writing classes and methods make them much more extensible  whilst keeping them type-safe.</strong></p>
+</body>

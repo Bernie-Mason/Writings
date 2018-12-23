@@ -1,0 +1,56 @@
+Branching with if
+
+How can we make our report generator script adapt to the privileges of the user running the script? The solution to this problem will require us to find a way to change directions.	
+
+The if statement has the following syntax:
+if commands: then
+	commands
+[elif commands; then
+	commands...]
+[else
+	commands]
+fi
+
+Before we look in more detail let's consider how the shell evaluates the success or failure of a command.
+
+Exit status
+Commands (including the scripts and shell functions we write) issue a value to the system when they terminate, called an exit status. This value, which is an integer in the range of 0 to 255, indicates the success or failure of the command's execution. 
+The shell provides a parameter that we can use to examine the exit status:
+
+[bernie@antergos_vb Documents]$ ls -d /usr/bin
+/usr/bin
+[bernie@antergos_vb Documents]$ echo $?
+0
+[bernie@antergos_vb Documents]$ ls -d /bin/usr
+ls: cannot access '/bin/usr': No such file or directory
+[bernie@antergos_vb Documents]$ echo $?
+2
+
+In this example, we execute the ls command twice. The first time, the command executes successfully. If we display the value of the parameter $? we get a 0. The second time (after the error) it is 2. Many commands simply exit with a value of 1 when they fail.
+
+[bernie@antergos_vb Documents]$ true
+[bernie@antergos_vb Documents]$ echo $?
+0
+[bernie@antergos_vb Documents]$ false
+[bernie@antergos_vb Documents]$ echo $?
+1
+
+The shell provides this commands simply to set the exit status.
+
+Such commands can be used to see how the if statement works. The if statement really is evaulating the success or failure of commands:
+
+[bernie@antergos_vb Documents]$ if false; then echo "It's true"; fi
+[bernie@antergos_vb Documents]$ if true; then echo "It's true"; fi
+It's true
+
+By far the most frequent command with if is test. The test command performs a variety of checks and comparisons. It has two equivalent forms:
+
+	test expression
+
+and more popular
+
+	[ expression ]
+
+where expression is an expression that is evaluated as either true or false. 0 for true and 1 for false as the exit status.
+
+

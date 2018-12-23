@@ -1,0 +1,19 @@
+React Flux PluralSight course
+
+Objective of environment setup
+
+Just type gulp, get all this....
+
+* Compile React JSX
+* Lint JSX and JS via ESLint
+* Bundle JS and CSS files
+* Migrate the built app to the dist folder
+* Run a dev webserver
+* Open the browser at your dev URL
+* Reload the browser upon save
+
+Step 1
+npm init  - node js create a package.json
+
+Step 2
+npm install --save N

@@ -1,0 +1,6 @@
+Git Useful stuff
+
+git clean -fxd
+git commit -amend (-a) : amends to previous commit and performs git add .
+git reset HEAD~1 : resets the index of the last commit but not the working tree (i.e. the changed files are preserved but not marked for commit) and reports what has not been updated (this is the --mixed option). --hard will also reset working tree
+git reflog branch_name : reference logs record when the tips of branches and other references were updated in the local repo. These are useful in various Git commands, to specify the old value of a reference. git reflog show is an alias for git log -g --abbrev-commit --pretty=onelineS

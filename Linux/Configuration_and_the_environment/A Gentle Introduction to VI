@@ -1,0 +1,139 @@
+A Gentle Introduction to VI
+// From "The Linux Command Line" - Chapter 12
+
+Learning the linux command line is not something we can do in an afternoon. We need to practice, practice and practice more. Here we'll look at vi (pronounced vee eye) text editor, one of the core programs in the Unix tradition. vi is somewhat notorious for its difficult user interface, but when a we see a master sit down at the keyboard and begin to play we will witness some great art.
+
+Why should we learn vi?
+In the modern age of graphical editors and easy-to-use text-based editors such as nano, why should we learn vi? There are three good reasons
+	1. vi is always available. This can be a lifesaver if we have a system with no graphical interface, such as a remote server or a local system with a broken X configuration. nano, while increasingly popular, is still not universal. POSIX, a standard for program compatibility on Unix systems, requires that vi be present
+	2. vi is lightweight and fast. For many tasks, it's easier to bring up vi than it is to find the graphical text editor in the menus and wait for its multiple megabytes to load. In addition, vi is designed for typing speed. As we shall see, a skilled vi user never has to lift their fingers from the keyboard whilst typing.
+	3. We don't want other Linux/Unix users to think we're sissies
+
+A little background
+The first version of vi was written in 1976 by Bill Job, a Berkeley student who later founded Sun Microsystems. vi derives its name from the word visual, because it was intended to allow editing on a video terminal with a moving cursor. Before visual editors were line editors, which operated on a single line of text at a time. To specify a change to make, such as adding or deleting text. With the advent of video terminals (rather than printer-based terminals like teletypes), visual editing became possible. vi actually incorporates a powerful line editor called ex, and we use line-editing command whilst using vi.
+
+Most Linux distributions don't include real vi; rather they ship with an enhanced replacement called vim written by Bram Moolenaar. vim is a substantial improvement over traditional Unix vi and is usually symbolically linked (or aliased) to the name vi on Linux systems. We assume we're working in vim for the following:
+
+To open vim:
+
+[bernie@antergos-vbox ~]$ vi
+
+To quit (the colon indicates an ex command)
+
+:q
+
+To force quit
+
+:q!
+
+To create a new file with vi:
+
+[bernie@antergos-vbox ~]$ vi foo.txt
+
+This should open our new file in vim but not create it yet. The leading tildes at the start of each line indicate that nothing is written there yet. vi is modal editor. When vi starts up, it begins in command mode. In this mode, almost every key is a command.
+
+Entering insert mode - press i
+
+Write some stuff
+
+Press ESC to return to command mode
+Press :w to write
+
+Moving the cursor around.
+
+Whilst in command mode, vi offers a large number of movement commands, some of which it shares with less
+
+Key 					Moves the cursor
+L or right arrow 		Right one character
+H or left arrow 		Left one character
+J or down arrow 		Down one character
+K or up arrow 			Up one character
+0 (zero) 				To the beginning of the current line
+SHIFT-6					To the first non-whitespace character on the current line
+SHIFT-4					To the end of the current line
+W 						To the beginning of the next word or punctuation character
+SHIFT-W					To the beginning of the next word, ignoring punctuation characters
+B 						To the beginning of the previous word or punctuation character
+SHIFT-B  				To the beginning of the previous word, ignoring punctuation characters
+CTRL-F or PAGE DOWN  	Down one page
+CTRL-B or PAGE UP 		Up one page
+number-SHIFT-G 			To line number
+SHIFT-G	 				To the last line of the file
+
+Many commands in vi can be prefixed with a number, as with the G command. By specifying a number we say how many times we want the command carried out
+
+Basic editing
+Most editing consists of a few basic operations such as inserting text, deleting text, and moving text around by cutting and pasting. vi supports these operations in its own unique way. vi also provides a limited form of undo. If we press the U key while in command mode, vi will undo the last change that you made. This will come in handy!
+
+Appending text
+vi has several ways of entering insert mode. To append text to the end of a sentence we need the 'a' command. 
+
+Since we almost always want to append text to the end of a line, vi offers a shortcut the A command (shift-a). This is much more useful!
+
+Opening a line
+Another way we can insert text is by "opening" a line.. This inserts a blank line between two existing lines and enters insert mode. This has two varients, o which opens a line below and O which opens a line above the current line.
+
+Deleting text
+vi has a variety of ways of deleting text. Weirdly, it's kinda best to do this in command mode rather than insert mode. First the X key will delete a character at the cursor location (a number can be given to specify how many characters are to be deleted). The D key is more general purpose. In addition, d is always followed by a movement command that controls the size of the deletion.
+
+For example
+
+Command 		Deletes
+x 				The current character
+3x 				The current character and the next two
+dd 				The current line
+5dd 			The current line and the next four
+dW 				From the current cursor location to the beginning of the next word
+d$ 				From the current cursor location to the end of the current line
+dO 				From the current cursor location to the beginning of the line
+d^ 				From the current cursor location to the first non-whitespace character in the line
+dG 				From the current line to the end of the file
+d20G 			From the current line to the 20th line of the file
+
+Cutting, Copying and Pasting text
+The d command not only deletes but also cuts text. Each time we use the d command, the deletion is copied into a paste buffer (clipboard) that we can late recall with the p command to paste the contents before the cursor.
+
+The y command is used to "yank" (copy) text in much the same way as the d command is used to cut text.
+
+Command 		Deletes
+yy 				The current line
+5yy 			The current line and the next four
+yW 				From the current cursor location to the beginning of the next word
+y$ 				From the current cursor location to the end of the current line
+yO 				From the current cursor location to the beginning of the line
+y^ 				From the current cursor location to the first non-whitespace character in the line
+yG 				From the current line to the end of the file
+y20G 			From the current line to the 20th line of the file
+
+Joining lines
+vi is rather strict about its idea of a line. Normally, it is not possible to move the cursor to the end of the line and delete the end-of-line character to join one line with the one below it. Because of this, vi provides a specific command, J to join lines together.
+
+Search and replace
+vi has the ability to move the cursor locations based on searches. It can do this on either a single line or over an entire file. It can also perform text replacements with or without confirmation from the user
+
+The f command searches within a line. For example, the command fa would move the cursor to the next occurance of a character a within the line. The search may be repeated using a semicolon.
+
+Searching the entire file
+The / command is used to move the cursor to the next word or phrase (also works in less). When you type the / command, a forward slash will appear at the bottom of the screen. Next, type the word or phrase to be searched for, followed by the enter key. The cursor will move to the next location.
+
+Global Search and Replace
+vi uses an ex command to perform search and replace operations (called substitution in vi) over a range of lines or the entire file. To change the word Line to line we would need the following
+
+:%s/Line/line/g
+
+To ask for user confirmation:
+
+:%s/Line/line/gc
+
+Editing multiple files
+It's often useful to edit more than one file at once. You might need to make changes to multiple files at a time or may need to copy content from one file into another. With vi we can open multiple  files for editing by specifying them on the command line:
+
+vi file1 file2 file3
+
+:buffers gives us a list of open files
+:n switches to next file
+:N switches to previous file
+:buffer (number) switches to file in buffer number given
+:e loads another file for editing
+
+N

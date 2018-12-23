@@ -1,0 +1,7 @@
+What kind of programming language is python?
+	High-level and so is not directly machine readable
+	Interpreted: Processed at runtime by the interpreter (and so always needs the interpreter to run it) as opposed to a compiled language that no longer needs the interpreter once it has been compiled.
+	Interactive: You can use a Python prompt to interact with the interpreter directly to write your programs.
+	Object-oriented: Supports the object-oriented style allowing you to encapsulate behaviours and properties within objects.
+
+It is derived from other languages such as ABC, Modula-3, C++ and Unix shell and other scripting  languages

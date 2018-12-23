@@ -1,0 +1,41 @@
+Testing
+
+General testing
+
+Unit testing
+	
+	This is a specialized form of automated testing that software developers write and run. This can be thought of as 'performing intention checking'. In other words unit tests check that the program works and continues to work as the developer intended or planned for it to work. 
+
+What is the point of testing?
+	
+	Unit tests improves manageability. There is a pressure on managers for the performance of the team. Unit tests help managers better manage and control projects. Project managers and functional managers are concerned with the day-to-day work. Unit testing improves 
+
+		Visibility and reporting : Issues in code that doesn't work anymore are quickly flagged and therefore the source of the issue can be quickly isolated.
+		Control and correction :
+		Efficiency and speed
+		Planning and predictability
+
+What best practices should we adopt when testing?
+
+	For automated unit testing:
+		1. Every dev must be able to run the combined collection of all the developers' tests
+			- current changes don't break existing code under test.
+		2. The CI server must be able to run the entire suite of tests without anyu manual intervention
+			- CI server can run these tests as part of  the build cycle. 
+		3. The outcome of the tests must be unambiguous and repeatable.
+
+How do we decide which bits of the application we should test?
+
+
+Testing in C#
+
+	Automated testing
+
+		Unit testing: NUnit to test classes, functions and the interactions between them
+		Automated functional testing: If it's possible you should automate a lot of functional testing. Look at Selenium.
+		Continuous integration: Use CI to make sure all your automated tests run every time someone in your team makes a commit to the project
+
+	Manual testing
+
+		Manually test your project!
+		Exploratory testing: ET is a very low cost and effective way to find defects in products. It takes advantage of the intelligence of a human being and teaches testers and developers more about the project than any other testing technique. Doing an ET session aimed at every feature deployed in the test environment is not only an effective way to find problems quickly, but a fun and fast way to learn.

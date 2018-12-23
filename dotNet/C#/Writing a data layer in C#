@@ -1,0 +1,312 @@
+Writing a data layer in C#
+
+The purpose of a data layer is to take data from your working database and to convert it into a form that it can be used by your application. This then might go on to be used by a program, given to a browser or made available in an api. It doesn't really matter. The objective of the data layer is take the database data that is needed by the application and get it into a form that it needs. 
+
+The requirements of a data layer will be different each time but in this example I'm focusing on a very simple database schema with just 5 entries. Our MSSQL database schema:
+
+CREATE TABLE [dbo].[Friends](
+		[Id] [int] NOT NULL PRIMARY KEY IDENTITY(1,1),
+		[Name] [nvarchar](50) NULL,
+		[Power] [int] NULL,
+		[DateOfSomething] [date] NULL
+	) 
+
+Our database, called Test, has just one table. In addition, it has several stored procedures that allow basic CRUD operations to be done by SQL server. It is always preferred that such operations are done at the database level as it is usually far quicker than doing them at the data layer level or higher. Database operations are the specialty of databases and less data needs to be transferred if operations are kept within the database. Here's the create stored procedure in the database:
+
+CREATE PROCEDURE [dbo].[create_friend]
+	@Name nvarchar(50),
+	@Power int,
+	@DateOfSomething date
+AS
+	SET NOCOUNT ON;
+	INSERT INTO [Friends] ([Name], [Power], [DateOfSomething])
+	VALUES (@Name, @Power, @DateOfSomething)
+
+	SELECT CAST(SCOPE_IDENTITY() AS INT)
+
+	SET NOCOUNT OFF;
+GO
+
+The data layer that I've written, as a console application, consists of several parts that you can see below. Don't worry! We're going to go through each of them one-by-one and clarify what their function is and why we've separated them out. Firstly, you can see that we have an Abstract, Concrete, Entities and Maps folder. Don't worry about the TextDocs folder, this isn't important. The Abstract folder contains our interfaces; the contracts, the properties and methods that the concrete classes (contained in the Concrete folder) must have. We have a single entity in the Entity folder, the friend class that we'll use the populate the data from the database. Finally, we're going to be use automapper to map the raw database data to our a Friend object, so we a class in the Maps folder that sets configures this mapping.
+
+The Friend entity class
+Our Friend entity looks very similar to the database Friend table:
+
+namespace Gnupp.Training.FriendDataLayer.Entities
+{
+    public class Friend
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int Power { get; set; }
+        public DateTime DateOfSomething { get; set; }
+    }
+}
+
+The ConnectionProvider class
+
+In order for the data layer to retrieve the data currently in our database, it needs to open a connection with it. In this case I'm using Microsoft SQL server.
+
+using System.Data;
+using System.Data.SqlClient;
+using Gnupp.Training.FriendDataLayer.Abstract;
+
+namespace Gnupp.Training.FriendDataLayer.Concrete
+{
+    public class ConnectionProvider : IConnectionProvider
+    {
+        public IDbConnection GetConnection()
+        {
+            string connectionString =
+                System.Configuration.ConfigurationManager.ConnectionStrings["defaultConnectionString"].ConnectionString;
+            SqlConnection sqlConnection = new SqlConnection(connectionString);
+            return sqlConnection;
+        }
+
+        public IDbConnection GetConnection(string connectionStringParam)
+        {
+            SqlConnection sqlConnection = new SqlConnection(connectionStringParam);
+            return sqlConnection;
+        }
+    }
+}
+
+Where the IConnectionProvider defines the following contract:
+
+using System.Data;
+
+namespace Gnupp.Training.FriendDataLayer.Abstract
+{
+    
+    public interface IConnectionProvider
+    {
+        IDbConnection GetConnection();
+        IDbConnection GetConnection(string connectionString);
+    }
+}
+
+The ConnectionProvider class provides a single, overridden method that returns a SqlConnection object to be returned. As this object implements the IDbConnection interface, this satisfies the IConnectionProvider interface. If we wished to switch to a different database, or change our connection string name, we'd only have to change the code here. The connectionString object is found by the configuration manager class in the App.config file:
+
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+  <connectionStrings>
+    <add name ="defaultConnectionString" connectionString="Data Source=(local);Database=Test;Integrated Security=True;Persist Security Info=False;Pooling=False;MultipleActiveResultSets=False;Connect Timeout=5;Encrypt=False;TrustServerCertificate=True"/>
+  </connectionStrings>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.5.2" />
+    </startup>
+</configuration
+
+The FriendCommandProvider Class
+
+The next thing that we need to do is make a command object that we'll pass to the database so that it can run the appropriate stored procedure. As we're using SQL server this needs to be a SqlCommand object. The FriendCommandProvider class has 6 methods, one for each of the stored procedures: 1 create, 2 read (one get all, one get by id), 1 update, 1 delete and one reset that populates the database with the original data set. We should note that nothing has been done to the database yet! All we've done here is create a command object that we can give to the SQL server database.
+
+using System.Data;
+using System.Data.SqlClient;
+using Gnupp.Training.FriendDataLayer.Entities;
+using Gnupp.Training.FriendDataLayer.Abstract;
+
+namespace Gnupp.Training.FriendDataLayer.Concrete
+{
+    public class FriendCommandProvider : IFriendCommandProvider
+    {
+        public IDbCommand GetbyId(int id)
+        {
+            SqlCommand sqlCommand = new SqlCommand();
+            sqlCommand.CommandText = "[dbo].[get_single_friend]";
+            sqlCommand.CommandType = CommandType.StoredProcedure;
+            sqlCommand.Parameters.Add(new SqlParameter("@Id", id));
+
+            return sqlCommand;
+            
+        }
+
+        public IDbCommand Create(Friend friend)
+        {
+            SqlCommand sqlCommand = new SqlCommand();
+            sqlCommand.CommandText = "[dbo].[create_friend]";
+            sqlCommand.CommandType = CommandType.StoredProcedure;
+            sqlCommand.Parameters.Add(new SqlParameter("@Name", friend.Name));
+            sqlCommand.Parameters.Add(new SqlParameter("@Power", friend.Power));
+            sqlCommand.Parameters.Add(new SqlParameter("@DateOfSomething", friend.DateOfSomething));
+
+            return sqlCommand;
+        }
+
+        public IDbCommand Delete(int id)
+        {
+            ... // Omitted for brevity
+        }
+
+        public IDbCommand Reset()
+        {
+            ... // Omitted for brevity
+        }
+
+        public IDbCommand GetAll()
+        {
+            ... // Omitted for brevity
+        }
+
+        public IDbCommand Update(Friend friend)
+        {
+            ... // Omitted for brevity
+        } 
+    }
+}
+
+Which implements the following:
+
+using System.Data;
+using Gnupp.Training.FriendDataLayer.Entities;
+
+namespace Gnupp.Training.FriendDataLayer.Abstract
+{
+    public interface IFriendCommandProvider
+    {
+        IDbCommand GetbyId(int id);
+        IDbCommand GetAll();
+        IDbCommand Create(Friend friend);
+        IDbCommand Delete(int id);
+        IDbCommand Update(Friend friend);
+        IDbCommand Reset();
+    }
+}
+
+Once again, as we can see from our interface, if we wished to change our database, all we would need to do is make sure that the Command object that we returned from our FriendCommandProvider class implemented the IDbCommand interface (as SqlCommand does). 
+
+The GeneralMapper
+The GeneralMapper class was written to use Automapper, a handy object-object mapping tool. This class isn't specific to any object types. Instead it accepts generic input and destination types that allow the mapping objects to be specified by any instance of the class.
+
+using AutoMapper;
+using Gnupp.Training.FriendDataLayer.Abstract;
+
+namespace Gnupp.Training.FriendDataLayer.Concrete
+{
+    public class GeneralMapper : IMapper
+    {
+        public TDest Map<TDest>(object source)
+        {
+            return Mapper.Map<TDest>(source);
+        }
+
+        public TDest Map<TSource, TDest>(TSource source)
+        {
+            return Mapper.Map<TSource, TDest>(source);
+        }
+
+        public TDest Map<TSource, TDest>(TSource source, TDest dest)
+        {
+            return Mapper.Map<TSource, TDest>(source, dest);
+        }
+    }
+}
+
+This implements the IMapper interface:
+
+namespace Gnupp.Training.FriendDataLayer.Abstract
+{
+    public interface IMapper
+    {
+        TDest Map<TDest>(object source);
+        TDest Map<TSource, TDest>(TSource source);
+        TDest Map<TSource, TDest>(TSource source, TDest dest);
+    }
+}
+
+The FriendCommand class
+This is where is all comes together. The FriendCommand class is used to retrieve the appropriate data from the database and convert it into the data we want. In order to for an instance of the class to be constructed it needs a IConnectionProvider, IFriendCommandProvider and IMapper object. It doesn't care how these objects are obtained! Importantly, then, the only thing the class actually depends on is the mapping of Friend to an IDataReader object.
+
+using System.Collections.Generic;
+using System.Data;
+using Gnupp.Training.FriendDataLayer.Abstract;
+using Gnupp.Training.FriendDataLayer.Entities;
+
+namespace Gnupp.Training.FriendDataLayer.Concrete
+{
+    public class FriendCommand : IFriendCommand
+    {
+        private readonly IFriendCommandProvider _commandProvider;
+        private readonly IConnectionProvider _connectionProvider;
+        private readonly IMapper _mapper;
+
+        public FriendCommand(IFriendCommandProvider commandProvider, IConnectionProvider connectionProvider, IMapper mapper)
+        {
+            _commandProvider = commandProvider;
+            _connectionProvider = connectionProvider;
+            _mapper = mapper;
+        }
+
+        public Friend GetById(int id)
+        {
+            using (var connection = _connectionProvider.GetConnection())
+            {
+                connection.Open();
+                var command = _commandProvider.GetbyId(id);
+                command.Connection = connection;
+
+                using (var reader = command.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        var friend = _mapper.Map<IDataReader, Friend>(reader);
+                        return friend;
+                    }
+                    return null;
+                }
+            }
+        }
+
+        public int Create(Friend friend)
+        {
+            using (var connection = _connectionProvider.GetConnection())
+            {
+                connection.Open();
+                var command = _commandProvider.Create(friend);
+                command.Connection = connection;
+
+                int idOfNewFriend = (int)command.ExecuteScalar();
+                friend.Id = idOfNewFriend;
+                return idOfNewFriend;
+            }
+        }
+
+        public int Delete(int id)
+        {
+            ... // Omitted for brevity
+        }
+
+        public void Reset()
+        {
+            ... // Omitted for brevity
+        }
+
+        public List<Friend> GetAll()
+        {
+            ... // Omitted for brevity
+        }
+
+        public int Update(Friend friend)
+        {
+            ... // Omitted for brevity
+        }
+    }
+}
+
+Which implements the IFriendCommand interface:
+
+using System.Collections.Generic;
+using Gnupp.Training.FriendDataLayer.Entities;
+
+namespace Gnupp.Training.FriendDataLayer.Abstract
+{
+    public interface IFriendCommand
+    {
+        Friend GetById(int id);
+        List<Friend> GetAll();
+        int Create(Friend friend);
+        int Delete(int id);
+        int Update(Friend friend);
+        void Reset();
+    }
+}

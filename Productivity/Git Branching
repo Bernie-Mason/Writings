@@ -1,0 +1,164 @@
+Git Branching
+
+Nearly every VC has some form of branching support. Branching means you diverge from the main  line of development and continue to work without interferring with the main line. 
+
+	Branching is working on a separate version (or branch) that doesn't directly interfere with the main branch.
+
+In many VCS tools, this is a somewhat expensive process, often requiring that you create a new copy of your source code directory which can take a long time. 
+
+This is why Git's branching feature is truly awesome. Git makes and switches between branches almost instantaneously. Git encourages work patterns that branch and then merge often. Understanding and mastering this feature gives you a powerful and unique tool and can entirely change the way that you develop.
+
+Branches in Git
+Git stores data as a series of snapshots. When a commit is made, Git makes a commit object that contains a pointer to the snapshot of the content that you staged. This object also contains the author's name and email, the message that you typed, and pointers to the commit or commits that directly came before this commit (its parent or parents): zero parents for the initial commit, one parent for the normal commit, and multiple parents for a commit that results from a merge of two or more branches.
+
+
+Imagine we add three new files to our staging area:
+
+$ git add README test.rb LICENSE
+$ git commit -m 'The initial commit of my project'
+
+Staging the files computes a checksum for each one, stores a version of the file in the Git repository (Git refers to them as blobs), and adds that checksum to the staging area.
+
+When you create the commit by running  git commit, Git checksums each subdirectory (in this case, just the root project directory) and stores those tree objects in the Git repository. Git then creates a commit object that has the metadata and a point to the root project tree so it can re-create the snapshot when needed.
+
+Your git repository now contains five objects: one blob for the contents of each of your three files, one tree that lists the contents of the directory and specifies which files are stored as which blobs, and one commit with the pointer to that root tree and all the commit metadata.
+
+A branch in Git is simply a lightweight movable pointer to one of these commits. The default branch name in Git is master. As you start making commits, you're given a master branch that points to the last commit you made. Every time you commit, it moves forward automatically.
+
+Note: The 'master' branch is not a special branch. It is exactly like any other branch. The only reason nearly every repository has one is that the git init command creates it by default and most people don't bother  to change it.
+
+To create a new branch
+	$ git branch branchname
+
+To checkout to that branch
+	$ git checkout branchname
+
+To merge a branch with the current branch with a specific branch 
+
+	BAN@BAN-TOP MINGW64 ~/Documents/Git_Test (master)
+	$ git merge hotfix
+	Updating 863f8ea..48294e2
+	Fast-forward
+	 index.html | 1 +
+	 1 file changed, 1 insertion(+)
+	 create mode 100644 index.html
+
+
+The fast-forward phrase is used in the merge. Because the commit pointed to by hotfix was directly ahead of the master pointer that we're on, Git simply moves the pointer forward. To phrase that another way, when you try to merge one commit with a commit that can be reached by following the first commit's history, Git simplifies things by moving the pointer forward because there is no divergent work to merge together.
+
+We can now delete the hotfix branch:
+
+	BAN@BAN-TOP MINGW64 ~/Documents/Git_Test (master)
+	$ git branch -d hotfix
+	Deleted branch hotfix (was 48294e2).
+
+	BAN@BAN-TOP MINGW64 ~/Documents/Git_Test (master)
+	$ glodga
+	* 48294e2 (HEAD -> master) fixed
+	* 863f8ea added a Hello_Kitty.html file
+	| * daea942 (iss53) added a new footer [issue 53]
+	|/
+	* 6f62aad (origin/master) made other changes
+	| * 3ee2953 (testing) made a change
+	|/
+	* 08df60e This is a great commit message
+	* 13911a8 (tag: v1.0) tidy up!
+	* f1ae37f Corrected commit
+	* a05855d Second commit of test project
+	* c22a0fb (tag: v0.1) Initial commit
+
+	$ git checkout iss53
+	$ vim index.html
+	$ // make changes
+	$ git add index.html
+	$ git commit -m "Added title"
+
+ It's worth nothing here that the work you did in your hotfix branch is not contained in the files in your iss53 branch. Once you're ready  to merge your work into master.
+
+For a basic merge:
+
+	 $ git checkout master
+	 $ git merge iss53
+
+
+When you have merge conflicts:
+If you changed the same part of the same file differently in the two branches you're merging together, Git won't be able to  merge them cleanly. 
+
+	BAN@BAN-TOP MINGW64 ~/Documents/Git_Test (master)
+	$ git merge iss53
+	Auto-merging index.html
+	CONFLICT (add/add): Merge conflict in index.html
+	Automatic merge failed; fix conflicts and then commit the result.
+
+Git hasn't created a new merge commit. It has paused the process while you resolve the conflict. To view the unmerged files:
+
+	BAN@BAN-TOP MINGW64 ~/Documents/Git_Test (master|MERGING)
+	$ gs
+	On branch master
+	Your branch is ahead of 'origin/master' by 2 commits.
+	  (use "git push" to publish your local commits)
+	You have unmerged paths.
+	  (fix conflicts and run "git commit")
+	  (use "git merge --abort" to abort the merge)
+
+	Unmerged paths:
+	  (use "git add <file>..." to mark resolution)
+
+	        both added:      index.html
+
+	no changes added to commit (use "git add" and/or "git commit -a")
+
+Anything that has merge conflicts and hasn't been resolved is listed as unmerged. Git adds standard conflict-resolution markers to the files that have conflicts, so you can open them manually and resolve those conflicts. Your files contains a section that looks something like this
+
+	BAN@BAN-TOP MINGW64 ~/Documents/Git_Test (master|MERGING)
+	$ vim index.html
+
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<title>Best page ever</title>	
+		</head>
+		<body>
+	<<<<<<< HEAD
+			<p>This is a different set of text</p>
+		</body>
+	</html>
+	=======
+			<p>One set of body text</p>
+		</body>
+	</html>
+
+	>>>>>>> iss53
+
+This means the version in HEAD is the top part and the version in your iss53 branch looks like everything in the bottom. You can resolve this issue manually in a text editor of your choice. Or you can use a graphical tool:
+
+	git mergetool	
+
+After the text has been sorted we can remove the extraneous branch once again
+
+	BAN@BAN-TOP MINGW64 ~/Documents/Git_Test (master)
+	$ git branch -d iss53
+	Deleted branch iss53 (was 327c616).
+
+	BAN@BAN-TOP MINGW64 ~/Documents/Git_Test (master)
+	$ glodga
+	*   da81088 (HEAD -> master) merge issue sorted
+	|\
+	| * 327c616 updated index.html to have a body
+	| * 67ebaba finished adding a title
+	| * daea942 added a new footer [issue 53]
+	* | fee77cd (origin/master) updated the index.html master branch to have a different set of text in the same place
+	* | 8c75fb4 up to date
+	* | 48294e2 fixed
+	* | 863f8ea added a Hello_Kitty.html file
+	|/
+	* 6f62aad made other changes
+	| * 3ee2953 (testing) made a change
+	|/
+	* 08df60e This is a great commit message
+	* 13911a8 (tag: v1.0) tidy up!
+	* f1ae37f Corrected commit
+	* a05855d Second commit of test project
+	* c22a0fb (tag: v0.1) Initial commit
+
+

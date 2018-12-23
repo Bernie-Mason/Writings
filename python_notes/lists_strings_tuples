@@ -1,0 +1,187 @@
+Lists
+
+Lists and tuples
+	A list is a value that contains multiple values in an ordered sequence. The term list value (confusingly) refers to the list itself, as it is a value that can be stored in a variable or passed to a function, but not the values inside the list value! Confusing eh!? Values inside the list are called items. The syntax and usage of lists is very much like arrays in other languages:
+
+>>> spam = [1, 2, 3]
+>>> spam[0]
+1
+
+Lists can also contain other list values. The values in these lists can be accessed using multiple indexes like so:
+
+>>> foo = [['cat', bat]], [1, 2, 3, 4, 5]]
+>>> foo[0]
+['cat', bat]
+>>> foo[1,3]
+[4]
+
+We can also use negative indexes!
+
+>>> spam = [1, 2, 3]
+>>> spam[-1]
+3
+>>> spam[-2]
+2
+>>> spam[-3]
+1
+
+SLICES (SUBARRAYS)
+Just as an index can get a single value, a slice can get several values from a list, in the form of a new list. A slice is typed between square brackets like an index, but it ahs two integers separated by a colon:
+
+>>> spam[1:4] # gets the values between the 1 and 4th index (inclusive on the first, exclusive on the second index - argh!!!!)
+>>> spam = [1, 2, 3]
+>>> spam[0:3]
+[1, 2, 3]
+>>> spam[0:2]
+[1, 2]
+>>> spam[0:1]
+[1]
+
+Or an index may be left out to imply the beginning or end of line:
+
+>>> spam[:1]
+[1]
+>>> spam[1:]
+[2, 3]
+
+We can get the list length with
+
+>>> len(spam)
+3
+
+LIST CONCATENATION
+
+>>> [1, 2, 3] + ['A', 'B', 'C']
+[1, 2, 3, 'A', 'B', 'C']
+
+LOOPS
+>>> for i in spam:
+		print(i)
+1
+2
+3
+
+To iterate over the indices
+
+>>> for i in range(len(spam)):
+		print(i)
+0
+1
+2
+
+IN AND NOT OPERATORS
+You can determine whether a value is or isn't in a list with the in and not operators.
+
+>>> 'howdy' in ['hello', 'hi', 'howdy', 'heyas']
+True
+>>> spam = ['hello', 'hi', 'howdy', 'heyas']
+>>> 'cat' in spam
+False
+>>> 'cat' not in spam
+True
+
+THE MULTIPLE ASSIGNMENT TRICK
+We could write:
+>>> cat = ['fat', 'black', 'loud']
+>>> size = cat[0]
+>>> color = cat[1]
+>>> disposition = cat[2]
+
+But instead we can do:
+
+>>> cat = ['fat', 'black', 'loud']
+>>> size, color, disposition = cat
+
+Functions and methods
+	methods are functions that are tied to a particular data type. In C# the return type, and parameter types in, are usually specified (although object can be passed back, var cannot).
+
+list methods
+
+list.index(x[, start[, end]]) # start and end limit the search of value x
+>>> list.index(1)
+
+list.append(x)
+>>> spam.append(4)
+
+list.extend(iterable)
+>>> spam.extend(spam)
+
+list.insert(i, x)
+>>> spam.insert(len(spam), 4)
+
+list.remove(x)
+>>> spam.remove(1) # removes first instance of a list item whose value is x
+
+list.pop(i)
+>>> spam.pop(0) # removes the list item at the index and returns it
+
+list.clear()
+
+list.count(x)
+
+list.sort
+
+
+STRINGS (LIST LIKE TYPES)
+Lists aren't the only ordered sequence data types. Lists and strings are actually very similar. You can consider a string to be a list of single characters. Many list methods are available to strings:
+
+>>> spam = 'Hello'
+>>> for i in spam:
+	print(i)
+H
+e
+l
+l
+o
+
+Lists and strings are different in an important way. A list value is mutable: it can have values added, removed or changed. However, a string is an immutable data type. It cannot be changed. Trying to reassign a single character to a string results in a TypeError.
+
+The correct way to mutate a string is to use slicing and concatenation to build a new string by copying form parts of the old string:
+
+>>> spam = 'Zophie a cat'
+>>> newName = spam[0:7] + 'a dog'
+>>> newName
+'Zophie a dog'
+
+
+Although the  list is mutable, the seond line in the following code does not modify the list eggs:
+
+>>> eggs = [1,2,3]
+>>> eggs = [4,5,6]
+>>> eggs
+[4, 5, 6]
+
+The list value in eggs isn't being changed here; rather the variable eggs is being assigned a new and different list value which overwrites the old value.
+
+TUPLE DATA TYPE
+The tuple data type is almost identical to the list data type 
+
+>>> tup1 = (50, 25, 12);
+>>> tup1[0]
+50
+
+However it is immutable:
+
+>>> tup1[0] = 12
+Traceback (most recent call last):
+  File "<pyshell#60>", line 1, in <module>
+    tup1[0] = 12
+TypeError: 'tuple' object does not support item assignment
+
+If you have one value in a tuple you must indicate this using a trailing comma otherwise Python will think you're just using parentheses to separate values:
+
+>>> tup1 = (50,);
+
+You can use tuples to convey to anyone reading your code that you don't intend for a sequence of values to change. If you need an ordered sequence of values that never changes, use a tuple. A second benefit of using typles instead of lists it that, because they are immutable and their contents don't change, Python can implement some optimizations that make code using tuples slightly faster than code using lists.
+
+Convert list to tuple:
+>>> tuple(['cat', 'dog', 5])
+('cat', 'dog', 5)
+
+Convert tuple to list:
+>>> list(('cat', 'dog', 5)
+['cat', 'dog', 5]
+
+Convert string to list:
+>>> list('hello')
+['h','e','l','l','o']

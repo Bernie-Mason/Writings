@@ -1,0 +1,11 @@
+A stored procedure in SQL Server is a group of one or more Transact-SQL statements or a reference to a Microsoft .NET Framework common runtime language (CLR) method. Procedures resemble constructs in other programming languages because they can:
+	Accept input parameters and return multiple values in the form of output parameters to the calling program.
+	Contain programming statements that perform operations in the database. These include calling other procedures
+	Return a status value to a calling program to indicate success or failure
+
+Benefits of using stored procedures
+Reduced server/client network traffic
+	The commands in a procedure are executed as a single batch of code. This can significantly reduce network traffic between the server and client because only the call to execute the procedure is sent across the network. Without the code encapsulation provided by a procedure, every individual line of code would have to cross the network.
+
+Stronger Security
+Multiple users and client programs can perform operations on underlying database objects through a procedure, even if the users and programs do not have direct permissions on those underlying objects. The procedure controls what processes and activities are performed and protects the underlying database objects. This eliminates the  requirement to grant permissions at the individual object level and simplifies the security layers.

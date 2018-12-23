@@ -1,0 +1,127 @@
+Networking
+
+There is virtually no networking solution that we can't make in Linux. It is used to build all sorts of networking systems and appliances, including firewalls, routers, name servers, NAS (network attached storage) boxes.
+
+The number of network related commands is very large! We will focus our attention on just a few of the most frequently used ones. The commands chosen for examination include:
+	Monitoring networks
+	Transfering files
+	Remote logins (ssh program)
+
+ping - send an ICMP ECHO_REQUEST to network hosts
+traceroute - print the route packets to take a network host
+netstat - print network connections, routing tables, interface statistics, masquerade connnections and multicast memberships
+ftp - Internet file transfer program
+lftp - improved on the above
+wget - Non-interactive network downloader
+ssh - Open SSH client (remote login program)
+scp - Secure copy (remote file copy program)
+sftp - Secure file transfer program
+
+Remember that the hostname is the name give to the end-point (The machine in question) and will be used to identify it over DNS if that is configured. The domain is the name given to the network and it will be required to reach the network from an external point (like the internet).
+
+Examining and monitoring a network
+ping - send a special packet to the network host
+Most network devices that receive a ping packet will reply to it, allowing the network connection to be verified. Once started, ping continues to send packets at a specified interval until it is interupted.
+
+
+traceroute - trace the path of a network packet
+
+The traceroute program displays a listing of all the "hops" network traffic takes to get from the local system to a specified host. For example, to see the route taken to reach http://www.slashdot.org/
+
+
+
+netstat - examine network settings and statistics
+The netstat program is used to examine various network settings and statistics. The -ie option, we can examine the network interfaces in our system
+
+[bernie@antergos_vb ~]$ netstat -ie
+Kernel Interface table
+enp0s3: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 10.0.2.15  netmask 255.255.255.0  broadcast 10.0.2.255
+        inet6 fe80::3fa2:5cb2:1343:ee0c  prefixlen 64  scopeid 0x20<link>
+        ether 08:00:27:bd:aa:6f  txqueuelen 1000  (Ethernet)
+        RX packets 37575  bytes 32439650 (30.9 MiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 16438  bytes 1033321 (1009.1 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10<host>
+        loop  txqueuelen 1000  (Local Loopback)
+        RX packets 5  bytes 665 (665.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 5  bytes 665 (665.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+One of the really important bits here is the UP at the beginning of the second line, indicating that the network interface is enabled, and the presence of a valid IP address in the inet addr field on the second line. Also the presence of a valid IP address in the inet addr field
+
+
+The -r option will display the kernel's network routing table.
+
+[bernie@antergos_vb ~]$ netstat -r
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags   MSS Window  irtt Iface
+default         10.0.2.2        0.0.0.0         UG        0 0          0 enp0s3
+10.0.2.0        0.0.0.0         255.255.255.0   U         0 0          0 enp0s3
+
+In this simple example we see a typical routing table for a client machine on a local area network.
+
+Transporting files over a network
+The File Transfer Protocol program, ftp, is used widely on the Internet for file downloads. Most, if not all, web browsers support it, you often URLs starting with the ftp protocol ftp://
+Before there were web browsers, there was the ftp program. ftp is used to communicate between FTP servers, machines that contain files that can be downloaded over a network.
+FTP is not secure, because it sends account names and passwords in cleartext, not encrypted. Because of this, almost all FTP done over the Internet is done by anonymous FTP servers. An anonymous server allows anyone to log in using a login name anonymous and a meaningless password.
+
+lftp - a better ftp
+There are many ftp command-line clients. lftp has many other features, including  multiple protocol support (like HTTP) automatic retry on failed downloads, background processes, tab completion of path names and many more.
+
+We can use wget to download files:
+
+[bernie@antergos_vb ~]$ wget http://linuxcommand.org/index.php
+--2017-04-19 13:15:16--  http://linuxcommand.org/index.php
+Resolving linuxcommand.org... 216.34.181.97
+Connecting to linuxcommand.org|216.34.181.97|:80... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 3808 (3.7K) [text/html]
+Saving to: ‘index.php’
+
+index.php                  100%[=====================================>]   3.72K  --.-KB/s    in 0.001s  
+
+2017-04-19 13:15:21 (3.65 MB/s) - ‘index.php’ saved [3808/3808]
+
+Sucure Communication with Remote Hosts
+ssh - securely log in to remote computers
+The SSH protocol solves two basic problems of secure communication with a remote host. First, it authenticates that the remote host is who it says it is and second it encrypts all of the communications between the local and remote hosts. SSH consists of two parts. An SSH server runs on the remote host, listening for incoming connections on port 22, while an SSH client is used on the local system to communiate with the remote server
+Most linux distros ship an implementation of SSH called OpenSSH from the BSD project. Some distros include both the client and server packages by default whilst others supply only the client. To enable a system to receive remote connections, it must have the OpenSSH-server package installed, configured and running and it must allow connections on TCP port 22
+
+[bernie@antergos_vb ~]$ pacman -Qi openssh
+Name            : openssh
+Version         : 7.4p1-2
+Description     : Free version of the SSH connectivity tools
+Architecture    : x86_64
+URL             : https://www.openssh.com/portable.html
+Licenses        : custom:BSD
+Groups          : None
+Provides        : None
+Depends On      : krb5  openssl  libedit  ldns
+Optional Deps   : xorg-xauth: X11 forwarding [installed]
+                  x11-ssh-askpass: input passphrase in X [installed]
+Required By     : None
+Optional For    : gnome-control-center  seahorse
+Conflicts With  : None
+Replaces        : None
+Installed Size  : 4.63 MiB
+Packager        : Gaetan Bisson <bisson@archlinux.org>
+Build Date      : Sun 01 Jan 2017 08:25:12 UTC
+Install Date    : Tue 18 Apr 2017 10:50:20 UTC
+Install Reason  : Explicitly installed
+Install Script  : No
+Validated By    : SHA-256 Sum
+
+Tunneling with SSH
+Part of what happens when you establish a connection with a remote host via SSH is that an encrypted tunnel is created between the local and remote systems. Normally, this tunnel is used to allow commands typed at the local system to be transmitted safely to the remote system and the results to be transmitted safely back. In addition to this basic function, the SSH protocol allows most types of network traffic to be sent through the encrypted tunnel, creating a sort of VPN between the local and remote systems.
+
+The OpenSSH package also includes two programs that can make use of an  SSH-encrypted tunnel to copy files across the network.
+
+scp remote-sys:document.txt
+
+In windows we can use PuTTY to SSH into our remote host. The program also provides analogs for the scp and sftp programs.

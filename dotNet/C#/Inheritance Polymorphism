@@ -1,0 +1,67 @@
+Inheritance Polymorphism
+
+How OOP works inside of C#. To keep a class from inheriting from a class we can mark it as sealed
+
+Inheritance has an "Is a relationship". So a Dog 'is an' animal. While aggregated (or a delegate) represents a "has a relationship". If we want some information, create another class that is going to define an object that is going to be stored in our animal class. That is a 'has a'. A Dog or an animal has identification information
+
+A good example of Polymorphism is the ability to label a class method as it's superclass method name but to run the sub class method as it has been overridden:
+
+// In the superclass
+public virtual void MakeSound()
+{
+    Console.WriteLine($"{Name} says {Sound}");
+}
+
+
+// In the subclass
+public override void MakeSound()
+{
+    Console.WriteLine($"{Name} says {Sound} and {Sound2}");
+}
+
+
+Abstract class polymorphism
+
+If you want to define a class that you don't want to instantiate then you might want to create an abstract class. For example a shape is an abstract object. There is no concrete thing as a shape:
+
+
+abstract class Shape
+{
+    public string Name { get; set; }
+
+    // regular method
+    public virtual void GetInfo()
+    {
+        Console.WriteLine($"This is a {Name}");
+    }
+
+    // Abstract method. We want subclasses to overide this method
+    public abstract double Area();
+}
+
+
+Notice abstract method is quite like the virtual method that allows inheriting classes to override it. However, the difference is that abstract methods MUST be overridden by inheriting classes (quite like an interface contract)
+
+class Circle : Shape
+{
+    public double Radius { get; set; }
+
+    public Circle(double radius)
+    {
+        Name = "Circle";
+        Radius = radius;
+    }
+
+    public override double Area()
+    {
+        return Math.PI * (Math.Pow(Radius, 2.0));
+    }
+
+    public override void GetInfo()
+    {
+        base.GetInfo();
+        Console.WriteLine($"It has a radius of  {Radius}");
+    }
+}
+
+Here, as we said, we have to override the Area method. We've also chosen to override the GetInfo method to return some additional information.

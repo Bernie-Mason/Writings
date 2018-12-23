@@ -1,0 +1,44 @@
+Thread Objects and Features
+
+The .NET Framework provides a number of objects that help you create and manage multithreaded applications. Managed threads are represented by the Thread class. The ThreadPool class provides easy creation and management of multithreaded background tasks. The BackgroundWorker class does the same for tasks that interact with the user interface. The Timer class executes background tasks at timed intervals.
+
+THE THREADPOOL CLASS
+We know this one! This provides your app with a pool of worker threads that are managed by the system, allowing you to concentrate on application tasks rather than thread management. If you have short tasks that require background processing, the managed thread pool is an easy way to take advantage of multiple threads. E.g. beginning with the .NET Framework 4 you can create Task and Task<TResult> objects, which perform async task on thread pool threads.
+
+TIMERS
+Simply, Timers allow you to execute a piece of code at specific intervals. The following code example starts a timer that starts after one second (1000 milliseconds) and ticks every second until you press the Enter key. 
+
+using System;
+using System.Threading;
+
+public class Example
+{
+    private static Timer ticker;
+
+    public static void TimerMethod(object state)
+    {
+        Console.Write(".");
+    }
+
+    public static void Main()
+    {
+        ticker = new Timer(TimerMethod, null, 1000, 1000);
+
+        Console.WriteLine("Press the Enter key to end the program.");
+        Console.ReadLine();
+    }
+}
+
+Timers are lightweight objects that enable you to specify a delegate to be called at a specified time. A thread in a the thread pool performs the wait operation. Using the System.Threading.Timer class is straightforward. You create a Timer, passing a TimerCallback delegate to the callback method, an object representing state that will be passed to the callback, an initial raise time, and a time representing the period between callback invocations. To cancel a pending timer, call the Timer.Dispose function.
+
+EVENTWAITHANDLE, AUTORESETEVENT, COUNTDOWNEVENT, MANUALRESETEVENT
+EventWaitHandle: The EventWaitHandle class can represent either automatic or manual reset events and either local events or named system events.
+
+AutoResetEvent: The AutoResetEvent class derives from EventWaitHandle and represents a local event that resets automatically.
+
+ManualResetEvent and ManualResetEventSlim: The ManualResetEvent class derives from EventWaitHandle and represents a local event that must be reset manually. The ManualResetEventSlim class is a lightweight, faster version that can be used for events within the same process.
+
+CountdownEvent: The CountdownEvent class provides a simplified way to implement fork/join parallelism patterns in code that uses wait handles.
+
+MUTEXS
+You can use a Mutex object to provide exclusive access to a resource. The Mutex class uses more system resources than the Monitor class (See below), but it can be marshaled across application domain boundaries, it can be used with multiple waits, and it can be used to synchonize threads in different processes. 

@@ -1,0 +1,49 @@
+CONTROL FLOW
+
+Conditional branching. If statement allows us to branch our code depending on the conditions of execution.
+
+Conditional operator (ternary operator)
+string pass = age > 20 ? "pass" : "nopass";
+
+Switch statements
+
+Restricted to integers, characters, strings and enums
+	Case labels are constants
+
+For different iterator statements
+
+for, foreach, do..while and while
+
+Primary difference between while and dowhile is that the condition is checked after the first execution in the dowhile and before the first execution in the while.
+
+
+Jumping
+break -  break out of the loop
+continue - stop executing current loop and jump to next iteration
+goto - jump to another point that's marked by a label. Most programmers avoid goto at all costs and it makes reading the code harder.
+return - can be used in a void method that will break the loop and jump out of the method too.
+throw
+
+Throwing
+
+Use throw to raise an exception
+	An exception should only be raised in exceptional circumstances. They provide type safe and structured error handled.
+	When the software finds itself in a position that it can't move forward.
+	When we throw an exception we throw an object.
+	Working with exceptions is structured:
+		We can set up blocks of code to handle certain exceptions.
+	the throw keyword means that we're throwing an object.
+	An unhandled exception will terminate your program in .NET. It's much better to fail then potentially corrupt your data.
+
+if (age == 21)
+{
+	throw new ArgumentException("21 is not valid")
+}
+
+We can follow a try block with multiple catch statements. Only one can execute so we need to state the most specific exception types first and the most general last.
+
+try{}
+catch(DivideByZeroException){}
+catch(Exception){}
+
+Finally block. This is code that always executes at the end of a block regardless of whether something threw. Freeing up resources (like closing files or disposing sessions) is a classic example of the kind of thing you'd normally do here. That said we'd normally use a using statement for any class that implements IDisposable.

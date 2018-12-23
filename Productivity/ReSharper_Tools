@@ -1,0 +1,60 @@
+ReSharper_tools//
+ In the solution explorer
+Refactor a file (move, rename etc)
+		 ctrl-shift-R
+
+Create new file (ctrl if in file)
+	(ctrl)-alt-insert
+
+Create folder (must be in solution explorer)
+	alt+p+d
+
+// Text manipulation and code generation
+Select areas of text:
+	ctrl-alt-right(left to deselect)
+		Add code blocks around selected areas:
+			ctrl-E-U
+		Move selected areas around
+			ctrl-shift-alt+arrowkeys
+
+Complete a method signature
+	ctrl-shift-enter
+
+View recent clipboard entries
+	ctrl-shift-V
+
+Bring up parameter information
+	ctrl-shift-space
+
+Go to last location you were editing
+	ctrl-shift-backspace
+
+Go to declaration
+	f12
+
+Go to containing declaration
+	Ctrl+[ (shift to select all	)
+
+Navigate to next class member
+	alt-up/down  
+
+// VS movement
+Go to everything-type
+	ctrl-T
+
+Go to file (more specific than go to everything)
+	ctrl-shift-T
+
+switch to solution explorer
+	alt+shift+L
+
+Go to next error (custom)
+	ctrl-alt-E
+
+// Code generation
+main
+	Alt+insert
+
+// Notes 
+For go-tos	
+	Can use camelhumps (idc for IDalCommand)

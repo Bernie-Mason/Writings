@@ -1,0 +1,13 @@
+Making a good mobile user experience is much more tricky that delivering content to desktops. It takes more planning, design and, especially, testing.
+Mobile web browsers are enormously varied in performance. Some are fast and very capable whilst others are slow and inconsistent.
+The ASP.NET MVC framework is a server-side framework meaning that you are restricted in your options for tackling the spectrum of performance that is encountered when trying to cater to mobile clients.
+
+There are several options when considering the mobile capabilities you want your app to have:
+1. Using responsive design - create content that fully adapts to the platform on which it is being viewed. This is possible as CSS is handled by the client side.
+3. Do basically nothing - perhaps test your site or several common mobile/tablet devices and adjust your content (.css) files accordingly
+
+Bootstrap.css states a class set that may be implemented to make 'visible' or 'hidden' HTML elements based on the width of the platform screen.
+  a. For example the visible-xs and hidden-xs classes can be used to change elements when the window size is below 768 pixels.
+  b. It does this with a media query:
+
+  Client-side and server side validation. Server side validation can easily be provided in the form of data annotations on the relevant class properties. However, users want immediate feedback if there are issues with the data they've entered. This is why developers often want to implement client side validation. Javascript  can perform client side validation based on the data annotations in your (domain) model.

@@ -1,0 +1,123 @@
+TypeScript Language Features
+
+Basic or Primitive Types
+	boolean
+	number
+	string
+	array
+	tuple
+	enum
+	null
+	undefined
+	any
+	void: exists purely to indicate the absence of a value, such as in a function with no return value.
+Complex or Non-Primitive Types
+	class
+	interface
+
+TS includes the entire JS language plus a collection of useful additional features. JS features
+
+	Flow control
+	Data types
+	Operators
+	Subroutines
+
+The basic building blocks of your program will come from JS, including if statements, switch statements, loops arithmetic, logic tests and functions. All JS syntax is valid TS. 
+
+You might get errors or warnings when pasting JS into a TS file. A common example comes fro the dynamic type system in JS wherein it's perfectly acceptable to assign values of different types to the same variable during its lifetime. TS detects this assignments and gens errors to warn you that the type of the variable has been changed by the assignment. Because this is a common cause of errors in a program, you can correct the error by creating separate variables, by performing type assertion, or by making the variable dynamic.
+
+The TS compiler differs from others in that it will still try to make valid JS even if there are errors and warnings present in your code.
+
+Consider the two examples of the same routine:
+
+	var radius = 4;
+	var area = Math.PI * radius * radius
+
+	# or
+
+	var radius = 4;
+	with (Math) {
+		var area = PI * radius * radius;
+	}
+
+The first calls Math.PI explicitly whilst the second uses a with statement which adds the properties and functions of Math to the current scope. Statements nested inside the with statement, which adds the properties and functions of Math to the one scope. Statements nested inside the with statement can omit the Math prefix, calling functions and properties directly. At the end of the with statement, the original lexical scope is restored, so subsequent calls outside of the with block must use the Math prefix.
+
+The with statement is not allowed in strict mode in ECMAScript 5 and 6 classes. TS treats with statements as an error and will treat all types within the with statement as dynamic types. Due to the following:
+	
+	The fact it is disallowed in strict mode
+	The general opinion that the with statement is dangerous
+	The practical issues of determining the identifiers that are in scope at compile time
+
+Variables
+TS variables follow JS naming rules. 
+
+	First character needs to be a letter (upper or lower) an underscore or a dollar sign
+	Subsequent chars can be letters, digits
+
+Variables are functionally scoped. If they are declared at the top of your program they are available in its global scope but you should minimize the number of variables that you have globally scoped.
+
+const vs var
+A variable is a data structure that contains information that is expected to change. A constant is a data structure that contains information that will never change. If there is room for error, var should always be used. However, not all information that never changes in the lifetime of a program needs to be declared with const. 
+
+TS is optionally statically typed; this means that types are checked automatically to prevent accidental assignment of invalid values. It is possible to opt out of this by declaring dynamic variables.
+
+You can see that autocompletion is aware of the variable type , and supplies a relevant list of methods and properties. This is useful enough for primitive types - but most reasonable IDEs can replicate simple inference even in a JS file. However, in a program with a large number of custom types, modules and classes, the deep knowledge of the TS Language Service means you'll have sensible autocompletion throughout your entire program. Neat huh!
+
+Type Annotations
+Although the TS language service is expert at inferring types automatically, there are times when it isn't able to determine the type. There are also times where you'll wish to make a type explicit either for safety or readability.
+
+E.g.
+var name: string = 'Steve'; // Explicit type and instantiation
+var name: string; // Explicit type
+var name = 'Steve' // Instantiation
+
+The type used to specify an annotation can be a primitive type, an array type, a function signature, or any complex structure you want to represent including, the names of classes and interfaces you create.
+ 
+// function annotation with parameter type annotation and return type annotation. Definition. Template. Kinda like an interface?
+var sayHello: (name: string) => string; 
+
+// implementation of sayHello function:
+sayHello = function (name: string) {
+	return 'Hello ' + name;
+};
+
+// object type annotation
+var person: { name: string; heightInCentimeters: number; };
+
+// Implementation of a person type object
+person = {
+	name: 'Mark',
+	heightInCentimeters: 183
+}
+
+If a type annotation becomes too complex, you can create an interface to represent the type to simplify annotations. 
+
+Interface Person: { 
+	name: string; 
+	heightInCentimeters: number; 
+}
+
+var person: Person = {
+	name: 'Mark',
+	heightInCentimeters: 183
+}
+
+
+
+This is especially useful if you intend to reuse the type as it provides a re-usable definition. Interfaces are not limited to describing object types; they are flexible enough to describe any kind of structure you might encounter.
+
+Primitive types
+TS primitives directly represent the underlying JS types and follow the standards set by those types. string, number and boolean.
+	String variables can contain a sequence of UTF-16 units
+	number is 64 bit floating point
+
+The any type is exclusive to TS and denotes a dynamic type. Tihs type is used whenever TS is unable to infer a type, or when you explicity want to make a type dynamic. This is therefore equivalent to opting out of type checking for the life of that variable. The type system also contains three types that aren't intended to be used as type annotations but instead refer to the absence of values.
+	
+	The undefined type is the value of a variable that has not been assigned a value.
+	The null type can be used to represent an intentional absence of an object value. 
+	The void type is use only on function return types to represent functions that do not return a value or as a type argument for generic class or function.
+
+Arrays
+Typescript arrays have precise typing for their contents. To specify an array type, you simply add square brackets after the type name. This works for all types whether they are primitive or custom types. When you add an item to the array its type will be checked to ensure it's compatible. When you access elements in the array, you will get quality auto-completion because the type of each item is known.
+
+Note that an array can be instantiated after the equals sign using the empty sign using the empty array literal ([]). YOu can also instantiate it with values, by adding them within brackets, separated by commas. 

@@ -1,0 +1,230 @@
+Starting a project
+
+In this chapter we'll start building a program. The purpose of this project is to see how various shell features are used to create programs and, more importantly, create good programs. 
+
+The program that we'll write is a report generator. It will present various statistics about our system and its status, and it will produce this report in HTML format so we can view it with a browser.
+
+Programs are usually built up in a series of stages, with each stage adding features and capabilities. The first stage of our program will produce a very minimal HTML page that contains no system information. That will come later.
+
+First Stage: Minimal document
+
+The first thing we need to know is the format of a well formed HTML document. It looks like this:
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Page Title</title>
+	</head>
+	<body>
+		<p>Page body</p>
+	</body>
+<html>
+
+
+If we enter this into our text editor and save the file as foo.html we open it using chromium using file:///home/username/foo/foo.html
+
+The first stage of our program will be able to output this HTML file to stdout. We can write a program to do this pretty easily. Let's start our text editor and create a new file:
+
+	[bernie@antergos_vb foo]$ vim ~/bin/sys_info_page
+
+Then we enter the following program:
+
+#! /bin/bash
+
+# Program to output a system information page
+
+echo "<!DOCTYPE html>"
+echo "<html lang="en">"
+echo "	<head>"
+echo "		<title>Page Title</title>"
+echo "	</head>"
+echo "	<body>"
+echo "		<p>Page body</p>"
+echo "	</body>"
+echo "<html>"
+
+Our first attempt contains a shebang; a comment and a sequence of echo commands, one for each line of output. After saving the file, we make it executable:
+
+[bernie@antergos_vb foo]$ chmod 755 ~/bin/sys_info_page 
+[bernie@antergos_vb foo]$ sys_info_page
+<!DOCTYPE html>
+<html lang=en>
+  <head>
+      <title>Page Title</title>
+  </head>
+  <body>
+      <p>Page body</p>
+  </body>
+<html>
+
+When the program runs, we should see the text of the HTML document displayed on the screen, because the echo commands in the script send their output to standard output. WE'll run the program again and redirect the output of the program to the sys_info_page.html
+
+[bernie@antergos_vb foo]$ sys_info_page > sys_info_page.html
+[bernie@antergos_vb foo]$ firefox sys_info_page.html
+
+
+#! /bin/bash
+
+# Program to output a system information page
+
+echo "<!DOCTYPE html>"
+<html lang="en">
+	<head>
+		<title>Page Title</title>
+	</head>
+	<body>
+		<p>Page body</p>
+	</body>
+<html>"
+
+A quoted string may include newlines and therefore, contain multiple lines of text. The shell will keep reading the text until it encounters the closing quotation mark.
+
+Second stage: Adding a little data
+
+Now that our program can generate a minimal document.
+
+Variables and constants:
+
+
+
+#! /bin/bash
+
+# Program to output a system information page
+
+title="System Information report"
+
+echo "<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>$title</title>
+
+        <style type="text/css">
+            h1 {
+            font-size: 35 pt;
+            line-height: 12pt;
+            text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <h1 style="color:#666;">$title</h1> 
+        <button type="button" onclick="alert('You clicked the button')">
+        Click Me!
+        </button>
+    </body>
+<html>"
+
+Unlike many other programming languages, if we use a variable it is created on the fly. We don't actually have to declare it first.
+
+Variable rules
+
+	1. Variable names may consist of alphanumeric characters and underscores (like filenames)
+	2. The first character of a variable name must be either a letter or an underscore.
+	3. Spaces and punctuation symbols are not allowed
+
+The word variable implies a value that changes, and in many applications, variables are used this way. However, the variable in our application is used as a constant. The constant value doesn't change. The shell makes no distinction between variables and constants. A common convention is to use uppercase letters to designate constants and lowercase letters for true variables.
+
+#! /bin/bash
+
+# Program to output a system information page
+
+TITLE="System Information Report For $HOSTNAME"
+
+
+echo "<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>$TITLE</title>
+
+        <style type=\"text/css\">
+            h1 {
+            font-size: 35 pt;
+            line-height: 12pt;
+            text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <h1 style=\"color:#666;\">$TITLE</h1>
+        <button type=\"button\" onclick='alert(\"You clicked the button\")'>
+        Click Me!
+        </button>
+    </body>
+<html>"
+
+We added the HOSTNAME constant too. 
+
+The shell actually does provide a way to enforce immutability of constants through the use of declare built-in and the -r (read only) option:
+
+	declare -r TITLE="Page Title"
+
+This would prevent TITLE being assigned a different value.
+
+Assigning values to variables and constants
+Variables are assigned in the following way:
+
+	variable=value
+
+Unlike other programming languages, the shell does not care about the type of data assigned to the variable; it treats them all as strings. You can force the shell to restrict the assignment to integers by using the declare command with the -i option, but, like setting variables as read-only this is rarely done.
+
+a=z 				# Assign the string "z" to variable a
+b="a string"		# Embedded spaces must be within quotes
+c="a string and $b" # Other expansions such as variables can be expanded into the assignment
+d=$(ls-l foo.txt) 	# Results of a command
+e=$((5*7)) 			# Arithmetic expansion
+f="\t\ta string\n" 	# Escape sequences such as tabs and newlines
+
+During expansion, variable names may be surrounded by optional curly braces {}.
+
+[bernie@antergos_vb foo]$ filename="myfile"
+[bernie@antergos_vb foo]$ touch $filename
+[bernie@antergos_vb foo]$ mv $filename $filename1
+mv: missing destination file operand after 'myfile'
+Try 'mv --help' for more information.
+
+This attempt fails because the shell interprets the second argument of the mv command as a new and empty variable. The solution?
+
+[bernie@antergos_vb foo]$ mv $filename ${filename}1
+
+
+Here Documents
+
+#! /bin/bash
+
+# Program to output a system information page
+
+TITLE="System Information Report For $HOSTNAME"
+CURRENT_TIME=$(date +"%x %r %Z")
+TIME_STAMP="Generated $CURRENT_TIME, by $USER"
+
+cat << _EOF_
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>$TITLE</title>
+
+        <style type="text/css">
+            h1 {
+            font-size: 35 pt;
+            line-height: 12pt;
+            text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <h1 style="color:#666;">$TITLE</h1>
+        <button type="button" onclick='alert(\"You clicked the button\")'>
+        Click Me!
+        </button>
+    </body>
+    <footer>
+        <section>
+            <div>
+                $TIME_STAMP
+            </div>
+        </section>
+    </footer>
+<html>
+_EOF_
+
+Instead of using echo, our script now uses cat and a here document. The string _EOF_ was selected as the token and marks the end of the embedded text. Note that the token must appear alone and that there must not be trailing spacees on the line. The advantage of this is that we can now use quotations without needing to escape them.:

@@ -1,0 +1,20 @@
+.NET
+
+.NET is a software framework which is part of the VS installation. Our applications run on top of the .NET framework, taking advantage of all of the libraries and services that the framework provides. This allows you to write all sorts of different applications in .NET.
+
+There are generally though to be two parts to the .NET Framework
+	The Common Language Runtime (CLR)
+		The CLR manages your application. It's an execution environment for .NET applications. It's reponsible for managing and tearing down the application.
+			It manages memory - cleans up when down. 
+			It virtualises the execution environment
+				Don't need to know about the operating system or number of cores
+			Multiple languages: C#, Visual Basic and F#
+			A new version of the CLR, the Core CLR, will run on non-Windows machines.
+	The Framework Class Library (FCL)
+		A library of functionality to build applications. Large and varied.
+			You might master a few areas of this like ASP.NET for making web applications.
+		BCL: Base class library which is a subset
+
+When installing VS, we also get a few command line tools
+
+writing this to a seperate file

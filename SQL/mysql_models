@@ -1,0 +1,27 @@
+Modeling simplifies database design and maintenance by enabling you, the data architect, to visualize requirements and resolve design issues. Model-driven database design is an efficient methodology for creating valid and well-preforming databases, while providing the flexibility to respond to evolving data requirements. Models are used to build ER diagrams and physical MySQL databases.
+
+Utilities:
+	Create and manipulate a model graphically
+	Reverse engineer a live database to a model
+	Forward engineer a model to a script or live database.
+	Create and edit tables and insert data
+
+Model Overview
+
+	EER (enhanced entity-relationship) Diagrams
+	Physical Schemata
+	Schema Privileges
+	SQL Scripts
+	Model Notes
+
+
+Model menu functions
+	Add diagram
+	Create Diagram from Catalog Objects: Create a EER Diagram from all the objects in the catalog
+	User Defined Types: Presents a dialog box that enables you to add and delte user defined data types.
+	Object Notatino: 
+
+Database menu functions
+
+	Reverse engineer - creates a model from a database
+	Forward engineer - creates a database from a model.

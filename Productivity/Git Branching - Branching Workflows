@@ -1,0 +1,13 @@
+Git Branching - Branching Workflows
+
+Here I'll lay out some common workflows that this lightweight branching makes possible, so you can decide if you would like to incorporate it into your own developement cycle.
+
+Long-running branches
+Because Git uses a simple three-way merge, merging from one branch into another multiple times over a long period is generally easy to do. This means you can have several branches that are always open and that you use for different stages of your development cycle; you can merge regularly from some of them into others. 
+
+Many Git developers have a workflow that embrances the approach of only having code that is entirely stable in their master branch - possibly only code that has been or will be released. They have another parallel branch named develop or next that they work from or use to test stability. When it becomes stable, it can be merged into master. It's used to pull in topic branches (short-lived branches, like issues)  when they're ready, to make sure they pass all the tests and don't introduce bugs.
+
+This can be done for several levels of stability. Some larger projects also have a proposed or pu (proposed updates) branch that has integrated branches that may not be ready togo into the next or master or next branch. The idea is that your branches are at various levels of stability; when they reach a more stable level, they're merged into the branch above them. Again, having multiple long running branches isn't necessary, but it's often helpful, especially when you're dealing with very large or complex projects.
+
+Topic branch
+Theses are useful in a project of any size. A topic branch is a short-lived branch that you create and use for a particular feature  or related work. WN

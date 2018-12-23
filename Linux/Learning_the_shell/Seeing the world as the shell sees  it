@@ -1,0 +1,131 @@
+Seeing the world as the shell sees  it
+//The Linux command line
+
+Here we will examine what actually happens in the command line when you press the enter key. 
+
+Expansion
+Each time you type a command and press the ENTER key, bash performs several processes upon the text before it carries out your command. We've seen a couple of cases of how a simple character sequence, for example *, can have a lot of meaning to the shell. The process that makes this happen is called expansion. With expansion, you enter something, and it is expanded into something else before the shell acts upon it. To demonstrate what we mean, let's take a look at the echo command. echo is a shell builtin that performs a very simple task. It prints out its text arguments on standard output.
+
+[bernie@antergos-vbox ~]$ echo this is a test
+this is a test
+
+That's pretty straightforward. Any argument passed to echo gets displayed. What about
+
+[bernie@antergoes-vbox ~]$ echo *
+Desktop Documents Music Pictures Public Templates Videos
+
+What just happened? Why didn't echo just print *? * is a wildcard for "match any characters in a filename" but we haven't learnt yet how the shell does that. The simple answer is that the shell expands the * into something else (in this instance, the names of the files in the current working directory) before the echo command is executed. When the ENTER key is pressed, the shell automatically expands any qualifying characters on the command line before the command is carried out, so the echo command never saw the *, only its expanded result. Knowing this, we can see that echo behaved as expected.
+
+Pathname Expansion
+The mechanism by which wildcards work is called pathname expansion. If we try some of the techniques that we employed in our earlier work, we will see that they are really expansions:
+
+echo D*
+Desktop Documents
+
+echo s*
+Documents Pictures Templates Videos
+
+or even
+
+echo /usr/*/share
+/usr/local/share
+
+Pathname expansion of hidden files
+As we know, filenames that begin with a period character are hidden. Pathname expansion also respects this behavior. An expansion such as:
+
+echo *
+
+Doesn't reveal hidden files. 
+
+echo .*
+
+Does ok, however also include the working (.) and parent (..) directories in the results. 
+ls 
+
+Arithmetic expansion
+The shell allows arithmetic to be performed by expansion. This allows us to use the shell prompt as a calculator. If uses the following form:
+
+$((expression))
+
+Brace expansion
+Perhaps the strangest expansion is called brace expansion. With it, you can create multiple text strings from a pattern containing braces.
+
+echo Front-{A,B,C}-Back
+Front-A-Back, Front-B-Back, Front-C-Back
+
+Patterns to be brace expanded may contain a leading portion called a preamble and a trailing portion called a postscript. The brace expansion itself may contain either a comma-separated
+
+Using a range:
+echo Number_{1..5}
+Number_1 Number_2 .... etc
+
+echo {A..Z}
+A B C .... Z
+
+The most common application for this is to make lists of files or directories. 
+
+Parameter expansion
+This is a feature that is more useful in shell scripts that directly into the command line. Many of its capabilities have to do with the system's ability to store small chunks of data and to give each chunk a name. Many such chunks, more properly called, variables, are available for your examination. For example, the variable named USER contains your username. To invoke:
+
+echo $USER
+bernie
+
+Command substitution
+This allows us to use the output of a command as an expansion:
+
+Quoting
+Now that we've seen how  mnay ways the shell can perform expansions, it's time we learn how we can control it. For example, take this:
+
+echo this is a       text
+this is a test
+
+Or this:
+
+echo The total is $100.00
+The total is 00.00
+
+The shell removes extra whitespace in the first example. In the second, parameter expansion substituted an empty string for the value of $1 because it was an undefined variable. The shell provides a mechanism called quoting to selectively suppress unwanted expansions.
+
+Double Quotes
+The first type of quoting we'll look at are double quotes. If text is placed inside double quotes, all the special characters except $, \ and ' loose their meanings.
+
+Word splitting
+Pathname expansion
+Tilde expansion
+Brace expansion
+- These are all suppressed 
+
+Parameter expansion
+Arithmetic expansion
+Command substitution
+- These all still work
+
+Single Quotes
+If we use single quotes then we express all expansions
+
+Escaping characters
+Sometimes we want to quote only a single character. To do this, we can precede a character with a backslash, which in this context is called an escape character. Often this is done inside double quotes to avoid an expansion:
+
+echo "The balance is \$5.00"
+The balance is $5.00
+
+It is also common to use escaping to eliminate the special meaning of a character in a filename. For example, it is possible to use characters in filenames that normally have special meaning the to the shell. This would include $, !, & (a space) and others. To include a special character in a filename, you can do this:
+mv bad\&filename good_filename
+To allow a backslash to appear, escape it by typing \\. Note that within single quotes, the backslash loses its special meaning and becomes just an ordinary character.
+
+Backslash escape sequences
+In addition to its role as the escape character, the backslash is also used as part of a notation to represent certain special characters called control codes. The first 32 characters in the ASCII coding scheme are used to transmit commands to teletype-like devices. Some of these codes are familiar (tab, backspace, line feed and carriage return), whilst others are not (null, end-of-transmission and acknowledge)
+
+\a - Bell(alert)
+\b - Backspace
+\n - Newline
+\r - Carriage return
+\t - tab
+
+\r\n
+Carriage return (returns the carriage/cursor to the start of the line)
+
+This table lists some of the common backslash escape sequences. The idea behind using the backslash originated in the C programming language and has been adopted by many others. Adding the -e option to echo  will enable interpretation of escape sequences.
+
+Final note
+As we move forward with using the shell, we will find that expansions and quoting are used with increasing frequency so it makes sense to get a really good understanding of how they work. In fact, it could be argued that they are the most important subjects about the shell. Without a proper understanding of expansion, the shell will always be a source of mystery and confusion, and so much of its potential will be wasted.

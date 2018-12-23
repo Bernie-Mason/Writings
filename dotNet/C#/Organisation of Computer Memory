@@ -1,0 +1,6 @@
+Organisation of Computer Memory 
+Computers use memory to hold programs that are being executed (GOOOO!) and the data that these programs use (munch). Operating systems and language runtimes frequently divide memory used for holding data into separate areas, each of which is managed in a distinct manner. These areas are traditionally known as the stack and heap.
+	
+	When you call a method, the memory required for its parameters and its local variables is always acquired from the stack. When the method finishes, the memory acquired is automatically released and made available for reuse when another method is called. 
+		In C# this is actually true for any block of code enclosed in curly braces!
+	When you create an object (a new instance of a class) using the new keyword, the memory required to build the object is always acquired from the heap. The same object can be referenced from several places by using reference variables with the same values.  

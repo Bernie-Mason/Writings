@@ -1,0 +1,85 @@
+Flow Control: Looping with For
+
+for variable [in words]; do
+		commands
+done
+
+where variable is the name of a variable that will increment during the execution of this loop. words is an optional list of items that will be sequentially assigned to variable.
+
+For example:
+[bernie@antergos_vb bin]$ for i in A B C D; do echo $i; done
+A
+B
+C
+D
+
+We can use brace expansion:
+[bernie@antergos_vb bin]$ for i in {A..D}; do echo $i; done
+A
+B
+C
+D
+
+or pathname expansion
+[bernie@antergos_vb bin]$ for i in read*; do echo $i; done
+read_ifs
+read_integer
+read_menu
+read_multiple
+read_validate
+read_validate_test
+
+or command substitution:
+
+#!/bin/bash
+
+# longest_word: find the longest string in a file
+
+for i; do
+        if [[ -r $i ]]; then  # check filename is readable
+                max_word=
+                max_len=0
+                for j in $(strings $i); do
+                        len=$(echo -n $j | wc -c)
+                        if (( len > max_len )); then
+                                max_len=$len
+                                max_word=$j
+                        fi
+                done
+                echo "$i: '$max_word' ($max_len characters)"
+        fi
+done
+~
+
+In the above program we expect one or more filenames. Each one. Because a list of words was omitted for i, the positional parameter is automatically used instead.
+
+for: C language form
+
+Recent versions of bash have added a second form of for-command syntax that resembers the C programming language form (I know this one already!)
+
+for (( expression1; expression2; expression3 )); do
+		commands
+done
+
+expression1 = initial value
+expression2 = termination condition
+expression3 = iteration
+
+for example:
+
+for (( i=0; i<5; i=i+1 )); do
+		echo $i
+done
+
+this is the same as the following while loop:
+
+expression1
+while (( expression2 )); do
+		commands
+		(( expression3 ))
+done
+
+
+
+
+

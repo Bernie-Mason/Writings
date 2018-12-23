@@ -1,0 +1,60 @@
+Threads vs processes
+
+A process provides everything needed to execute a program. It is usually started with a single thread, often called the primary thread and can create additional threads.
+	It has:
+		1. A virtual address space
+		2. Executable code
+		3. Opens handles to system objects
+		4. A security context
+		5. A unique process identifier 
+		6. Environmental variables
+		7. A priority class
+		8. Minimum and maxing working set sizes
+		9. At least one thread of execution
+
+A thread is an entity within a process that can be scheduled for execution. All threads of a process share its virtual address space and system resources. 
+
+Windows Service
+Is a windows background process (no user interface). Needs to be installed before executing. Perform actions. Controlled by service control manager and started automatically. An exe is controlled by the OS and is run by the user.
+
+You can easily write your own services. For example to warm you if the disk space was getting full or to set an alarm.
+
+
+Exe vs DLL
+An executable is an indenpendent program/process that can be run. A DLL is neither executable.
+
+Strong vs weakly typed
+Strong typing means that when the code is compiled, strict rules are enforced allowing (or not) the code to be compiled. Javascript is an example of a weakly typed language that doesn't enforce rules upon compilation. Strongly typed code therefore means less run time errors as problems can be caught at compile time.
+
+PID
+Process ID : it's a unique ID for any process in a system
+
+GAC : Is the Global Assembly Cache. It stores the .NET assemblies that are specifically designated to be shared by all applications executed on a system.
+An assembly is a chunk of precompiled code that can be executed by the .NET runtime environment (CLR).
+
+The runtime automatically handles object layout and manages references to objects releasing them (garbage collection) when they are no longer being used. 
+
+
+
+.NET
+.NET is a general purpose development platform. It supports several programming languages (notably c#), async programming methods and native interoperability.
+
+C# is simple powerful and type-safe. It is object oriented. 
+
+CLR - The common language runtime, the virtual machine componenet of Microsoft's .NET framework, manages the execution of .NET programs. JIT converts compiled code into machine instructions which the computers CPU then executes.
+
+.NET has automatic memory management (garbage collection). However, some objects reference unmanaged resources that aren't automatically maintained by whatever .NET runtime you're using. A FileStream object is a managed object but references a file handle, which is unmanaged. So when you're done using the FileStrem, you need to release the file handle.
+
+Objects that reference unmanaged resources immplement the IDisposable interface. When you're done using the object, you call the objects Dispose() method. Or using a using block automatically disposes whatever object you were using.
+
+An object is an instance of a specified type and only operations allowed for a given obejct those of its type. Type safety is also used to help enforce encapsulation by ensuing the fidelity of the accessor keyword (like private working only within a class or protected working in any derived classes)
+
+Managed code : code whose execution is managed by a runtime like CLR. IL is the intermediate language and is a the product of compilation of code written in high-level .NET languages (like c#). JIT is the just in Time Compiler. Takes IL and compiles it in preparation for running as native code.
+
+.NET is made up of a number of key 
+
+
+.NET has three main runtimes
+	.NET framework
+	.NET core
+	Xamarin

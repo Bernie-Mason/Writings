@@ -1,0 +1,4 @@
+Special classes and methods
+
+Static classes
+Static classes are for when all members are static. It has behaviors and properties but they are immutable. A static class is sealed and cannot be instantiated

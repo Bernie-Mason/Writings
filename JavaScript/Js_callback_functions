@@ -1,0 +1,128 @@
+A callback is basically where a function accepts another function as a parameter. At some point during the execution the called function will execute the function passed as a parameter, this is called a callback. Quite often the callback actually happens as an async event, in which case the called function may return without having executed the callback, that may happen later.
+
+Callback functions are derived from a programming paradigm known as functional programming. Functional programming specifies the use of functions as arguments, assignment to variables and being returned from other functions. They are, in fact, objects.
+
+One of the chief techniques in functional programming happens to be callback functions. This is as easy as passing regular variables as arguments. 
+
+A Callback or Higher-order Function
+A callback function is a function that is passed to another function as a parameter, and the callback function is called (or executed) inside of the otherFunction. It is a pattern (lit. a common established solution to a common problem), and therefore, the use of a callback function (which is unnamed or anonymous) is also known as a callback pattern.
+
+//Note that the item in the click method's parameter is a function, not a variable.​
+​//The item is a callback function
+$("#btn_1").click(function() {
+  alert("Btn 1 Clicked");
+});
+
+var friends = ["Mike", "Stacy", "Andy", "Rick"];
+​
+friends.forEach(function (eachName, index){
+console.log(index + 1 + ". " + eachName); // 1. Mike, 2. Stacy, 3. Andy, 4. Rick​
+});
+
+The callback for the forEach function is pre-defined. That is, it's parameters are always the same:
+
+var friends = ["Mike","Stacy","Andy","Rick"]
+
+friends.forEach(function (eachName, index){
+	console.log(index + 1 + "." + eachName); // 1.Mike, 2.Stacy etc
+});
+Again, note  the way we pass an anonymous function to the forEach method as a parameter. 
+
+How do Callback Functions Work?
+
+We can pass functions around like variables and return them in functions and use them in other functions. When we pass a callback function as an argument to another function, we are only passing the function definition. We are not executing the function in the parameter. Since the containing function has the callback function in its parameter as a function definition, it can execute the callback anytime. 
+
+Note that the callback function is not executed immediately. It is "called back" at some point inside the containing function's body. So even though our jQuery function looks like this:
+
+$("#btn_1").click(function(){
+	alert("Btn 1 Clicked");
+});
+
+the anonymous function will be called later inside the function body. Even without a name, it can still be accessed later via the arguments object by the containing function.
+
+Callback functions are closures
+When we pass a callback function as an argument to another function, the callback is executed at some point inside the containing function's body just as if the callback were defined in the containing function. This means that the callback is a type o closure.
+
+	Closures have access to the containing function's scope, so the callback function can access the containing functions' variables, and even the variables from the global scope.
+
+	A closure is an inner function that has access to the outer (enclosing) function's variables - scope chain. The closure has three scope chains: it has access to its own scope (variables defined within the curly braces), it has access to the outer function's variables, and it has access to the global variables.
+
+	The inner function has access not only to the outer function's variables, but also to the outer function's parameters. Note that the inner function cannot call the arguments object of the outer function, however, even though it can call the outer function's parameters directly.
+
+	function showName (firstName, lastName) { 
+	​var nameIntro = "Your name is ";
+	    // this inner function has access to the outer function's variables, including the parameter​
+	​function makeFullName () {         
+	​return nameIntro + firstName + " " + lastName;     
+	}
+	​
+	​return makeFullName (); 
+	} 
+	​
+	showName("Michael", "Jackson"); // Your name is Michael Jackson 
+
+	A closure differs from a nested function in that the nested function in a closure continues to live even when the outer function has completed. Callbacks are functions which are usually executed when an event completes, when they are executed they have access to outer functions variables even though the outer function has completed its execution.
+
+	1. Closures have access to the outer function's variable even after the outer function has returned.
+	2. Closures store references to the outer function's variables. Not the actual value.
+	3
+
+	function celebrityID () {
+	    var celebrityID = 999;
+	    // We are returning an object with some inner functions​
+	    // All the inner functions have access to the outer function's variables​
+	    return {
+	        getID: function ()  {
+	            // This inner function will return the UPDATED celebrityID variable​
+	            // It will return the current value of celebrityID, even after the changeTheID function changes it​
+	          return celebrityID;
+	        },
+	        setID: function (theNewID)  {
+	            // This inner function will change the outer function's variable anytime​
+	            celebrityID = theNewID;
+	        }
+	    }
+	}
+	​
+	​var mjID = celebrityID (); // At this juncture, the celebrityID outer function has returned.​
+	mjID.getID(); // 999​
+	mjID.setID(567); // Changes the outer function's variable​
+	mjID.getID(); // 567: It returns the updated celebrityId variable 
+
+	Looks like a class with a property right!
+
+Back to callbacks.
+
+Basic principles when Implementing Callback functions.
+
+We can use named or anonymous functions:
+
+// global variable
+var allUserData = [];
+
+// generic logStuff function that prints to console
+
+function logStuff(userData){
+	if (typeof userData === "string"){
+		console.log(userData);
+	}
+	else if (typeof userData === "object"){
+		for (var item in userData){
+			console.log(item": " + userData[item]);
+		}
+	}
+}
+
+// A function that takes two parameters, the last one a callback function
+
+function getInput(options, callback){
+	allUserData.push(options);
+	callback(options);
+}
+
+// When we call the getInput function, we pass logStuff as a parameter
+// So logStuff will be the function that will be called back inside the getInput function
+
+getInput({name:"Rich", specialty:"JS"}, logStuff);
+// name: Rich
+// specialty: JS

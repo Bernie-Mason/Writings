@@ -1,0 +1,3 @@
+// Derived from https://www.codeproject.com/Articles/137979/Simple-HTTP-Server-in-C
+
+High performance web services often use complex external web servers such as  IIS, Apache or Tomcat. As HTML is a flexible language, it is handy to be able to serve HTML out of practically any application  or backend server. In these situations we don't need the full complexity of an external server and instead can write a simple HTTP class which can be embedded to service simple web requests.

@@ -1,0 +1,237 @@
+TypeScript in depth
+
+With Brice Wilson
+
+MAJOR AREAS
+Functions
+Interfaces
+Classes
+Modules and namespaces
+Generics
+Compiler options
+Type definitions
+
+Need basic JS
+
+Why use TS
+Strong typing
+	Added safety
+	JS only has a handful of types whereas TS allows you define your own types.
+Superset of JS
+	Simplifies transition for devs that have passing familiarity with JS. JS is valid TS
+Types enable faster development.
+	If using a TS aware editor it's easier to navigate the properties and methods available on custom types.
+Compiles to plain JS. Either:
+	ES3
+	ES5
+	ES6 (ES2015)
+Cross-platform
+	Mac/windows linux. I assume he means there is a cross platform compiler
+Open source
+	Available on GitHub
+
+Prerequisites
+	Basics of JS
+	Node.js
+
+Will build the shell of a library manager app.
+
+Getting set up
+Remember that node is a JS runtime. npm is the node package manager. It is Chrome V8 JavaScript engine.
+
+Choosing a TS editor
+VS and VSCode are both good environments. VS is windows only. VSCode is cross platform.
+
+The VS tools for node and TS look pretty cool. Would be good to have a play with these at some later date. I wonder when it starts to get laggy?
+
+
+--target es5 --watch
+target means the compile target (ES5 flavour js) and the watch clause will watch the file for changes and recompile.		
+
+
+enums arrays and tuples
+
+
+var, let and const
+
+1. primary difference between var and let/const is scoping. let/const are scoped to the block they are declared in whereas var is declared globally. 
+2. Variables declared with var are hoisted to the top of the function they're declared in. let and const are not hoisted. 
+3. let and const are also prevented from being declared twice in the same scope.
+
+Basic TS data types
+Boolean (js)
+number (js floating point number)
+string (js)
+Array (js but enhanced in ts)
+Enum (ts only)
+Any (js can be assigned any type. In general we avoid this.)
+Void (used to specify the absence of a type. I.e. a function that doesn't return a value.)
+
+Type Inference
+
+let myString = 'this is a string';
+// TS will infer that this is a string
+myString = 42; // Error in TS but not JS
+
+function ReturnNumber() {
+	return 42;
+}
+
+let anotherString = "This is also a string";
+anotherString = ReturnNumber(); // error
+
+We can specify the types of our variables and return types using the colon syntax but this isn't necessary for the TS compiler to detect these issues.
+
+Important point about const.
+It only guarantees that the identifier won't be changed to be something entirely different. We can't assign a const variable to a brand new array but we can modify the contents of that array.
+
+
+ARRAYS
+Arrays generally work the same as in JS. They generally want to hold just a single type.
+
+let strArray1: string[] = ["","",""];
+let strArray1: Array<string> = ["","",""]; // Generic syntax
+
+TUPLES
+Types don't have to be the same but we specify the types at their positions
+
+let myTuple: [string, number]
+// Elements passed this position can be either. Don't really like this.
+
+
+FUNCTIONS
+Pretty similar to JS in a lot of ways. 
+
+Most obvious difference is that we're allowed to specify parameter and return types. We also have arrow functions and function types. Parameters can also be declared as optional or have default values (not available in js). We can also overload functions.
+
+TS functions
+1. Types. No types in JS.
+2. Arrow functions. JS has them in ES205
+3. Function types. None in JS
+4. Required and optional. In JS all are required.
+5. Default paramters. Supported in JS in ES2015
+6. Rest parameters.
+7. Overloaded parameters
+
+function CreateCusomterId(name: string, id: number): string {
+	return name + id;
+}
+
+ARROW FUNCTIONS.
+A more concise way of writing anonymous functions that are prevalent throughout JS and TS.
+
+Anonymous
+let arr = allBooks.filter(function(book) {
+	return book.author === "herman";
+})
+We have to write an entire function!
+
+Arrow 
+let arr = allBooks.filter(book => book.author === "herman");
+Much more concise way to write the same code. 
+A side benefit to arrow functions is with "this". "this" with arrow functions is set when the the function is created rather than when it's invoked.
+
+Arrow function syntax
+myBooks.forEach(() => console.log("Done!"))
+myBooks.forEach(title => console.log(title)) // parens not required
+myBooks.forEach((title, author) => console.log(title + " " + author)) // parens required for more than one
+
+Capturing "this" in JS
+Understanding this is JS is often quite confusing. It is set at the time when the function is executed not when the function is created, for example if it's defined in a callback that could be executed at some time in the future. This leads to code where we assign "this" up front in a function so that we're using the correct context.
+
+With arrow functions, this gets captured more effectively.
+
+
+FUNCTION types
+These are defined by the combination of parameter types it accepts and the parameter types that it returns.
+
+function PublicationMessage(year: message): string {
+	return "Date published " + year;
+}
+
+let publishFunc: (someYear: number) => string.
+// Not to be confused with an arrow function! This is a type definition for a function, not an executable function.
+
+publishFunc = PublicationMessage;
+
+Optional and Default
+Optional must appear after all required parameters. Default parameters may be to a literal value or an expression.
+
+
+Rest parameters
+The "rest" of the parameters that the function expects.
+
+function GetBooksReadForCust(name: string, ...bookIDs: number[]) { }
+
+let books = GetBooksReadForCust("bernie", 1, 3, 5, 6, 7);
+
+The elipsis (or spread) allows you to pass a variable number of parameters
+
+FUNCTION OVERLOADING
+Many typed programming languages have function overloads. Same name but differ in their function somehow.
+
+function GetTitles(author: string): string[];
+function GetTitles(available: boolean): string[];
+
+
+INTERFACES
+What is an interface? 
+Duck typing
+Function types for interfaces
+Interfaces for class types
+
+An interface is a contract that defines a type. The compiler enforces the contract via type checking. It defines how a type can and can't be used. It specifies the shape of an object.
+
+It may specify methods and parameters but has no implementation details. We know this. Like in C#.
+
+Interfaces are a form of duck typing. They focus on the shape of an object. Provided the object has a shape of a particular type it can be one, even if it wasn't declare as one.
+
+The duck test. "If I see a bird that swims, walks and quacks like a duck then it's a duck."
+
+E.g.
+
+interface Duck {
+	walk: () => void;
+	swim: () => void;
+	quack: () => void;
+}
+
+Interfaces for Function Types
+
+function CreateCustomerID(name: string, id: number): string {
+	return name + id;
+}
+
+let IdGenerator: (chars: string, nums: number) => string;
+IdGenerator = CreateCustomerID;
+
+interface StringGenerator{
+	(chars: string, nums: number): string;
+}
+
+Extending interfaces
+
+
+Class types
+These are a big topic in TS. Interfaces only define the shape of an object.
+
+interface Librarian {
+	doWork: () => void;
+}
+
+class ElementarySchoolLibrarian implements Librarian {
+	doWork(){
+		console.log("Reading to and teaching children");
+	}
+}
+
+
+
+
+
+
+
+
+
+
+

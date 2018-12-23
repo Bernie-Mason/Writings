@@ -1,0 +1,22 @@
+Asynchronous Programming
+
+Concurrency is when two or more tasks can start, run, and complete in overlapping time periods. It doesn't necessarily mean they'll ever both be running at the same instant. Eg. multitasking on a single-core machine.
+
+Parallelism is when tasks literally run at the same time, eg. on a multicore processor.
+
+Sun's Multithreaded Programming Guide:
+
+	Concurrency: A condition that exists when at least two threads are making progress. A more generalized form of parallelism that can include time-slicing as a form of virtual parallelism.
+	Parallelism: A condition that arises when at least two threads are executing simultaneously.
+
+Parallelism is about execution, concurrency is about structure.
+
+
+Most of the programming that we do is in a single threaded manner. At any one point in time a program has a single execution thread. This is not always super efficient. Applications that can perform multiple operations at the same time might be better able to make use of the computer resources available. Some processes might run more quickly if you can divide them into parallel paths of execution that can run concurrently.
+
+There are two reasons you might want to perform multitasking in an app.
+
+	1. To improve responsiveness. You can give the user the impression that the program is performing more than one task at a time by dividing the program into concurrent threads of execution and allowing each thread to run in turn for a short period. 	
+	2. To improve scalability. You can do this make by making efficient use of the processing resources available and using these resources to reduce the time required to execute parts of an application. A developer can determine which parts of an application can be performed in parallel and arrange for them to be run concurrently
+IN C#
+

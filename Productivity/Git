@@ -1,0 +1,40 @@
+Git commit (press enter to go to vim)
+press esc
+press i (INSERT a comment)
+Git commit message format
+
+1st line: 50 character or less heading (summary) of change
+
+3rd line: Describe original problem that was addressed.
+Describe the change that was made.
+Describe the result of the change or the result you know you're going to have.
+Describe any future improvements.
+
+Bug Note: Closes-Bug: #123123
+press enter
+press esc
+press :wq
+press enter
+
+git diff
+git rm (--cached (only from staging area)) filename
+git log (--pretty=online, -2 (no of entries), -p (diff))
+e.g.  git log --pretty=format:"%h - %an, %ar : %s"
+
+git log table:
+Option 	Description of Output
+%H 		Commit hash
+%h 		Abbreviated commit hash
+%T 		Tree hash
+%t 		Abbreviated tree hash
+%P 		Parent hashes
+%p 		Abbreviated parent hashes
+%an 	Author name
+%ae 	Author email
+%ad 	Author date (format respects the --date=option)
+%ar 	Author date, relative
+%cn 	Committer name
+%ce 	Committer email
+%cd 	Committer date
+%cr 	Committer date, relative
+%s 		Subject

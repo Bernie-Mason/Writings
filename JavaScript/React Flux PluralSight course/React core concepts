@@ -1,0 +1,29 @@
+React core concepts
+
+MVC
+
+React doesn't dictate how you handle dataflows, routing or other concerns in your application. It focus's on being soley a composible component library.
+
+Well composed React components fulfill both the V and C in MVC. A controller view is a React view that handles data concerns and compose other dumb components together.
+
+THE RISK OF TWO-WAY BINDING
+Knockout, Angular and Ember all support two-way binding. It's quick and reduces boilerplate. However, it can lead to unpredictable interacts in your application. These interactions can be hard follow in a large application.
+
+JSX
+Optional xml like syntax for markup. This compiles down to JavaScript (it's an abstraction). I don't really like this. I don't find it easier to read. But it's probably better than React.createElement. I think the typeScript(?) alternative is much better.
+
+JS AND HTML: SEPARATING CONCERNS OR TECHNOLOGIES?
+
+Keeping JS and HTML in sync is tricky. We need to manually do this and the application fails in unpredictable ways. There's no explicit interface between JS and HTML. Often they will get out of sync! A typo in the markup in Angular may cause the environment to fail as HTML isn't strictly parsed like JS is.
+
+In JS we at least get some error messages when we have failing code. In HTML we have no idea what line just failed. Making a typo in JSX will throw an error!
+
+VIRTUAL DOM
+Leading principal: Compare current state the desired state.
+
+Updating the DOM is slow, expensive - requires a lot of processes. React determines the most efficient way to update the DOM. Traditional two way binding approaches don't have a virtual DOM so when state changes the DOM gets updated. 
+
+React uses a virtual DOM
+Compare DOM's current state to desired new state. THEN. Update the DOM in the most efficient way. It does this by looking at it's individual components.
+
+Can improve performance even further by have a shouldComponentUpdate handler. Can use immutable data structures. The virtual DOM isn't just about performance. We can attach event handlers

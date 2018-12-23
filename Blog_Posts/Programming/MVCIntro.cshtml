@@ -1,0 +1,45 @@
+﻿@*@using System.Web.Mvc.Html
+
+@{
+    ViewBag.DefaultPageHeader = "Programming";
+    ViewBag.DefaultPageSubHeader = "Yep";
+}*@
+
+<h2>Introduction to MVC in ASP.NET</h2>
+<p>Web application platforms come in many flavours. Some are for presenting information to the users 
+    (blogs, educational sites), others allow users to purchase items whilst a growing number allow the 
+    users to share media or their thoughts on social networks. In each case, the purpose of the web application 
+    is to build and render a dynamic output.
+    </p>
+<p>MVC is a software pattern that offers a solution to web application problem by separating the user interface, 
+    the buisness data and the interactions between the two. An MVC application consists of models, controllers and views:
+    </p>
+<ul>
+    <li>
+        <b>Model:</b> The model is the representation of the real world objects, processes and 
+        rules that make up the domain of the application. They contain the data that users work with and be view or domain oriented.
+    </li>
+    <li><b>Views:</b> These are used to render some part of the model to the interface. 
+    This exposes the user to model data or allows them to add their own.
+    </li>
+    <li><b>Controller:</b> The controller's purpose is to act as a bridge between the models and views. 
+    It needs to process incoming requests, perform operations on any relevant models and then select views 
+    to return to the user.</li>
+</ul>
+<p>The views and controllers expose the domain objects to the clients in a consistent way. Starting with a 
+    model and adding controllers and views is a popular design strategy.
+</p>
+
+<h3>Domain model</h3>
+<p>
+    Most important part of an MVC application. When we set about building a web application we 
+    should start by looking specifications for the application and thus recognising the operations, 
+    features and rules that it must provide. These set of items that we wish to model is known as the domain.
+    The software solution to this problem is called the domain model. For ASP.NET MVC this is a set of 
+    C# classes and structures (collectively known as domain types).
+</p>
+
+
+@*@Html.Partial("_MVCLinks")*@
+ 
+

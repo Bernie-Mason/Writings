@@ -1,0 +1,19 @@
+Useful stuff SQL server
+
+ctrl-shift-r - refresh local chance. Really useful if SQL server isn't remembering that you've created something new like a stored procedure.
+
+In C#
+
+If working this MSSQL you can create an MSSQL project.
+
+Sample connection string:
+
+SqlConnection myConnection = new SqlConnection("user id=BAN;" +
+                                               "password=;" +
+                                               "Data Source = (local);" +
+                                               "Trusted_Connection=yes;" + 
+                                               "database=Test; " + 
+                                               "connection timeout=5");
+
+Notes: For a SQL authentication the user id and password aren't necessary. 
+	   The Date Source/Server/Address/Addr should always be (local) for a local database

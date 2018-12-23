@@ -1,0 +1,33 @@
+Functions
+
+def hello(): # define function
+	print('Hello world')
+
+hello() # function call
+
+The purpose of functions is to group code that gets executed multiple times. Without a function defined, you would have to type the code each time and the program gets messy. It avoids code duplication (pretty much all forms of abstraction are designed to do this).
+
+Parameters
+def hello(name):
+	print('Hello ' + name)
+
+hello('Alice')
+hello('Bob')
+
+A parameter is a variable that an argument is stored in when the function is called. The first time the hello() function is called, it's with the argument 'Alice'. The program execution enters the function, and the variable name is set to 'Alice'.
+The variable is name
+The argument is Alice
+
+Return values and return statements
+When you  call the len() function and pass it an argument such as 'Hello' the function call evaluates to the integer value 5, which is the length of the string you passed it. In general, the value that a function call evaluates to is called the return value of the function.
+
+def len(input)
+	stringLength = .... code
+	return stringLength
+
+The None value
+In Python there is a value called None, which represents the absence of a value. None is the only value of the NoneType data type. Just like the Boolean True and False values, None must be typed with a capital N.
+	This can be helpful when you need to store something that won't be confused for a real value in a variable (like NaN)
+
+Local and global scope
+A local variable may be made global by use of the global keyword.

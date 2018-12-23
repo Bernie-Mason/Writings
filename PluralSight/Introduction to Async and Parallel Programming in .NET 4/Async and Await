@@ -1,0 +1,18 @@
+Async and Await 
+
+Motivation
+
+Responsiveness: Network I/O and other long running/blocking operations have high latency. Important to start them in the background. - ASYNC PROGRAMMING
+
+Performance. Reduce time of CPU bound computations by dividing the workload into chunks that can be executed simultaneously - PARALLEL PROGRAMMING
+
+Async and Parallel Programming in .NET
+
+Based on Task and Task Parallel Library (TPL). But why do we need this? We have threads and the async programming model pattern. There's the event-based async pattern. 
+
+HOWEVER, as this becomes more and more important to the users in .NET we'll see the new model becoming more advanced. Better cancelling, exception handling, continuations. 
+
+TASKS
+Programming model is based on the concept of a Task. A Task is a unit of work; an object denoting an ongoing operation or computation. 
+
+Creating a Task

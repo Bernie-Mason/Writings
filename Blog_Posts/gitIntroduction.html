@@ -1,0 +1,32 @@
+<h2>A brief introduction to Git</h2>
+<p>Git is a free to use tool that allows users to effectively accomplish two of the most common tasks that workers need in the digital age: <em>backing up</em> our work and <em>sharing</em> our work. If you want to learn more after reading this, you should check out the first few chapters of this <a href="https://progit2.s3.amazonaws.com/en/2016-03-22-f3531/progit-en.1084.pdf">free, and very accessible, book</a>. </p>
+
+<p>Git was created in 2005 by the Linux development community and was created as a simple, fast tool for non-linear and distributed development. Git is not as friendly as most pieces of commercial software but with a bit of knowledge and patience it can save large amounts of time, increase efficiency when sharing complicated projects and reduce the risk to your work from yourself and from project collaborators.</p> 
+
+<h3>What is git?<h3>
+
+<p>Git is a distributed version control system (DVCS). This means that <em>it</em>, and therefore <em>you</em>, have control over the various iterations (or versions) of whatever you're, and other people, are working on. It does this by having a .git directory (called a repository) on your computer, in your project folder which contains a copy of every version of the project that has been saved to it. Most commonly you'll be working with the latest iteration but, importantly, Git gives you the flexibility to go back to go back to any point that you updated your Git repository.</p> 
+
+<p>In DVCSs, clients (like you) have don't just have a snapshot of the latest version of the files: they fully mirror the repository. This is very helpful because if a remote server containing the repository goes offline, any systems (like your one) that were collaborating with can be used to restore the server. As the entire project history is available on your local disk, Git is incredibly quick to browse history, or to look at the difference in the project at any two points in time. You're able to access most of the project details without being online.</p>
+
+
+<h3>How does Git store versions?</h3>
+<p>Unlike most other version control softwares Git DOES NOT think of storing its data as a series of deltas from the original file. Git contains its data changes as a list of references to snapshots of a filesystem. If a file hasn't changed since a previous commit, Git references the previous snapshot for that file.</p>
+
+<p>Everything that is committed in Git is check-summed before it is stored. The state that is committed at that time is always referred to by that checksum meaning that it is totally impossible to change a file's contents or directory's structure without Git catching it. The SHA-1 hash is a 40 hex character string that is the checksumming method for Git. </p>
+
+<h3>The three staging areas></h3>
+<p><strong>Git has three main states that the directory files can be in: modified, staged and committed.</strong></p>
+
+<ul>		
+	<li>Modified: you've made some changes to the files in your working directory but haven't told Git about it yet</li>
+
+	<li>Staged: you've marked any modified files that you want to go into the next commit. They are now sitting in the staging area.</li>
+
+	<li>Committed: you've safely stored the staged changes into your database. The files are now in your .git directory (repository).</li>
+</ul>
+
+<p>This middle man, staged changes, is important as it allows you to be specific about what you want to change. Note that the stating area is a real physical file, generally contained within the .git directory, that stores information about what will go into your next commit. </p>
+
+<p>When we copy or clone the data from a repository onto a new computer we get the metadata and object database that are stored in the .git file. This cloning is also called checkouting. The working tree on one computer is a single checkout of one version of the project. These files are pulled out of the compressed database in the .git directory and placed on your computer to modify.</p>
+

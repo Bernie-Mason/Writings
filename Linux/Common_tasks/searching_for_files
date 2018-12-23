@@ -1,0 +1,111 @@
+Searching for files
+
+locate - find files by name
+find - search for files in a directory hierarchy
+xargs - build and execute command lines from standard input
+touch - change files times
+stat - display file or filesystem status
+
+The locate program performs a rapid database search of pathnames and then outputs every name that matches a given substring. It searchs solely based on file name. The find program on the other hand can be used to identify files that meet specific criteria!. It does this through the application of tests, actions, and options.
+
+Test
+
+To list the directories from our search:
+[bernie@antergos_vb ~]$ find ~ -type d | wc -l
+710
+
+Adding the test -type d limited the search to directories. We can also use:
+	b 		Block special device file
+	c 		Character special device file
+	f 		Regular file
+	l 		Symbolic link
+
+We can also search by file size and filename by adding some additional tests. Let's look for all regular files that match the wildcard pattern *.JGP and are larger than 1 mgbtye
+
+[bernie@antergos_vb ~]$ find ~ -type f -name "*.JPG" -size +1M
+
+Here we add the -name test followed by the wildcard pattern. Notice that we enclose it in quotes to prevent the pathname expansion by the shell. Next, we add the -size test followed by the string +1M. The leading plus sign indicates that we are looking for files larger than the specified number.
+
+Operators
+Even with all the tests that find provides, we may still need a better way to describe the logical relationship between tests. For example, what it we needed to determine if all the files and subdirectories in a directory had secure permissions? We would look for all the files with permissions that are not 0600 and directories with permissions that are not 0700.  Fortunately, find provides a way to combine tests and logical operators to create more complex logical relationships.
+
+[bernie@antergos_vb ~]$ find ~ \( -type f -not -perm 0600 \) -or \( -type d -not -perm 0700 \)
+
+We can use -and, -not and -or logical operators this way. We can also group tests and operators together to form larger expressions using parentheses. Note that as parentheses have special meaning to the shell, they must be quoted when using them on the command line to allow them to be passed as arguments to find. Usually the backslash character is used to escape them.
+
+Actions
+Having a list is useful but we'd really like to act on the list. First let's look at a few of the predefined actions: -delete, -ls, -print (full pathname), -quit (quit once a match is made)
+
+[bernie@antergos_vb ~]$ find ~
+
+This command produced a list of every file and subdirectory contained within our home directory. It produced a list because the -print action is implied if no other action is specified. Thus it is the same as:
+
+[bernie@antergos_vb ~]$ find ~ -print
+
+We can use find to delete files that certain criteria (pass certain tests). It should go without saying that we should use extreme caution when using the -delete action. ALWAYS TEST IT FIRST BY SUBBING IN THE PRINT ACTION!
+
+[bernie@antergos_vb ~]$ find ~ -type f -name '*.BAK' -print
+
+before we go remember that there is an implied -and relationship between tests and actions. Therefore, the above and below expressions yield the same
+
+[bernie@antergos_vb ~]$ find ~ -type f -and -name '*.BAK' -and -print
+
+Since the logical relationship between tests and actions determines which of them are performed, we can see that the order of the tests and actions is important. For instance, if we were to reorder the tests and actions so that the -print action was the first one, the command would behave differently (it would always print as the print action always evaluates to true).
+
+In addition to predefined actions, we can also invoke arbitrary commands. The traditional way of doing this is with the -exec action, like this:
+
+-exec command {};
+
+Where command is the name of a command and {} is a symbolic representation of the current pathname, and the semicolon is a required delimiter indicating the end of the command. 
+
+for example
+
+-exec rm '{}' ';'
+
+Again, since the brace and semicolon characters have special meaning the shell, they must be quoted or escaped. It's also possible to execute a user-defined action interactively, By using the -ok action in place of -exec, the user is prompted before execution of each specified command:
+
+Improving efficiency
+When the -exec action is used, it launches a new instance of the specified command each time a matching file is found. There are times when we might prefer to combine all of the search results and launch a single instance of the command. Instead of
+
+ls -l file1
+ls -l file2
+
+We want..
+
+ls -l file1 file2
+
+Here we cause the command to be executed only one time rather than multiple times. There are two ways we can do this: the traditional way, using the external command xargs, and the alternative way, using a new feature in find itself. 
+
+In our example
+
+[bernie@antergos_vb ~]$ find ~ -name 'foo.txt' -type f -exec ls -l '{}' ';'
+
+If we change the semicolon to a plus sign, we activate the ability of find to combine the results of the search into an argument list for a single execution of the desired command
+
+[bernie@antergos_vb ~]$ find ~ -name 'foo.txt' -type f -exec ls -l '{}' '+'
+
+We get the same results, but the system only has to execute the ls command once. We can also use the xargs command to get the same result. xargs accepts input from standard input and converts it into an argument list for a specified command:
+
+[bernie@antergos_vb ~]$ find ~ -name 'foo.txt' -type f -print | xargs ls -l
+
+Dealing with odd filenames
+Unix-like systems allow embedded spaces (and even newlines) in filenames. This causes problems for programs like xargs that construct argument lists for other programs. An embedded space will be treated as a delimiter, and the resulting command will interpret each space-separated word as a separate argument. To overcome this, find and xargs allow the optional use of a null character as argument separator. A null character is defined in ASCII as the character represented by the number 32). The find command provides the action -print0 which produces null-separated output, and the xargs command has the --null option, which accepts null separated input. This makes sure that all files are handled correctly.
+
+find ~ name '*.jpg' -print0 | xargs --null ls-l
+
+rm
+
+
+Making a playground
+With just two lines, we created a playground directory containing 100 directories each with 26 files.
+
+[bernie@antergos_vb ~]$ mkdir -p playground/dir-{00{1..9},0{10..99},100}
+[bernie@antergos_vb ~]$ touch playground/dir-{00{1..9},0{10..99},100}/file-{A..Z}
+
+The touch command is usually used to set or update the modification times of files. However, if a filename argument is that of a non-existent file, an empty file is created.
+
+We can confirm that we've created 100 files of the same type using:
+
+[bernie@antergos_vb playground]$ find -type f -name 'file-A' | wc -l
+
+Next let's look at finding files based on their modification times

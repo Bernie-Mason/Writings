@@ -1,0 +1,25 @@
+// Derived from Git Professional
+
+Git was created in 2005 by the Linux development community and was created as a simple, fast tool for non-linear and distributed development. 
+
+Git is a distributed version control system. In DVCSs, clients have don't just have a snapshot of the latest version of the files: they fully mirror the repository. This is very helpful because if the remote server goes offline or explodes, any systems that were collaborating with can be used to restore the server. Each clone on each users system is actually a full backup. As the entire project history is available on your local disk, Git is incredibly quick to browse history, or to look at the difference in the project at any two points in time. You're able to access most of the project details without being online. That is incredible.
+
+Git is able to use complex branching systems for non-linear development allowing work patterns that aren't possible with centralized version control systems.
+
+How does Git store versions?
+Unlike most other version control softwares Git DOES NOT think of storing its data as a series of deltas from the original file. Git contains its data changes as a list of references to snapshots of a filesystem. If a file hasn't changed since a previous commit, Git references the previous snapshot for that file.
+
+Everything that is committed in Git is check-summed before it is stored. The state that is committed at that time is always referred to by that checksum meaning that it is totally impossible to change a file's contents or directory's structure without Git catching it. The SHA-1 hash is a 40 hex character string that is the checksumming method for Git. 
+
+Git has three main states that the directory files can be in: modified, staged and committed.
+
+		Modified: you've made some changes to the files in your working directory but haven't told Git about it yet
+
+		Staged: you've marked any modified files that you want to go into the next commit. They are now sitting in the staging area.
+
+		Committed: you've safely stored the staged changes into your database. The files are now in your .git directory (repository).
+
+This middle man, staged changes, is important as it allows you to be specific about what you want to change. Note that the stating area is a real physical file, generally contained within the .git directory, that stores information about what will go into your next commit. 
+
+When we copy or clone the data from a repository onto a new computer we get the metadata and object database that are stored in the .git file. This cloning is also called checkouting. The working tree on one computer is a single checkout of one version of the project. These files are pulled out of the compressed database in the .git directory and placed on your computer to modify.
+

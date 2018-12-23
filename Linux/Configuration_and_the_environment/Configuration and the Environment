@@ -1,0 +1,133 @@
+Configuration and the Environment
+The environment
+
+// From "The Linux Command Line" Chapter 11: The Environment
+
+THe shell maintains a body of information during our shell session called the environment. Data stored in the environment is used by programs to determine facts about our configuration. While most programs use configuration files to store program settings, some programs will also look for values stored in the environment to adjust their behavior. Knowing this, we can use the environment to customize our shell experience.
+
+printenc - Print part or all of the environment
+set - Set shell options
+export - export environment to subsequent executed programs
+alias - create an alias for a command
+
+What is stored in the environment?
+The shell stores two basic types of data in the environment, although, with bash, the types are largely indistinguishable. They are environment variables and shell variables. Shell variables are bits of data placed there by bash, and environment variables are basically everything else. In addition to variables, the shell also stores some programmatic data, namely alias and shell functions. 
+
+Examining the environment
+To see what is stored in the environment, we can use either the set built in bash or the printenv program. The set command will show both the shell and environment variables, while printenv will only display the latter. 
+
+The set command, when used without options or arguments, will display both the shell and environment variables, as well as any defined shell functions. We can look at the values of specific variables using:
+
+[bernie@antergos-vbox ~]$ printenv USER
+
+OR
+
+[bernie@antergos-vbox ~]$ echo $USER
+
+Remember that the dollar sign is used when you want to use the value of a variable in the command line.
+
+Some important and useful variables
+
+DISPLAY 		The name of your display if you are running  a graphical environment 
+EDITOR 			The name of the program to be used for text editing
+SHELL 			The name of your shell program
+HOME 			The pathname of your home directory
+LANG 			Defines the character set and collation order of your language
+OLD_PWD 		The previous working directory
+PAGER 			The name of the program to be used for paging output. This is often set to /usr/bin/less but set to empty for my antergos system
+PATH 			A colon-separated list of directories that are searched when you enter a name of an executable program.
+PS1 			Prompt String 1. This defines the contents of your shell prompt. This can be extensively customised!
+PWD 			The current working directory
+TERM 			The name of your terminal type. Unix-like systems support many terminal protocols; this variable sets the protocol to be used with your terminal emulator.
+TZ 				Specifies your time zone. Most Unix-like systems maintain the computer's internal clock in Coordinated Universal Time (UTC) and then display the local time by applying an offset specified by this variable
+USER 			Your username
+
+How is the environment established
+When we log onto a system, the bash program starts and reads a series of configuration scripts called startup files, which define the default environment shared by all users. This is followed by more startup files in our home directory that define our personal environment. That exact sequence depends on the type of shell session being started.
+
+Login and Non-login shells
+There are two kinds of shell sessions: a login shell session and a non-login shell session. A login shell session is one in which we are prompted for our username and password; for example, when we start a virtual console session. A non-login shell session typically occurs when we launch a terminal session in the GUI. Login shells read one or more startup files.
+
+Startup Files for Login Shell Sessions
+/etc/profile 		A global config script that applies to all users
+~/.bash_profile 	A users personal startup files. Can be used to extend or override settings in the global configuration script
+~/.bash_login		If ~/.bash_profile is not found, bash attempts to read from this script
+~/.profile 			If neither ~/.bash_profile or ~/.bash_login are found bash attempts to read this file
+
+Non-login shell sessions read the startup files as shown below:
+/etc/bash.bashrc 	A global config script that applies to all users
+~/.bashrc 		 	A user's personal startup file. Can be used to extend or override settings in the global configuration settings
+
+In addition to reading the startup files above, non-login shells inherit  the environment from their parent process, usually a login shell. Take a look at your system and see which startup files you have. The ~/.bashrc is probably the most important startup file from the ordinary user's point of view, since it is almost always read. Non-login shell read it by default, and most startup files for login shells are written in such a way as to read the ~/.bashrc file as well
+
+
+Take a look inside a typical .bash_profile file
+
+Lines that begin with a hash are comments. This is called an if compound command, which we will cover fully when we get into shell scripting. This bit of code shows us how the login gets the contents of .bashrc.
+
+Ever wonder how the shell knows where to kind commands when we enter them on the command line? For example, when we enter ls, the shell doesn't search the entire computer to find /bin/ls (the full pathname of the command); rather is searches the list of directories that are contained in the PATH variable.
+The PATH variable is often (but not always) set by the /etc/profile startup file and with this code:
+
+PATH=$PATH:$HOME/bin
+
+PATH is modified to add the directory $HOME/bin to the end of the list. This is an example of parameter expansion!
+
+[bernie@antergos-vbox ~]$ foo="This is some"
+[bernie@antergos-vbox ~]$ echo $foo
+This is some
+[bernie@antergos-vbox ~]$ foo=$foo" text."
+[bernie@antergos-vbox ~]$ echo $foo
+This is some text
+
+Using this technique, we can append text to the end of the variable's contents.
+By adding the string $HOME/bin to the end of the PATH variable's contents the directory $HOME/bin id added to the list of directories searched when a command is entered. This means that when we want to create a directory within our home directory for storing our own private programs, the shell is ready to accommodate us. All we have to do is call it bin, an we're ready to go!
+
+finally we have
+
+export PATH
+
+The export command tells the shell to make the contents of PATH available to child processes of this shell
+
+Modifying the environment
+Since we know where the startup files are and what they contain, we can modify them to customise our environment.
+Which files?
+As a general rule, to add directories to your PATH or define additional environment variables, place those changes in bash_profile. For everything else, place the changes in .bashrc. Unless you're the system admin and need to change the defaults for all users of the system, restrict your modifications to the files in your home directory. It is certainly possible to change the files in /etc such as profile, and in many cases it would be sensible to do so,  but for now we'll play it safe
+
+Text Editors
+To edit the shell's startup files, as well as most other config files we use a text editory. A lot of text editors are available for LInux. Text editors fall into two catagories: graphical and text based. gedit is the GNOME graphical editor. nano is a popular text-based editor. The vi editor (on most Linux systems called vim, which is short for Vi IMproved) is the traditional editor for Unix-Like systems
+
+[bernie@antergos-vbox ~]$ gedit somefile.txt
+
+This command will start the gedit text editor and load the file named somefile.txt from the working directory. 
+
+Before we edit .bashrc let's create a copy
+
+[bernie@antergos-vbox ~]$ cp .bashrc .bashrc.bak
+
+Note that the extensions .bak, .sav and .old are popular ways of indicating a backup file.
+
+Open .bashrc in nano and have a look at what you get.
+
+The screen consists of a header at the top, the text of the file being edited in the middle, and a menu of commands at the bottom. Since nano was designed to replace the text editor supplied with an email client, it is rather short on editing features.
+CTRL-X to exit the program 
+CTRL-O to save work (denoted as write out)
+
+At the end of the file add the following commands
+umask 0002
+export HISTCONTROL=ignoredups
+export HISTSIZE=1000
+alias l.='ls -d .* --color=auto'
+alias ll='ls -l --color=auto'
+
+Line 1 sets the umask to solve the problem with shared  directories:
+Line 2 causes the shell's history recording feature to ignore a comand if the same command was just recorded
+Line 3 increases the size of the command history from the default of 500 lines to 1000
+Line 4 creates a new command called l., which displays all directory entries that begin with a dot
+Line 5 creates a new command called ll which displays a long-format directory listing
+
+THIS IS FUCKING COOL
+
+Why comments are important
+Whenever you modify config files, it's a good idea to comment the changes. Shell scripts and bash startup files use a # symbol
+
+Editing config files is AN ESSENTIAL SKILL. Moving forward, as we read man pages for commands, take note of the environment variables that commands support. There may be a gem or two. In later chapters we will learn about shell functions, a powerful feature that we can also include in the bash startup files to add to your arsenal of custom commands.

@@ -1,0 +1,18 @@
+Steps in creating the SportsStore MVC application (or any MVC app)
+1. Create a new empty solution
+2. Add a "Domain" class libary, an MVC "WebUI" project and a unit tests project named "UnitTests".
+3. Use the package manager to include usful packages such as
+  a. Ninject (+ .Web.Common + .MVC3) - both WebUI and UnitTests need this
+  b. Moq - both WebUI and UnitTests need this
+  c. Microsoft Asp.Net.Mvc - WebUI DOESN'T need this as it's already an MVC application but the over 2 do!
+4. Create an entities folder and add your first model class. MVC revolves around the domain model so this is the place you want to start.
+  a. In the case of the SportsStore application you'll want to create a Product model.
+  b. You can then create a folder called Abstract in the Domain namespace and include an interface (with a name like IProductRepository). This interface uses IEnumerable<T> to allow a caller to obtain a sequence of Product objects, without saying how or where the data is stored or retrieved. A class that depends on the IProductRepository interface can obtain Product objects without needing to know about where they are coming from or how the implementation class will deliver them. This is the essence of the repository pattern.
+5. Create a controller that declares a constructor dependency (constructor injection) on the interface an ActionResult that returns a view (set the Routing as needed). Get a 'index' view or equivalent
+6. Set up a Database. VS has an administration-free implementation of the core SQL server features called LocalDB
+  a. Create the database connection in Visual Studio. Open the Server Explorer window from the View menu and click Connect to Database.
+  b. Select Sql Server and click continue. Set the server name to (localdb)\MSSQLLocalDB, use Windows Authentication and set the database name
+  c. Add a DbContext class to a new folder named Concrete in the Domain
+  d. To the Web.config file add: <add name="EFDbContext" connectionString="Data Source=(LocalDb)\MSSQLLocalDB;Initial Catalog=SportsStore;Integrated Security=True" providerName="System.Data.SqlClient" />
+7. Now add a repository class that inherits from IProductRepository named EFProductRepository and bind it to our Ninject infrastructure.
+8.

@@ -1,0 +1,28 @@
+// From The Linux Command Line
+
+Introduction to Linux
+
+Freedom, with regards to Linux, is the power to decide what your computer does, and the only way to have this freedom is to know what your computer is doing. It is a computer without secrets, one where everything can be known if you care enough to find out.
+
+It has been said that "graphical user interfaces make easy tasks easy, while command line interfaces make difficult tasks possible."
+
+Linux is modeled on the Unix family of operating systems and so shares the same rich history of command line tools as Unix. Unix came into prominance during the early 1980s, before the widespread adoption of the graphical user interface and, as a result, developed an extensive command line interface instead. In fact, one of the strongest reasons early adopters of Linux chose it over, say Windows NT was the powerful command line interface, which made the difficult tasks possible.
+
+Learning the Linux command line is challenging. It's not that it's so hard, but rather it's so vast. The average Linux system has literally thousands of programs you can employ on the command line. This is not a casual endeavor. 
+
+We first need to acquaint ourselves with the Unix way of thinking. Linux is not just a piece of software; it's also a small part of the larger Unix culture, which has its own language and history.
+
+4 things I want to learn!
+
+1. Learn the Shell: Start the exploration of the basic language of the command line, including such things as the structure of commands, filesystem navigation, command line editing, and finding help and documentation for commands.
+2. Configuration and the Environment covers editing configuration files that control the computer's operation from the command line.
+3. Common tasks and essential tools: Explore many of the ordinary task that are performed from the command  line.
+4. Writing Shell Scripts: introduces shell programming, an easy to learn technique for automating many common computing tasks.
+
+Technically speaking, Linux is the name of the operating system's kernel and nothing more. The kernel is very important, since it makes the operating system go, but it's not enough to form a complete operating system.
+
+JAM: "yeah learning to use linux is transferable between distros
+the difference is in package management
+default installed software
+and where software has its config files stored
+as well as those programs default config"

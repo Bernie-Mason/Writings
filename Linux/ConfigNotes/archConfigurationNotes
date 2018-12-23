@@ -1,0 +1,45 @@
+
+
+Get writings:
+$ cd Documents/
+$ git clone https://github.com/Bernie-Mason/Writings.git
+
+Install packages
+$ sudo pacman -S vim
+$ sudo pacman -S varnish
+$ sudo pacman -S nginx
+
+Install aur packages
+$ cd
+$ mkdir aur
+$ cd aur
+$ git clone https://aur.archlinux.org/sublime-text.git 
+$ cd sublime-text/
+$ makepkg -si
+
+Configure shell
+$ vim .bashrc
+	# Change umask to make directory sharing easier
+	umask 0002	
+
+	# Ignore duplicates in command line history and increase
+	# history size to 1000 lines
+	export HISTCONTROL=ignoredups
+	export HISTSIZE=1000	 
+
+	#add some helpful alias
+	alias l.='ls -d .* --color=auto'
+	alias ll='ls -ls --color=auto'
+
+Git config
+$ git config --global user.email "bernie.mason@gmail.com"
+$ git config --global user.email "bernie"
+$ ssh-keygen
+
+Enable message logging
+$ sudo pacman -S syslog-ng
+$ systemctl enable syslog-ng
+$ systemctl start syslog-ng
+- view message logging
+$ sudo tail -f /var/log/messages.log
+

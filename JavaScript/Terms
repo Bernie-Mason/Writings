@@ -1,0 +1,14 @@
+EVENT DELERGATION
+
+JS event listeners fire not only on a single DOM element but on all its descendants (children).
+
+EVENT BUBBLING
+
+Inverse of above. Also known as propagation, events on an element will 'bubble up' and also fire on all parents. When clicking on <a> you're also clicking on it's divs and ultimately the body.
+
+Module
+Modules are just clusters of words (or code). Good modules, however are highly self-contained with distinct functionality, allowed them to be shuffled, removed, or added as necessary, without disrupting the system as a whole. This started in ECMAScript 2015. This allows imported and exported of functions and classes. A module has at least one import or export.
+
+Modules are executed within their own scope, not in the global scope; this means that variables, functions, classes etc declared in a modules are not visible outside the module unless they are explictly exported using one the of the export forms. Conversely, to consume a variable, function, class, interface, etc exported from a different module, it has to be imported using one of the import forms.
+
+Modules import one another using a module loader. At runtime the module loader is responsible for locating and executing all dependencies of a module before executing it. Well-known module loaders in JS as are teh CommonJS module loader for Node.js and require.js for web apps (Epro uses this!)

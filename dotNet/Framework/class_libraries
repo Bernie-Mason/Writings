@@ -1,0 +1,9 @@
+Class Libraries
+
+Class libraries can be constructed using .NET Framework, .NET Core or .NET Standard implementations. But what's the difference between them?
+
+The .NET Standard library will be super compatible with other applications BUT will have a smaller .NET API surface are that the library can access.
+
+The .NET Core library will have a larger .NET API surface area that the library can access but only .NET Core apps will be compatible with in.
+
+For example, a library that targets .NET Standard 1.3 will be compatible will apps that target .NET Framework 4.6, .NET Core 1.0 and any other platform that supports it.

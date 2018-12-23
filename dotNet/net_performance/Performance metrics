@@ -1,0 +1,45 @@
+Performance metrics
+
+Goals of performance testing and optimization. There are lots of profilers and monitoring tools available to you, however, to use any of these tools, you need to know which performance metrics you're interested in. Different apps will have different performance goals, driven by business and operational needs. 
+
+Knowing the system's performance goals and the limits of its environment often guides you more than halfway through the process of improving its performance. 
+
+PERFORMANCE GOALS
+These should be expressed in language that's unambiguous to anyone working on the project. They should be expressed in terms of quantifiable performance metrics that can be measured by some means of performance testing. The performance goal should also contain some information about its environment - general or specific to that performance goal.
+
+PERFORMANCE METRICS
+Unlike performance goals, performance metrics are not connected to a specific scenario or environment. A performance metric is a measurable numeric quantity that reflects the application's behavior. You can measure a performance metric on any hardware and in any environment, regardless of the number of active users.
+
+PERFORMANCE METRIC  				UNITS OF MEASUREMENT
+CPU Utilization 					Percent
+Physical/Virtual Memory Usage		Bytes, kilobytes, megabytes etc
+Cache Misses						Count, rate (misses/second)
+Page Faults 						Count, rate (faults/second)
+Database Access Counts/Timing		Count, rate (access counts/second), milliseconds
+Allocations							Number of bytes, number of objects rate 
+Execution Time 						Milliseconds
+Network operations					Count, rate
+Disk operations						Count, rate
+Response Time 						Milliseconds
+Exceptions thrown 					Count, rate
+Startup Time 						Milliseconds
+Contentions 						Count, rate
+
+Some metrics are more relevant to certain application types than others. E.g. database access times are not a metric you can measure on a client system. Some common combinations of performance metrics and application types include:
+	For client applications, you might focus on startup time, memory usage and CPU utilization
+	For server applications hosting the system's algorithms, you usually focus on CPU utilization, cache misses, contentions, allocations and garbage collections
+
+The level at which performance metrics are measured can be changed without significantly altering the meaning. Execution time, for example, can be measured at the system level, at the single process level, or even for individual methods and lines.
+
+PERFORMANCE IN THE SOFTWARE DEVELOPMENT LIFECYCLE
+Although it's possible to retrofit performance into an existing application, a better approach is to consider every step of the development lifecycle an opportunity to understand the application's performance better: first, the performance goals and important metrics; next, whether the application meets or exceeds its goals; and finally, whether maintenance, user loads, and requirement changes introduce any regressions.
+
+	1. During the requirements gathering phase, start thinking about the performance goals you would like to set.
+	2. During the architecture phase, refine the performance metrics important for your application and DEFINE CONCRETE PERFORMANCE GOALS.
+	3. During the development phase, FREQUENTLY PERFORM EXPLORATORY PERFORMANCE TESTING on prototype code or partially complete features to verify you are well within the system's performance goals.
+	4. During the testing phase, PERFORM SIGNIFICANT LOAD TESTING AND PERFORMANCE TESTING to validate completely your system's performance goals
+	5. During subsequent development and maintenance, PERFORM ADDITIONAL LOAD TESTING AND PERFORMANCE TESTING WITH EVERY RELEASE to quickly identify any performance regressions introduced into the system.
+
+Taking the time to develop a suite of automatic laod tests and performance tests, set up an isolated lab environment in which  to run them, and analyze their results carefully to make sure no regressions are introduced is very time-consuming. Nevertheless, the performance benefits gained from systematically measuring and improving performance and making sure regressions don't creep slowly into the system is worth the initial investment in having a robust development process.
+
+

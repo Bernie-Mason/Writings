@@ -1,0 +1,512 @@
+String and Numbers
+
+Computers are all about working with data. In past chapters, we've focused on processing data at the file level. However, many problems need to be solved using smaller units of data such as strings and numbers.
+
+The shell provides a number of parameter expansions that perform string operations. In addition to arithmetic expansion, there is a common command linie program called bc, which performs higher level math.
+
+Parameter expansion
+Most parameter expansions are used in scripts rather than in the command line. We have already worked with some forms of parameter expansion; for example, shell variables. The shell provides many more.
+
+Basic Parameters
+The simplest form of parameter expansion is reflected in the ordinary use of variables. For example, $a, when expanded, becomes whatever the variable contains. Simple parameters may also be surrounded by braces, such as ${a}. This has no effect on the expansion, but it is required if the variable is adjacent to other text, which may confuse the shell. 
+
+Expansions to Manage Empty Variables
+Several parameter expansions deal with nonexistent and empty variables. These expansions are handy for handling missing positional parameters and assigning default values to parameters. Here is one such expansion:
+		${parameter:-word}
+	
+If parameter is unset (i.e. doesn't exist) or is empty, this expansion results in the value of word. If parameter is not empty, the expansion results in the value of parameter:
+
+[bernie@antergos_vb ~]$ foo=
+[bernie@antergos_vb ~]$ echo ${foo:-"substitute value if unset"}
+substitute value if unset
+[bernie@antergos_vb ~]$ echo $foo
+
+[bernie@antergos_vb ~]$ foo=bar
+[bernie@antergos_vb ~]$ echo ${foo:-"substitute value if unset"}
+bar
+[bernie@antergos_vb ~]$ echo $foo
+bar
+
+		${parameter:=word}
+
+If parameter is empty or unset, this expansion resulst in the value of word. Additionally, this creates and initialises parameter to the value of word. If parameter is not empty, the expansion results in the value of parameter.
+
+		${parameter:?word}
+
+Here, if parameter is unset or empty, this expansion causes the script to exit with an error, and the contents of word are sent to standard error. If parameter is not empty, the expansion results in the value of parameter.	e
+		
+		${parameter:+word}
+	
+If the parameter is unset or empty, the expansion results in nothing. If parameter is not empty, the value is of word is substituted for parameter; however, the value of parameter is not changed.
+
+[bernie@antergos_vb ~]$ foo=
+[bernie@antergos_vb ~]$ echo ${foo:+"substitute value if unset"}
+
+[bernie@antergos_vb ~]$ foo=bar
+[bernie@antergos_vb ~]$ echo ${foo:+"substitute value if unset"}
+substitute value if unset
+[bernie@antergos_vb ~]$ echo $foo
+bar
+
+Expressions That Return Variable Names
+The shell has the ability to return names of variables. This feature is used in some rather exotic situations.
+		${!prefix*}
+		${!prefix@}
+
+This expansion returns the name of exisitng variables with names beginning with prefix. According to bash documentation, both forms of the expansion perform identically. Here, we list all the variables in the environment with names that begin with BASH:
+
+[bernie@antergos_vb ~]$ echo ${!BASH*}
+BASH BASHOPTS BASHPID BASH_ALIASES BASH_ARGC BASH_ARGV BASH_CMDS BASH_COMMAND BASH_COMPLETION_COMPAT_DIR BASH_LINENO BASH_REMATCH BASH_SOURCE BASH_SUBSHELL BASH_VERSINFO BASH_VERSION
+
+String Operations
+There is a large set of expansions that can be used to operate on strings. Many of these expansions are particullarly well suited to operations on pathnames. The expansion
+
+	${#parameter}
+
+expands teh length of the string contained by parameter. Normally, parameter is a string; however, if parameter is either * or @, then the expansion results in the number of positional parameters:
+
+[bernie@antergos_vb ~]$ foo="This string is long"
+[bernie@antergos_vb ~]$ echo "'$foo' is ${#foo} characters long"
+'This string is long' is 19 characters long
+
+-----------
+
+	${parameter:offset}
+	${parameter:offset:length}
+
+This expansion is used to extract a portion of the string contained in parameter. The extraction begins at offset characters from the beginning of the string and continues until the end of the string, unless the length is specified.
+
+[bernie@antergos_vb ~]$ foo="This  string is long."
+[bernie@antergos_vb ~]$ echo ${foo:5}
+string is long
+[bernie@antergos_vb ~]$ echo ${foo:-5}
+long.
+[bernie@antergos_vb ~]$ echo ${foo:-5:2}
+lo
+
+-----------
+
+${parameter#pattern}
+${parameter##pattern}
+
+These expansions remove a leading portion of the string contained in parameter defined by pattern. pattern is a wildcard pattern like used in pathname expansion. The difference in the two forms is that the # form removes the shortest match, while the ## form removes the longest match.
+
+[bernie@antergos_vb ~]$ foo=file.txt.zip
+[bernie@antergos_vb ~]$ echo ${foo#*.}
+txt.zip
+[bernie@antergos_vb ~]$ echo ${foo##*.}
+zip
+
+-----------
+
+${parameter%pattern}
+${parameter%%pattern}
+
+These expansions are the same as the # and ## above, expect they remove text from the end of the string rathar than the beginning.
+
+[bernie@antergos_vb ~]$ foo=file.txt.zip
+[bernie@antergos_vb ~]$ echo ${foo%.*}
+file.txt
+[bernie@antergos_vb ~]$ echo ${foo%%.*}
+file
+
+-----------
+
+${parameter/pattern/string}
+${parameter//pattern/string}
+${parameter/#pattern/string}
+${parameter/%pattern/string}
+
+This expansinon performs a search and replace upon the contents of parameter. If text is found matching wildcard pattern, it is replaced with the contents of string. In the normal form, only the first occurence of pattern is replace. In the // form, all occurences are replace. The /# form requires that the match occur at the beginning of the string, and the /% form requires that the match occur at the end. /string may be omitted, which causes the text matched by pattern to be deleted.
+
+[bernie@antergos_vb ~]$ foo=JPG.JPG
+[bernie@antergos_vb ~]$ echo ${foo/JPG/jpg}
+jpg.JPG
+[bernie@antergos_vb ~]$ echo ${foo//JPG/jpg}
+jpg.jpg
+[bernie@antergos_vb ~]$ echo ${foo/#JPG/jpg}
+jpg.JPG
+[bernie@antergos_vb ~]$ echo ${foo/%JPG/jpg}
+JPG.jpg
+
+Parameter expansion is a good thing to know. The string-manipulation expansions can be used as substitutes for other common commands such as sed and cut. Expansions improve the efficiency of scripts by eliminating the use of extended programs. Let's relook at our longest_word program:
+
+#!/bin/bash
+
+# longest_word2: find the longest string in a file
+
+for i; do
+		if [[ -r $i ]]; then  # check filename is readable
+				max_word=
+				max_len=0
+				for j in $(strings $i); do
+						#len=$(echo -n $j | wc -c)
+						len=${#j}
+						if (( len > max_len )); then
+								max_len=$len
+								max_word=$j
+						fi
+				done
+				echo "$i: '$max_word' ($max_len characters)"
+		fi
+done
+
+Now let's look at the effect of our changes:
+[bernie@antergos_vb bin]$ time longest_word sys_info_page
+sys_info_page: 'style="color:#666;">$TITLE</h1>' (31 characters)
+
+real	0m0.364s
+user	0m0.017s
+sys	0m0.013s
+[bernie@antergos_vb bin]$ time longest_word2 sys_info_page
+sys_info_page: 'style="color:#666;">$TITLE</h1>' (31 characters)
+
+real	0m0.008s
+user	0m0.003s
+sys	0m0.000s
+
+Look how much quicker our new version is when it doesn't have to use echo and wc!
+
+Arithmetic Evaluation and Expansion
+It's basic form is
+
+	$((expression))
+
+where expression is a valid arithmetic expression.
+This is related to the compound command (( )) used for arithmetic evaluation (truth tests). 
+
+Number Bases
+
+Back in Chapter 9, we looked at octal (base 8) and hex (16) numbers. In arithmetic expressions, the shell supports integer constants in any base.
+
+number
+0number (octal)
+0xnumber (hex)
+base#number
+
+For example:
+
+[bernie@antergos_vb bin]$ echo $((0xf3))
+243
+[bernie@antergos_vb bin]$ echo $((023))
+19
+[bernie@antergos_vb bin]$ echo $((2#010110))
+22
+
+Unary operators
+There are two unary operators, the + and the -, which are used to indicate if a number is  positive or negative.  - + * / all do as expected and ** and % are exponentiation and modulo respetively.
+
+[bernie@antergos_vb bin]$ echo $(( 5 / 2 ))
+2
+
+Since the shell's arithmetic operates on only integers, the results of division are always whole numbers. This makes determination of a remainder in a division operation important. 
+
+[bernie@antergos_vb bin]$ echo $(( 5 % 2 ))
+1
+
+Calculating the remaining is useful in loops. It allows an operation to be performed at specified interval during the loop's execution. 
+
+#!/bin/bash
+
+# modulo : demonstrate the modulo operator 
+
+for ((i = 0; i <= 20; i = i + 1)); do
+	remainder=$(( i % 5 ))
+	if (( $remainder == 0 )); then
+		printf "<%d> " $i
+	else
+		printf "%d " $i
+	fi
+done
+printf "\n"
+
+And if we run this: 
+
+[bernie@antergos_vb bin]$ modulo
+<0> 1 2 3 4 <5> 6 7 8 9 <10> 11 12 13 14 <15> 16 17 18 19 <20>
+
+Assignment
+Although its uses may not be immediately apparent, arithmetic expression may perform assignment. We have assignment many times, though in a different context. Each time we give a variable a value, we are performing assignment. We can also do it within arithmetic expressions:
+
+[bernie@antergos_vb bin]$ foo=
+[bernie@antergos_vb bin]$ echo $foo
+
+[bernie@antergos_vb bin]$ if (( foo = 5 )); then echo "It is true."; fi
+It is true.
+[bernie@antergos_vb bin]$ echo $foo
+5
+
+In the example above, we first assign an empty value to foo and verify it's empty. Next we perform the compound command (( foo = 5 )).
+
+Assignments: += -= *= /= and %= are all available (C based assignments)
+
+Like in C, parameter++ or ++parameter are also available. Like in C the prefix means that the parameter is incremented before the parameter is returned:
+
+[bernie@antergos_vb bin]$ foo=1
+[bernie@antergos_vb bin]$ echo $(( ++foo ))
+2
+[bernie@antergos_vb bin]$ echo $foo
+2
+[bernie@antergos_vb bin]$ echo $(( foo++ ))
+2
+[bernie@antergos_vb bin]$ echo $foo
+3
+
+For most shell applications, prefixing the operator will be most useful.
+
+Bit operators
+One class of operators manipulates numbers in an unusual way. These operators work at the bit level and are used for certain kinds of low-level tasks, often involving setting or reading bit flags. 
+
+Operator 	Description
+~ 			Bitwise negation of all bits in a number
+<< 			Left bitwise shift
+>> 			Right bitwise shift
+& 			Bitwise AND. Perform an OR operation on all the bits in two numbers
+| 			Bitwise OR
+^ 			Bitwise XOR
+
+Note that there are also corresponding assignment operators (i.e. <<=) for all but bitwise negation
+
+[bernie@antergos_vb bin]$ for ((i=0;i<8;++i)); do echo $((1<<i)); done
+1
+2
+4
+8
+16
+32
+64
+128
+
+
+Logic
+We already know that the compound commmand (( )) supports a variety of comparison operators. There are a few more that can be used to evaluate logic.
+
+Operator 			Description
+expr1?expr2:expr3 	Comparision (ternary) operator. If expression expr1 evaluates to be non-zero (arithmetic true) then expr2, else expr3
+
+When used for logical operations, expressions follow the rules of arithmetic logic; that is, expressions that evaluate as 0 are considered false, while non-zero expressions are considered true. The (( )) compound command maps the results into the shell's normal exit codes:
+
+[bernie@antergos_vb bin]$ if ((1)); then echo "true"; else echo "false"; fi
+true
+[bernie@antergos_vb bin]$ if ((0)); then echo "true"; else echo "false"; fi
+false
+
+The strangest of the logical operators is the ternary operator. This operator, which is modeled after the one in the C language) performs a standalone logical test. It can be used as a kind of if/then/else statement. It acts on three arithmetic expressions (strings won't work), and if the first expression is true (or non-zero), the second expression is performed. Otherwise, the third expression is performed. We can try this on the command line:
+
+[bernie@antergos_vb bin]$ a=0
+[bernie@antergos_vb bin]$ ((a<1?++a:--a))
+[bernie@antergos_vb bin]$ echo $a
+1
+[bernie@antergos_vb bin]$ ((a<1?++a:--a))
+[bernie@antergos_vb bin]$ echo $a
+0
+
+Here we see the ternary operator in action. This example implements a toggle. Each time the operator is performed, the value of the variable a switches from 0 to 1 or vice versa.
+#!/bin/bash
+
+# arith_loop: script to demonstrate arithmetic operators
+
+finished=0
+a=0
+printf "a\ta**2\ta**3\n"
+printf "=\t====\t====\n"
+
+until ((finished)); do
+		b=$((a**2))
+		c=$((a**3))
+		printf "%d\t%d\t%d\n" $a $b $c
+		((a<10?++a:(finished=1)))
+done
+
+Which outputs:
+
+[bernie@antergos_vb bin]$ arith_loop
+a	a**2	a**3
+=	====	====
+0	0	0
+1	1	1
+2	4	8
+3	9	27
+4	16	64
+5	25	125
+6	36	216
+7	49	343
+8	64	512
+9	81	729
+10	100	1000
+
+In this script, we implement an until loop based on the value of the finished variable. We increment a until the ternary operator sees that a is no longer less than 10, in which case finished is set to 1 and the loop terminates.
+
+bc - an arbirtrary-precision calculator language
+We have seen that the shell can handle all types of integer arithmetic, but what if we need to perform higher maths or even just use floating point numbers!? The answer is that we can't! At least, not directly with the shell. To do this, we need to use an external program. There are several approaches to take. Embedding Perl or AWK programs is one possible solution but, unfortunately, outside the scope of this book.
+
+Another approach is to use a specialised calculator program. One such program found on most Linux systems is called bc. The bc program reads a file written in its own C-like language and executes it. A bc script may be a separate file, or it may be read from standard input. The bc language supports quite a few features including variabless, loops, and programmer-defined functions. 
+
+[bernie@antergos_vb bin]$ bc -q
+2+2
+4
+234.234+324.34
+558.574
+quit
+[bernie@a
+
+The ability to take standard input means that we can use here documents, here strings and pipes to pass scipts. This is a here string example:
+
+[bernie@antergos_vb bin]$ bc <<< "2+2"
+4
+
+
+An Example Script	
+As a real world example, let's construct a script that performs a common calculation, monthly loan payments. In the script below, we use a here document to pass a script to bc:
+
+
+#!/bin/bash
+
+# loan_calc: script to calculate monthly loan payments
+
+PROGNAME=$(basename $0)
+
+usage() {
+		cat <<- _EOF_
+		Usage: $PROGNAME PRINCIPAL INTEREST MONTHS
+
+		Where
+
+		PRINCIPAL is the amount of the loan.
+		INTEREST is the APR as a number (7% = 0.07).
+		MONTHS is the length of the loan's term.
+
+		_EOF_
+}
+
+if (($# != 3)); then
+		usage
+		exit 1
+fi
+
+principal=$1
+interest=$2
+months=$3
+
+bc <<- _EOF_
+		scale = 10
+		i = $interest / 12
+		p = $principal
+		n = $months
+		a = p * ((i * ((1 + i) ^ n)) / (((1 + i) ^ n) - 1))
+		print a, "\n"
+_EOF_
+
+Which when run returns:
+
+[bernie@antergos_vb bin]$ loan_calc 135000 0.0775 180
+1270.7222490000
+
+This example calculates the monthly payment for a $135000 loan at 7.75 % APR for 180 months (15 years). Notice the precision of the answer. This is determined by the value given to the special scale variable in the bc script. A full description of the bc scripting language can be found in it's man page.
+
+Final note
+
+	In this chapter, we have learned about many of the little things that can be used to get "real work" done in scripts. As our experience with scripting forws, the ability to effectively manipulate strings and numbers will prove extremely valuable. Our loan-calc script demonstrates that even simple scripts can do some very useful things.
+
+	Extra Credit:
+
+Write the basic functionality of the loan_calc script and improve it with the following features:
+
+	A full verification of command line arguments
+	A command-line option to implement an "interactive" mode that will prompt the user to input the principal, interest rate and term of the loan
+	A better format for the output
+
+This is what we came up with:
+
+
+#!/bin/bash
+
+# loan_calc: script to calculate monthly loan payments
+
+PROGNAME=$(basename $0)
+interactive=
+principal=
+interest=
+months=
+
+usage() {
+		cat <<- _EOF_
+		Usage: $PROGNAME PRINCIPAL INTEREST MONTHS ( -i | --interactive )
+
+		Where
+
+		PRINCIPAL is the amount of the loan.
+		INTEREST is the APR as a number (7% = 0.07).
+		MONTHS is the length of the loan's term.
+
+		_EOF_
+}
+
+#if (($# != 3)); then
+#		usage
+#		exit 1
+#fi
+
+if [[ -n $1 ]]; then
+		case $1 in
+				-i|--interactive) 		interactive=1
+										;;
+				-h|--help) 				usage
+										;;
+				*)						principal=$1
+										interest=$2
+										months=$3
+										;;
+		esac
+fi
+
+if (( interactive == 1 )); then
+	while true; do
+
+		read -p "Please enter a value for the principal: "
+		
+		if [[ $REPLY >  0 ]]; then
+			principal=$REPLY
+			break
+		else
+			echo "Invalid Entry" >&2
+		fi
+	done
+
+	while true; do
+
+		read -p "Please enter a value for the interest: "
+		
+		if (( $REPLY >  0 )); then
+			interest=$REPLY
+			break
+		else
+			echo "Invalid Entry" >&2
+		fi
+	done
+	while true; do
+
+		read -p "Please enter a value for the number of months: "
+		
+		if (( $REPLY >  0 )); then
+			months=$REPLY
+			break
+		else
+			echo "Invalid Entry" >&2
+		fi
+	done
+fi
+
+if [[ $interest > 0 && $principal > 0 && $months > 0 ]]; then
+	echo "calculation started: $interest interest, $principal principal and $months months"
+	bc <<- _EOF_
+			scale = 6 
+			i = $interest / 12
+			p = $principal
+			n = $months
+			a = p * ((i * ((1 + i) ^ n)) / (((1 + i) ^ n) - 1))
+			print "The monthly payment is: ",  a, "\n" 
+	_EOF_
+else
+	echo "Invalid arguments!"
+fi

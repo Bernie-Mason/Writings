@@ -1,0 +1,104 @@
+Rebasing 
+In Git, there are two main ways to integrate changes from one branch into another: the merge and the rebase. 
+
+Rebasing is a pretty amazing tool but there are cases when you won't want to use it.
+
+The basic rebase
+Let's think of a situation where we just have one branch that has diverged from our master:
+
+BAN@BAN-TOP MINGW64 ~/Documents/Git_Test (master)
+$ glodga
+* 95efa37 (HEAD -> master) Added a second basic file
+| * fa3795d (god_branch) Added a basic text file
+|/
+*   21a37bd (testing) Merge branch 'god_branch'
+
+
+god_branch and master are working on separate things. Each branch has a single commit working on something else. The easiest way to integrate the branches is by using the merge command. It performs a three-way merge between the two latest branch snapshots (95efa37 and fa3795d) as well as the most common ancestor of the two (21a37bd).
+
+However, there is another way: you can take the patch of the change that was introduced in fa3795d and reapply it on the top of 95efa37. This is called rebasing. With the rebase command, you take all the changes that were committed in one branch and replay them on another.
+
+	$ git checkout god_branch
+	$ git rebase master
+
+It works by going to the common ancestor of the two branches (the one you're  on and the one you're rebasing onto), getting the diff introduced by each commit of the branch you're on, saving those diffs to temporary files, resetting the current branch to the same commit as the branch you are rebasing onto, and finally applying each change in turn.
+
+If you look  at the log of a rebased branch, it looks like a linear history: it appears that all the work happend in a series even when it originally happened in parallel.
+
+	BAN@BAN-TOP MINGW64 ~/Documents/Git_Test (god_branch)
+	$ glodga
+	* e052cfa (HEAD -> god_branch) Added Basic.txt again
+	* a0be160 merge changes
+	* d071985 (master) Added master Basic.txt to be overwritten on rebase
+	* 95efa37 Added a second basic file
+
+	BAN@BAN-TOP MINGW64 ~/Documents/Git_Test (god_branch)
+	$ git checkout master
+
+	BAN@BAN-TOP MINGW64 ~/Documents/Git_Test (master)
+	$ git merge god_branch
+
+	BAN@BAN-TOP MINGW64 ~/Documents/Git_Test (master)
+	$ glodga
+	* e052cfa (HEAD -> master, god_branch) Added Basic.txt again
+	* a0be160 merge changes
+	* d071985 Added master Basic.txt to be overwritten on rebase
+	* 95efa37 Added a second basic file
+	| * fa3795d (origin/god_branch) Added a basic text file
+
+Often you'll do this to make sure that your commit apply cleanly on a remote branch - perhaps in a project to which you're trying to contribute but that you don't maintain. In this case, you'd do your work in a branch and then rebase your work onto origin/master when you were ready to submit your patches to the main project. That way, the maintainer doesn't have to do any integration work - just a fast-forward to a clean apply.
+
+Note that the snapshot pointed to the final commit you end up with, whether it's the last of the rebased commits for a rebase or the final merge commit after a merger, is the same snapshot - it's only the history that is different. Rebasing replays changes from one line  of work onto another in the order they were introduced, whereas merging takes endpoints and merges.
+
+More interesting Rebases
+
+You can also have your rebase replay on something other than the rebase target branch. Suppose you have a master, server and client branches which all are several commits diverged from one another:
+
+BAN@BAN-TOP MINGW64 ~/Documents/Git_Test (master)
+$ glodga
+* 2f3728e (HEAD -> master) Second master commit with the server and client branches
+* 65c9285 First master commit with the server and client branches
+| * 1d64034 (server) This is the third server file
+| * 37e6787 This is the second server commit
+| * 8c8a2ba This is first server commit
+|/
+| * 103e637 (client) Second commit of the client branch
+| * 7575fe0 First commit for the client branch
+|/
+
+
+Suppose you decide that you want to merge client-side changes into your mainline for a release, but you want to hold off on the server-side changes until it's tested further. You can take the changes on client that aren't on server and replay them on your master branch by using the --onto option of git rebase:
+
+	BAN@BAN-TOP MINGW64 ~/Documents/Git_Test (master)
+	$ git rebase --onto master server client
+	First, rewinding head to replay your work on top of it...
+	Applying: First commit for the client branch
+	Applying: Second commit of the client branch
+
+	BAN@BAN-TOP MINGW64 ~/Documents/Git_Test (client)
+	$ glodga
+	* 192db79 (HEAD -> client) Second commit of the client branch
+	* 38449c3 First commit for the client branch
+	* 2f3728e (master) Second master commit with the server and client branches
+	* 65c9285 First master commit with the server and client branches
+	| * 1d64034 (server) This is the third server file
+	| * 37e6787 This is the second server commit
+	| * 8c8a2ba This is first server commit
+	|/
+
+This basically says, "Checkout the client branch, figure out the patches from the common ancestor of the client and server branches, and then replay them onto the master." It's a bit complex but the result is pretty cool.
+
+The perils of rebasing
+But rebasing isn't without it's drawbacks. These can be summed up in a single line:
+	DO NOT REBASE COMMITS THAT EXIST OUTSIDE OF YOUR REPOSITORY
+When you rebase stuff, you're abandoning existing commits and creating new ones that are similar but different. If you push commits somewhere and others pull them down and base work on the, and then you rewrite those commits with git rebase and push them up again, your collaborators will have to remerge their work and things will get messy when you try to pull their work back into yours.
+
+Rebase vs Merge
+Now we've seen both we should step back and talk about what history means.
+
+One point of view on this is that your repository's commit history is a record of what actually happened. It's a historical document, valuable in its own right, and shouldn't be tampered with. From this angle, changing the commit history is almost blasphemous, you're lying about what actually transpired. The opposing point of view is that the commit history is the story of how your project was made. You wouldn't publish the first draft of a book, and the manual for how to maintain your software deserves careful editing. This camp uses tools like rebase and filter-branch to tell the story in the way that's best for future readers. 
+
+In general the way to get the best out of both worlds is to rebase local changes you've made but haven't yet shared before you push them in order to clean up your story, but never rebase anything you're pushed somewhere.
+
+Summary
+You should be comfortable now creating and switching new branches and merging local branches. You should also be able to share your branches by pushing them to a shared server, working with others on shared branches, and rebasing your loal branches before they're shared. 

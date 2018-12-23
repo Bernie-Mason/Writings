@@ -1,0 +1,253 @@
+Positional Parameters
+
+One feature that has been missing from our programs is the ability to accept and process command line options and arguments. In this chapter, we will examine the shell features that allow our programs to get access to the contents of the command line.
+
+Accessing the command line
+The shell provides a set of variables called positional parameters that contain the individual words on the command line. The variables are name 0 through 9. They can be demonstrated this way:
+
+
+#!/bin/bash
+
+# posit_param: script to view command line parameters
+
+echo "
+	\$0 = $0 
+	\$1 = $1 
+	\$2 = $2
+	\$3 = $3
+	\$4 = $4
+	\$5 = $5
+	\$6 = $6
+	\$7 = $7
+	\$8 = $8
+	\$9 = $9
+	"
+
+When this script is run we get:
+
+[bernie@antergos_vb bin]$ posit_param
+
+	$0 = /home/bernie/bin/posit_param
+	$1 =
+	$2 =
+	$3 =
+	$4 =
+	$5 =
+	$6 =
+	$7 =
+	$8 =
+	$9 =
+
+Even when no arguments are provided, $0 will always contain the first item appearing on the command line, which is the pathname of the program being executed. When arguments are provided, we see the results:
+
+[bernie@antergos_vb bin]$ posit_param a b c bernie
+
+	$0 = /home/bernie/bin/posit_param
+	$1 = a
+	$2 = b
+	$3 = c
+	$4 = bernie
+	$5 =
+	$6 =
+	$7 =
+	$8 =
+	$9 =
+
+Determing number of arguments
+The shell provides the # variable to do this:
+
+#!/bin/bash
+
+# posit_param: script to view command line parameters
+
+echo "
+	Number of arguments: $#
+	\$0 = $0 
+	\$1 = $1 
+	\$2 = $2
+... etc
+
+Which yields:
+
+[bernie@antergos_vb bin]$ posit_param a b c bernie
+
+	Number of arguments: 4
+	$0 = /home/bernie/bin/posit_param
+	$1 = a
+	$2 = b
+	$3 = c
+	$4 = bernie
+	$5 =
+	$6 =
+	$7 =
+	$8 =
+	$9 =
+
+shift - getting access to many arguments
+
+[bernie@antergos_vb bin]$ posit_param *
+
+	Number of arguments: 15
+	$0 = /home/bernie/bin/posit_param
+	$1 = case_menu
+	$2 = hello_world
+	$3 = posit_param
+	$4 = read_ifs
+	$5 = read_integer
+	$6 = read_menu
+	$7 = read_multiple
+	$8 = read_validate
+	$9 = read_validate_test
+
+In this example, the wildcard * expands into 82 arguments. How can we process that many? The shell provides a method. The shift method moves the value along as well as reducing the $# by one:
+
+
+#!/bin/bash
+
+# posit_param: script to view command line parameters
+
+echo Number of arguments: $#
+i=0
+while [[ $# -gt 0 ]]; do
+	echo "Argument count $i = $1"	
+	i=$((i + 1))
+	shift
+done
+
+Simple Applications
+Even without shift, it's possible to write useful applications using positional parameters. 
+
+
+#!/bin/bash
+
+# file_info : provide simple file information
+
+PROGNAME=$(basename $0)
+
+if [[ -e $1 ]]; then
+	echo -e "\nFile Type:"
+	file $1
+	echo -e "\nFile Status:"
+	stat $1
+else
+	echo "$PROGNAME: usage: $PROGNAME file" >&2
+	exit 1
+fi
+
+This script returns:
+
+[bernie@antergos_vb bin]$ file_info read_menu
+
+File Type:
+read_menu: Bourne-Again shell script, ASCII text executable
+
+File Status:
+  File: read_menu
+  Size: 859       	Blocks: 8          IO Block: 4096   regular file
+Device: 802h/2050d	Inode: 555867      Links: 1
+Access: (0755/-rwxr-xr-x)  Uid: ( 1000/  bernie)   Gid: (  100/   users)
+Access: 2017-05-26 10:28:34.041921165 +0000
+Modify: 2017-05-26 10:28:32.828585838 +0000
+Change: 2017-05-26 10:28:32.901919291 +0000
+ Birth: -
+
+This program displays the file type (determined by the command file) and file status (determined from the stat command) of a specified command. One interesting feature of this program is the PROGNAME variable. It is given the value that results from the basename command. This command removes the leading portion of a pathname, leaving only the base name of a ile. In our example, basename does this! 
+
+Using positional parameters with shell functions
+Just as positional parameters are used to pass arguments to shell scripts, they can also be used to pass arguments to shell functions. To demonstrate, we will convert the file_info script into a shell function:
+
+Handling Positional Parameters En Masse
+It is sometimes useful to manage all the positional parameters as a group. For example, we might want to write a wrapper around another program. This means that we create a script or shell function that simplifies the execution of another. The wrapper supplies a list of arcane command-line options and then passes a list of arguments to the lower-level program.
+The shell provides two special parameters for this purpose. They both expand into the complete list of positional parameters but differ in rather subtle ways.
+
+$* 		Expands into the list of positional parameters, starting with 1. When surrounded with double quotes, it expands into a double quoted string containing all the positional parameters, each separated by the first character of the IFS shell variable (default is space)
+$@ 		Expands into a list of positional parameters, starting with 1. When doubled quoted it expands into individually double quoted postional parameter
+
+
+#!/bin/bash
+
+# posit_param2: script to view command line parameters
+
+print_params () {
+		cat <<- _EOF_
+			\$1 = $1
+			\$2 = $2
+			\$3 = $3
+			\$4 = $4
+			_EOF_
+}
+
+pass_params () {
+		echo -e "\n" '$* :'; print_params $*
+		echo -e "\n" '"$*" :'; print_params "$*"
+		echo -e "\n" '$@ :'; print_params $@
+		echo -e "\n" '"$@i"'; print_params "$@"
+}
+
+pass_params "word" "words with spaces"
+
+This returns:
+
+[bernie@antergos_vb bin]$ posit_param2
+
+ $* :
+$1 = word
+$2 = words
+$3 = with
+$4 = spaces
+
+ "$*" :
+$1 = word words with spaces
+$2 =
+$3 =
+$4 =
+
+ $@ :
+$1 = word
+$2 = words
+$3 = with
+$4 = spaces
+
+ "$@i"
+$1 = word
+$2 = words with spaces
+$3 =
+$4 =
+
+This is a rather convoluted program, we create two arguments, word and words with spaces, and pass them to the pass_params function. That function, in turn, pass them to the print_params function. This shows us how useful $@ can be as it preserves the integrity of our positional parameter.
+
+A more complete applcation
+Let's have a look again at our sys_info_page. Our next addition will add several command-line options to the program:
+
+	Output file: We will add an option to specify a name for a file to contain the program's output. It will be specified as either -f file or --file file.
+	Interactive mode: This option will prompt the user for an output file-name and will determine if the specified file already exists. If it does, the user will be prompted before the existing file is overwritten. This option will be specified with either -i or --interactive.
+	Help. Either -h or --help may be specified to cause the program to output an informative usage message.
+	
+usage () {
+        echo "$PROGNAME: usage: $PROGNAME [ -f file | -i ]"
+        return
+}
+
+# process command line options
+
+interactive=
+filename=
+
+while [[ -n $1 ]]; do # if first positional parameter string is greater than 1
+        case $1 in
+            -f | -file)         shift # $2 is moved to $1
+                                filename=$1
+                                ;;
+            -i | --interactive) interactive=1
+                                ;;
+            -h | --help)        usage
+                                exit
+                                ;;
+            *)                  usage >&2
+                                exit 1
+                                ;;
+        esac
+        shift
+done
+
+Cool right! The first positional parameter passed in will be an option! If it's -f then we'll assume that $2 will be a file name (thus why we use shift before we assign filename). If the option is -i, then the interactive variable is assigned a value. Specifying the help command runs the usage function which displays a list of options.

@@ -1,0 +1,31 @@
+What is LINQ?
+	LINQ stands for Language Integrated Query. The core of LINQ is in data processing. How do we take collections of objects and select just the data we want? Well LINQ let's us do this and more. The best way of showing this is to dive in. So first we need some data!
+
+
+	
+
+Ok, ok, but what is a query?
+	A query is an expression that gets data from a source like a database or a text file. We use a special query language to write them.
+
+
+Important points to include
+The return type of a LINQ query has to implement the IEnumerable<T> or IEnumberable interfaces. The structure that you specify doesn't matter, Dictionary, List<T> or any other collection type as long as it it is enumerable.
+
+Let's talk about the two most important LINQ extension methods. 
+
+The Select extension method (or select query operator) is used to determine which part of the object you want to get out of your data structure. For example:
+
+IEnumberable<string> firstNames = people.Select(p => p.FirstName)
+
+Would return a collection of firstNames of our data set.
+
+The Where extension method(or where query operator) method allows us to filter which objects for the data structure we want to look at. For example:
+
+IEnumberable<People> peopleOverFifty = people.Where(p => p.Age > 50)
+
+Gives us a collection of People over fifty.
+
+
+
+This looks a bit like SQL...
+	Well yeah it does. The creators of LINQ were heavily influenced by the language that relational databases (like SQL Server) use to query their data. When a structure query language (SQL) statement is given to the database, SQL Server returns a high-level description of the data but doesn't actually specify how the database is meant to get it (which are controlled by the database management system itself). This is great! Because the application that uses the SQL has no knowledge of how the data is stored or retrieved, the storage and retrieval can be changed without having to change the application. The LINQ syntax and semantics are very similar to LINQ

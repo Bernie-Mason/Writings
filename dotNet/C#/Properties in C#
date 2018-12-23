@@ -1,0 +1,163 @@
+Properties in C#
+
+Properties are used to encapsulate fields and data in a class. By default our classes should have private fields which they make available through methods that check that allow storing and reading of values (and imposing validation along the way). Syntactically, we want to have our fields accessible through use of an assignment statement. To do this we have we have to make our field public:
+
+public struct MyClass
+{
+    public int X;
+    public int Y;
+}
+
+This is bad as it breaks the number one rule of encapsulation. The data contained is not kept private and a user can put in values that my be nonsensical or even type unsafe. Instead, we can set the field as private make methods that we can use to perform validation for the  field.
+
+public struct MyClass
+{
+    private int x;
+    private int y;
+
+    public int GetX()
+    {
+        return this.x;
+    }
+
+    public void SetX(int x)
+    {
+        if (x < 0 || x > 1280)
+        {
+            throw new ArgumentOutOfRangeException("X");
+        }
+        this.x = x;
+    }
+    // and the same for y....
+}
+
+This approach is ok but the syntax is awkward. As we said earlier, we'd really like to be able to use an assignment statement rather than method calling to set and read values. For this we have properties.
+
+Properties are a mix between methods and fields. They look like fields but behave like methods. The syntax is as follows
+
+AccessModifier Type PropertyName
+{
+	get 
+	{
+		// read accessor code
+	}
+	set
+	{
+		// write accessor code
+	}	
+}
+
+struct ScreenPosition
+{
+	private int _x, _y;
+
+	public ScreenPosition(int inputX, int inputY) : this()
+	{
+	    _x = rangeCheckedX(inputX);
+	    _y = rangeCheckedY(inputY);
+	}
+
+	public int X
+	{
+	    get { return this._x; }
+	    set { this._x =
+	        rangeCheckedX(value);
+	    }
+	}
+	public int Y 
+	{
+	    get { return this._y; }
+	    set
+	    {
+	        this._y =
+	        rangeCheckedY(value);
+	    }
+	}
+
+	private int rangeCheckedY(int i)
+	{
+	    if (i < 0 || i > 1280)
+	    {
+	        throw new ArgumentOutOfRangeException("_x");
+	    }
+	    return i;
+	}
+
+	private int rangeCheckedX(int i)
+	{
+	    if (i < 0 || i > 1080)
+	    {
+	        throw new ArgumentOutOfRangeException("_x");
+	    }
+	    return i;
+	}
+}
+
+In this example, the private field directly implements each property, but this is only one way to implement a property. All that is required is that a get accessor returns a value of the specified type. Such a value can easily be calculated dynmically rather than being simply retrieved from stored data, in which case there would be no need for a physical field.
+
+We state private fields that are used for properties with an underscore.
+
+Using properties
+
+When using a property in an expression, you can use it in a read context (when you are retrieving its value) and a write context when modifying it's values. 
+
+You can declare static properties in the same way that you declare static fields and methods. You can access static properties by using the name of the class or structure rather than an instance of it.
+
+Accessibility. The accessibility of the get and setters can be modified directly. Obviously, if the whole property is private, then an accessor can't be public and if both accessors are private then makes sense to just make the whole property private instead.
+
+Understanding property restrictions
+
+	1. We can only assign a value through a property of a structure or class once it has been initialized.
+	2. You can't use a property as a ref or out argument to a method (although you can use a writable field as a ref or an out argument). This makes sense because the property doesn't really point to memory location; rather, it points to an accessor method, such as a getter or setter.
+	3. A property can contain at most one get and set. A property cannot contain other methods, fields or properties (although the body of a property may, for example, call methods to validate the setter).
+	4. You cannot declare const properties
+
+Using properties appropriately
+
+Properties are a powerful feature, and used in the correct manner, they can help to make code easier to understand and maintain. However, they are no substitute for careful object-oriented design that focuses on the behavior of objects rather than on the properties of objects. Accesing private fields through regular methods or through properties does not, by itself, make your code well-designed. For example, a bank account holds a balance indicating the funds available in the account. You might therefore be tempted to create a Balance property on  the BankAccount class like this:
+
+class BankAccount
+{
+	private decimal _balance;
+
+	public decimal Balance{
+		get { return this._balance }
+		set { this._balance = value; }
+	}
+}
+
+Clearly this is terrible. It fails to represent the functionality required when you withdraw money (we could withdraw money easily that we don't have!).
+
+Generating automatic properties
+As mentioned earlier in this chapter, the principal purpose of properties is to hide the implementation of fields from the outside world. This is fine if your properties actually do some useful work, but if the get and set accessors simply wrap operations taht just read or assign value to a field, you might be questioning the value of this approach. However, there are at least two good reasons why you should define properties rather than exposing data as public fields even in these situations:
+		1. Compatibility with applications. Fields and properties expose themselves by using different metadata in assemblies. If you develop a class and decide to use public fields, any applications that us this class will reference them as fields. Although the syntax is the same for properties and fields the compiled code is actually very different - the C# sharp compiler just hides the differences from you. If you later decide that you really do need to change these fields to properties, existing applications will not be able to use the updated version of the class without being recompiled.
+		2. Compatibility with interfaces. If you are implementing an interface and the interface defines an item as a property, you must write a property that matches the specification in the interface, even if the property just reads and writes the data as a private field. You cannot implement a property simply by exposing  a public field with the same name.
+
+Thus we can write automatic properties. So that this:
+
+class Circle
+{
+	public int Radius { get; set; }
+}
+
+actually gets converted by the C# compiler to this:
+
+class Circle
+{
+	private int _radius;
+	public int Radius{
+		get
+		{
+			return this._radius;
+		}
+		set
+		{
+			this._radius = value;
+		}
+	}
+}
+
+So with absolutely minimal effort we can implement a simple property by using automatically generated code, and if we need additional logic later, we can implement it without breaking any existing applications.
+
+
+

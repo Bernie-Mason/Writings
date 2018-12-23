@@ -1,0 +1,17 @@
+﻿@{
+    Layout = null;
+}
+
+<p><strong>Controllers are one of the key building blocks of the MVC pattern. 
+</strong></p> 
+<p>Each request that an MVC application gets is handled by a controller which may process the request and//or perform operations on a before selecting an appropriate action like rendering a view. A controller can receive inputs and generate outputs in many different ways. It is important that the responsibility of the controller doesn't involve storing data, the model's job, or making interfaces for the user, which is the job of the view.</p>
+<p>There are three main ways that a controller can access data from an incoming request.</p>
+<li>
+    <ol>It can use a set of properties of the request called, context objects: Request, Response, RouteData, HttpContext and Server.</ol>
+    <ol>It can access any data that is passed as a parameter to the action method.</ol>
+    <ol>It can explicitly use (invoke) the model binding feature</ol>
+</li>
+
+<p>Action results allow the Framework to separate stating intentions from executing intentions. An object that is returned from a controller (like ViewResult) is derived from the ActionResult class and will describe what the response will be. This means that you only have to state that the controller will return an ActionResult type leaving you free to have multiple return types in a given controller depending on what conditions are met. This is an example of a command pattern.</p>
+
+<p>A common result from an action method is to redirect the browser to a different URL, like after a login. Redirects are most often used for action methods that are processing HTTP POST requests which are used when you want to change the state of the application. There is a risk that if HTML is returned after the request then the user may refresh the browser resubmitting the form. The solution is the Post/Redirect/Get pattern where a controller receives a POST request, processes it, and then redirects the browser to a different URL (a different controller that will perform a GET request).</p>

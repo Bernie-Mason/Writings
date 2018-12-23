@@ -1,0 +1,511 @@
+Regular expressions
+
+Now we need to learn the tools needed to manipulate text. As we've seen text data plays an important role on all Unix-like systems, such as Linux. But before we can fully appreciate all of the features offered by these tools, have to examine a technology that is frequently associated with the sophisticated uses of these tools - regular expressions.
+
+What are regular expressions
+Simply put, regular expressions are symbolic notations used to identify patterns in text. In some ways, they resemble the shell's wildcard method of  matching file- and pathnames but on a much grander scale. Regular expressions are supported by many command-line tools and by most programming languages to facilitate the solution of text manipulation problems. However, to confuse things further, not all regular expressions are the same, they vary slightly tool to tool and from language to language. For the discussion here, we'll limit ourselves to regex described in the POSIX standard, as opposed to many programming languages (most notably Perl), which use slightly larger and richer sets of notations.
+
+POSIX - portable operating system interface for unix is a collection of standards that define some of the functionality that a UNIX operating system should support.
+
+grep - search through text
+The main program we will use to work with regular expressions is our pal, grep. The name grep is actually derived from the phrase global regular expression print. In essence, grep searches text files for the occurance of a specified regular expression and outputs any line containing a match to standard output.
+
+The grep program accepts options and arguments this way:
+
+grep [options] regex [file...]
+
+where regex is a regular expression
+
+grep options
+-i 				Ignore case
+-v 				Invert match. Matches every line that doesn't contain a match
+-c 				Print number of matches
+-l 				Print the name of each file that contains a match instead of the lines themselves. 
+-L 				A NOT -l
+-n 				Prefix matching line with number of line in file
+-h 				For multiple searches, suppress the output of filenames
+
+Let's create a playgound:
+
+[bernie@antergos_vb foo]$ ls /bin > dirlist-bin.txt
+[bernie@antergos_vb foo]$ ls /usr/bin > dirlist-usr-bin.txt
+[bernie@antergos_vb foo]$ ls /sbin > dirlist-sbin.txt
+[bernie@antergos_vb foo]$ ls /usr/sbin > dirlist-usr-sbin.txt
+[bernie@antergos_vb foo]$ ls dirlist*.txt
+
+[bernie@antergos_vb foo]$ grep bzip dirlist*.txt
+dirlist-bin.txt:bzip2
+dirlist-bin.txt:bzip2recover
+dirlist-sbin.txt:bzip2
+dirlist-sbin.txt:bzip2recover
+dirlist-usr-bin.txt:bzip2
+dirlist-usr-bin.txt:bzip2recover
+dirlist-usr-sbin.txt:bzip2
+dirlist-usr-sbin.txt:bzip2recover
+
+In this example, grep searches all of the listed files for the string bzip and finds two matches, both in the file dirlist-bin.txt. If we were interested in only the files that contained matches rather than the matches themselves, we could specify:
+
+[bernie@antergos_vb foo]$ grep -l bzip dirlist*.txt
+dirlist-bin.txt
+dirlist-sbin.txt
+dirlist-usr-bin.txt
+dirlist-usr-sbin.txt
+
+
+Conversely we can files that didn't throw a match:
+
+[bernie@antergos_vb foo]$ grep -L bzip dirlist*.txt
+
+Metacharacters and literals
+While it may not have been apparent. Our grep searches have been using regular expressions all along, albeit very simple ones. The regular expression bzip is taken to mean that a match will occur only if the line in the file contains at least four characters and that somewherre in the line the characters b, z, i, and p are found in that order, with no other characters in between.
+
+The characters in the bzip string are all literal characters, in that they match themselves. In addition to literals, regular expressions may also include metacharacters, which are used to specify more complex matches. Regular expression metacharacters consist of the following:
+
+	^ $ . [ ] { } - ? * + ( ) | \
+
+All other characters are considered to be literals although the backslash character is used in a few cases to create metasequences, as well as allowing the metacharacters to be escaped and treated as literals instead of being interpreted as metacharacters
+
+Note that we see that metacharacters are also characters that have meaning to the shell when expansion is performed. When we pass regular expressions containing metacharacters on the command line, it is vital that they are enclosed in quotes to prevent the shell from attempting to expand them.
+
+The Any Character - .
+
+The period character can be be used to match any character. Included in a regular expression, it will match any character in that character position.
+
+
+[bernie@antergos_vb foo]$ grep -h '.zip' dirlist*.txt
+bunzip2
+bzip2
+bzip2recover
+funzip
+gpg-zip
+gunzip
+gzip
+hunzip
+hzip
+...
+
+We searched for any line in our files that matches the regular expression .zip. Notice that the zip program wasn't found. This is because the inclusion of the dot metacharacter in our regex increased the length of the required match to four characters; because the name zip contains only three, it doesn't match. Also, if any files in our lists had contained the file extension .zip they would have been matched, because the period character in the file extension is treated as "any character" too.
+
+Anchors
+The caret (^) and dollar sign ($) characters are treated as anchors in regular expressions. This means that they cause the match to occur only if the regular expression is found at the beginning of the line (^) or at the end of the line
+
+[bernie@antergos_vb foo]$ grep -h '^zip' dirlist-bin.txt
+zip
+zipcloak
+zipgrep
+zipinfo
+zipnote
+zipsplit
+
+[bernie@antergos_vb foo]$ grep -h 'zip$' dirlist-bin.txt
+funzip
+gpg-zip
+gunzip
+gzip
+hunzip
+hzip
+preunzip
+prezip
+unzip
+zip
+
+[bernie@antergos_vb foo]$ grep -h '^zip$' dirlist-bin.txt
+zip
+
+Note that ^$ will match blank lines!
+
+The Linux system contains a dictionary. In /usr/share/dict you might find one or several. The dictionary files located there are just long lists of words, one per lijne, arranged in alphabetical order. Knowing this, we can use grep to make a rudimentary crossword helper!
+
+[bernie@antergos_vb foo]$ grep -i '^..j.r$' /usr/share/cracklib/cracklib-small
+kajar
+major
+
+Bracket expressions and character classes
+In addition to matching any character at a given position in our regular expression, we can also match a single character from a specified set of characters by using bracket expressions. With bracket expressions, we can specify a set of characters (including characters that would otherwise be interpreted as metacharacters) to be matched. In this example. using a two-character set, we match any line that contains the string bzip or gzip:
+
+[bernie@antergos_vb foo]$ grep -h '[bg]zip' dirlist*.txt
+bzip2
+bzip2recover
+gzip
+bzip2
+bzip2recover
+gzip
+bzip2
+bzip2recover
+gzip
+bzip2
+bzip2recover
+gzip
+
+A set may contain any number of characters. Metacharacters lose their special when placed inside of brackets. However, there are two cases in which metacharacters have different meanings within brackets. The caret (^), which is used to indicate a negation and dash (-) which is used to indicate a character range.
+
+[bernie@antergos_vb foo]$ grep -h '[^bg]zip' dirlist*.txt
+bunzip2
+funzip
+gpg-zip
+... many
+
+With the negation activated, we get a list of files that contain the string zip preceded by any character except b or g. We can refine even further by using the dash character:
+
+[bernie@antergos_vb foo]$ grep -h '[^a-z]zip' dirlist*.txt
+gpg-zip
+orcus-zip-dump
+gpg-zip
+orcus-zip-dump
+gpg-zip
+orcus-zip-dump
+gpg-zip
+orcus-zip-dump
+
+
+Very useful right?! In just three characters we've abbreviated 26! We can use multiple ranges this way, which matches all file. To ignore the dash we can write:
+
+[bernie@antergos_vb foo]$ grep -h '[^a-z-]zip' dirlist*.txt
+or
+[bernie@antergos_vb foo]$ grep -h '[^-a-z]zip' dirlist*.txt
+
+POSIX Character Classes
+The traditional character ranges are easily understood and effective way to handle the problem of quickly specifying sets of characters. Unfortunately, they don't always work. While we have not encountered any problems with our use of grep so far, we might run into problems using other programs.
+
+For example, we've already seen how wildcards are used to perform pathname expansion. We saw that character ranges could be used in a manner almost indentical to regex.
+
+Even with character classes, there is still no convenient way to express partial ranges such as [A-M]. Using character classes, we repeat our directory listing to see an improved result. 
+
+[bernie@antergos_vb foo]$ ls /usr/sbin/[[:upper:]]*
+/usr/sbin/Magick-config      /usr/sbin/ModemManager    /usr/sbin/VBoxControl  /usr/sbin/Xorg
+/usr/sbin/Magick++-config    /usr/sbin/NetworkManager  /usr/sbin/VBoxService
+/usr/sbin/MagickCore-config  /usr/sbin/VBoxClient      /usr/sbin/Wand-config
+/usr/sbin/MagickWand-config  /usr/sbin/VBoxClient-all  /usr/sbin/X
+
+This  is not an example of a regular expression; rather it is the shell performing a pathname expansion. We mention it because POSIX character classes can be used for both.
+
+We can change our language to revert to the ASCII collation order by changing the LANG environmental variable.
+
+POSIX basic vs Extended Regular Expressions
+POSIX splits regular expression implementations into two kinds: basic regex (BRE) and extended regex (ERE). The features we've looked at so far are supported by any application that is POSIX compilable and implements BRE. Our grep program is one such program.
+
+The difference is a matter of metacharacters. With BRE the following metacharacters are recognised:
+^ $ . [ ] *
+All other characters are considered literation. With ERE, the following metacharacters are added:L
+( ) { } ? + |
+
+HOWEVER!!! The characters { } ( ) are treated as metacharacters in BRE if they're escaped with a backslash., whereas with ERE, preceding any metacharacter with a backslash cause it to be treated as a literal. FUCK.
+
+Since the features we are going to discuss next are part of ERE, we are going to need to use a different grep. Traditionally, this has been performed by the egrep program, but the GNU version of grep also supports extended regular expressions with the -E option used.
+
+Alternation
+This is the facility that allows a match to occur from amongst a set of expressions. Just as a bracket expressions allows a single character to match from a set of specified characters, alternation allows matches from a set of strings or other regular expressions.
+To demonstrate, we'll use grep in conjunction with echo:
+
+[bernie@antergos_vb foo]$ echo "AAA" | grep AA
+AAA
+[bernie@antergos_vb foo]$ echo "AAA" | grep AAA
+AAA
+[bernie@antergos_vb foo]$ echo "AAA" | grep AA.
+AAA
+[bernie@antergos_vb foo]$ echo "AAA" | grep AAB
+
+
+We pipe the output of echo into grep and see the results. When a match occurs, we see it printed out; when no match occurs (in the final example), we see no results.
+
+Now we add alternation:
+
+[bernie@antergos_vb foo]$ echo "AAA" | grep -E 'AAA|BBB'
+AAA
+[bernie@antergos_vb foo]$ echo "BBB" | grep -E 'AAA|BBB'
+BBB
+[bernie@antergos_vb foo]$ echo "CCC" | grep -E 'AAA|BBB'
+[bernie@antergos_vb foo]$ 
+
+Yep. It's a or expression. Notice that since this is an extended feature, we added the -E option (or we could have used the egrep feature). This isn't limited to two choices!
+
+[bernie@antergos_vb foo]$ echo "CCC" | grep -E 'AAA|BBB|CCC'
+CCC
+
+To combine alternation with other regular expression elements, we can use () to separate the Alternation
+
+[bernie@antergos_vb foo]$ grep -Eh '^(bz|gz|zip)' dirlist*.txt
+bzcat
+bzdiff
+bzgrep
+bzip2
+bzip2recover
+...
+
+This expresion matches files that start with bz gz or zip. 
+
+Quantifiers
+Extended regex supprot several ways to specify the number of times an element is matched:
+
+? - match an element zero times or one time
+This quantifier in effect means: "Make the preceding element optional"
+[bernie@antergos_vb foo]$ echo "(555) 123-4567" | grep -E '^\(?[0-9][0-9][0-9]\)? [0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]$'
+(555) 123-4567
+
+Here we follow each of the parathenses characters with a question mark denoting that they're optional. So..
+
+[bernie@antergos_vb foo]$ echo "555 123-4567" | grep -E '^\(?[0-9][0-9][0-9]\)? [0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]$'
+555 123-4567
+
+Is equally as valid.
+
+* - match an element zero or more times
+
+[bernie@antergos_vb foo]$ echo "This Works." | grep -E '[[:upper:]][[:upper:][:lower:]]*\.'
+This Works.
+
+[bernie@antergos_vb foo]$ echo "This also Works." | grep -E '[[:upper:]][[:upper:][:lower:]]*\.'
+This also Works.
+
+[bernie@antergos_vb foo]$ echo "This Doesn't Work" | grep -E '[[:upper:]][[:upper:][:lower:]]*\.'
+
++ - match an element one or more times
+This requires at least one instance of the preceding element to cause a match
+
+[bernie@antergos_vb ~]$ echo "This that" | grep -E '^([[:alpha:]]+ ?)+$'
+This that
+[bernie@antergos_vb ~]$ echo "This that 9" | grep -E '^([[:alpha:]]+ ?)+$'
+
+We see that this expression does not match the line "This that 9" because it contains a non-alphabetic character. It would also reject a string with more than one consecutive space.
+
+{} - match an element a specific number of times
+
+[bernie@antergos_vb foo]$ grep -Ev '^\([0-9]{3}\) [0-9]{3}-[0-9]{4}$' phonelist.txt
+(212) 596-422
+(736) 263-433
+(260) 186-23
+(272) 258-525
+(308) 322-326
+(102) 201-160
+
+Here we put a few of the metacharacters to use in a single expression
+
+The find command and regular expressions
+
+The find command supports a test based on a regular expression. There is an important consideration to keep in mind when using regex in find rather than in grep. Whereas grep will print a line when the line contains a string that matches an expression, find requires that the pathname exactly match the regular expression.
+
+Here we use find with a regular expression to find every pathname that contains any character that is not a member of the set: [^-_./0-9a-zA-Z]
+
+
+[bernie@antergos_vb ~]$ find . -regex '.*[^-_./0-9a-zA-Z].*'
+... many
+
+Due the requirement for an exact match of the entire pathname, we use .* at the both ends of the expression to match zero or more instances of any character. In the middle of the expression, we use a negated bracket expression containing a set of our acceptable pathname characters
+
+We can also use regex in less and vim. Pressing the / key followed by regex expression will perform a search.
+
+The zgrep program provides a frontend to grep, allowing it read compressed files. In our example, we search the compressed Section 1 man page files in their usual location. The result of this command is a list of files containing the string regex or regular expression
+
+Final Note
+In this chapter, we've seen a few of the many uses of regular expressions. We can find even more if we use regualr expressions to search for additional applications that use them. We can do that by searching man pages:
+
+[bernie@antergos_vb man1]$ zgrep -El 'regex|regular expression' *.gz
+apropos.1.gz
+awk.1p.gz
+bash.1.gz
+bsdtar.1.gz
+bzr.1.gz
+compress.1p.gz
+corelist.1perl.gz
+cp.1p.gz
+csplit.1p.gz
+ctest.1.gz
+dbiprof.1p.gz
+derb.1.gz
+du.1.gz
+ed.1p.gz
+edit.1.gz
+ex.1.gz
+ex.1p.gz
+exiv2.1.gz
+expr.1p.gz
+file.1.gz
+find.1.gz
+find.1p.gz
+foomatic-ppdfile.1.gz
+gawk.1.gz
+genrb.1.gz
+getfattr.1.gz
+git-add.1.gz
+git-annotate.1.gz
+git-blame.1.gz
+git-config.1.gz
+git-cvsimport.1.gz
+git-diff.1.gz
+git-diff-files.1.gz
+git-diff-index.1.gz
+git-diff-tree.1.gz
+git-grep.1.gz
+gitk.1.gz
+git-log.1.gz
+git-p4.1.gz
+git-remote.1.gz
+git-rev-list.1.gz
+git-rev-parse.1.gz
+git-show.1.gz
+git-svn.1.gz
+grep.1.gz
+grep.1p.gz
+groffer.1.gz
+h2xs.1perl.gz
+install-info.1.gz
+ippfind.1.gz
+killall.1.gz
+less.1.gz
+lex.1p.gz
+locate.1.gz
+lzegrep.1.gz
+lzfgrep.1.gz
+lzgrep.1.gz
+m4.1.gz
+mail.1.gz
+mailx.1.gz
+man.1.gz
+more.1.gz
+more.1p.gz
+msggrep.1.gz
+mv.1p.gz
+nano.1.gz
+nl.1p.gz
+objcopy.1.gz
+patch.1p.gz
+pax.1p.gz
+pcre2grep.1.gz
+pcre2test.1.gz
+pcregrep.1.gz
+pcretest.1.gz
+pdbtool.1.gz
+perl.1perl.gz
+perl5004delta.1perl.gz
+perl5005delta.1perl.gz
+perl5100delta.1perl.gz
+perl5101delta.1perl.gz
+perl5120delta.1perl.gz
+perl5121delta.1perl.gz
+perl5122delta.1perl.gz
+perl5125delta.1perl.gz
+perl5140delta.1perl.gz
+perl5141delta.1perl.gz
+perl5142delta.1perl.gz
+perl5143delta.1perl.gz
+perl5144delta.1perl.gz
+perl5160delta.1perl.gz
+perl5161delta.1perl.gz
+perl5180delta.1perl.gz
+perl5181delta.1perl.gz
+perl5200delta.1perl.gz
+perl5201delta.1perl.gz
+perl5202delta.1perl.gz
+perl5203delta.1perl.gz
+perl5220delta.1perl.gz
+perl5221delta.1perl.gz
+perl5222delta.1perl.gz
+perl5240delta.1perl.gz
+perl561delta.1perl.gz
+perl56delta.1perl.gz
+perl581delta.1perl.gz
+perl584delta.1perl.gz
+perl585delta.1perl.gz
+perl586delta.1perl.gz
+perl587delta.1perl.gz
+perl588delta.1perl.gz
+perl589delta.1perl.gz
+perl58delta.1perl.gz
+perlapi.1perl.gz
+perlbs2000.1perl.gz
+perldata.1perl.gz
+perldebguts.1perl.gz
+perldebtut.1perl.gz
+perldebug.1perl.gz
+perldiag.1perl.gz
+perldoc.1perl.gz
+perlebcdic.1perl.gz
+perlexperiment.1perl.gz
+perlfaq1.1perl.gz
+perlfaq.1perl.gz
+perlfaq3.1perl.gz
+perlfaq4.1perl.gz
+perlfaq5.1perl.gz
+perlfaq6.1perl.gz
+perlfaq7.1perl.gz
+perlfilter.1perl.gz
+perlfunc.1perl.gz
+perlgit.1perl.gz
+perlglossary.1perl.gz
+perlguts.1perl.gz
+perlhack.1perl.gz
+perlhacktips.1perl.gz
+perlhist.1perl.gz
+perlintern.1perl.gz
+perlinterp.1perl.gz
+perlintro.1perl.gz
+perliol.1perl.gz
+perlipc.1perl.gz
+perllocale.1perl.gz
+perlmod.1perl.gz
+perlmodlib.1perl.gz
+perlop.1perl.gz
+perlpacktut.1perl.gz
+perlperf.1perl.gz
+perlpodspec.1perl.gz
+perlpolicy.1perl.gz
+perlport.1perl.gz
+perlre.1perl.gz
+perlreapi.1perl.gz
+perlrebackslash.1perl.gz
+perlrecharclass.1perl.gz
+perlreguts.1perl.gz
+perlrequick.1perl.gz
+perlreref.1perl.gz
+perlretut.1perl.gz
+perlrun.1perl.gz
+perlsec.1perl.gz
+perlsource.1perl.gz
+perlstyle.1perl.gz
+perlsub.1perl.gz
+perlsyn.1perl.gz
+perltoc.1perl.gz
+perltrap.1perl.gz
+perltru64.1perl.gz
+perlunicode.1perl.gz
+perlunicook.1perl.gz
+perlunifaq.1perl.gz
+perluniintro.1perl.gz
+perluniprops.1perl.gz
+perlvar.1perl.gz
+pgrep.1.gz
+pkgfile.1.gz
+ptargrep.1perl.gz
+ptx.1.gz
+qstat.1p.gz
+rm.1p.gz
+rsync.1.gz
+sed.1.gz
+sed.1p.gz
+snmpcmd.1.gz
+snmptranslate.1.gz
+strip.1.gz
+tac.1.gz
+tar.1.gz
+tr.1p.gz
+uniq.1p.gz
+varnishd.1.gz
+varnishhist.1.gz
+varnishlog.1.gz
+varnishncsa.1.gz
+varnishtop.1.gz
+vedit.1.gz
+vi.1.gz
+vi.1p.gz
+view.1.gz
+wget.1.gz
+whatis.1.gz
+whois.1.gz
+xargs.1p.gz
+xterm.1.gz
+xzegrep.1.gz
+xzfgrep.1.gz
+xzgrep.1.gz
+zgrep.1.gz
+zip.1.gz
+zmore.1.gz

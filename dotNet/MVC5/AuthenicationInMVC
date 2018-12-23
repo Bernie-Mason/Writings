@@ -1,0 +1,150 @@
+There are several ways of setting up authentication in MVC. Forms authentication is still fairly common and can be achieved simply  by including the following in the Web.Config file
+
+<system.web>
+    <authentication mode="Forms">
+      <forms loginUrl="~/Account/Login" timeout="2880"/>
+      <!--TODO - CHANGE THIS TO STORE LOGIN CREDENTIALS IN A DATABASE. THIS IS NOT SECURE!!-->
+    </authentication>
+
+The loginUrl tells ASP.NET where to redirect users when they need to authenticate themselves. The next step is to get the details from the user.
+
+Applying authorization with filters.
+
+namespace BerniesBlog.WebUI.Controllers
+{
+    [Authorize]
+    public class AdminController : Controller
+    {
+        private IBlogPost blogPostRepo;
+        ...
+
+Now when we try to access the Index action method of the Admin Controller, the MVC Framework detects the Authorize filter and redirects us to URL specified in the Web.Config file
+
+Creating the Authenication Provider
+Using the forms authentication feature requires calls to two static methods of the System.Web.Security.FormsAuthentication class:
+    1. The Authenticate method validates credentials supplied by the user
+    2. The SetAuthCookie method adds a cookie to the response to the browser, so that users do not need to authenticate every time they make a request
+
+The problem with called static methods from within action methods is that it makes unit testing the controller difficult: mocking frameworks typically mock only instance members. The classes that comprise the MVC Framework have been designed with unit testing in mind, but FormsAuthentication predates the unit testing friendly design of MVC.
+The best way to address the problem is to decouple the controller from the static methods using an interface, which offers the additional benefit that this fits in with the broader MVC design pattern and makes it easier to switch to a different authentication system later.
+
+We start by defining an authentication interface provider:
+
+namespace BerniesBlog.WebUI.Infrastructure.Abstract
+{
+    interface IAuthProvider
+    {
+        bool Authenticate(string username, string password);
+    }
+}
+
+We can now create an implementation of this interface that acts as a wrapper around the static methods of the FormsAuthentication class. Create another folder in Infrastructure called concrete:
+
+namespace BerniesBlog.WebUI.Infrastructure.Concrete
+{
+    public class FormsAuthProvider : IAuthProvider
+    {
+        public bool Authenticate(string username, string password)
+        {
+            bool result = FormsAuthentication.Authenticate(username, password);
+            if (result)
+            {
+                FormsAuthentication.SetAuthCookie(username, false);
+            }
+            return result;
+        }
+    }
+}
+
+The implementation of the Authenticate method calls the static FormsAuthentication methods that we wanted to keep out of the controller and into a class that we can create an instance of for testing. The final step is to register the FormsAuthProvider in the AddBindings method of the NinjectDependencyResolver class:
+
+private void AddBindings()
+{
+    kernel.Bind<IBlogPost>().To<BlogPostRepo>();
+    kernel.Bind<IAuthProvider>().To<FormsAuthProvider>();
+}
+
+The next task is to create the Account controller and the Login action method. We'll need both a GET and POST Login action method. The first to render a login view and the second to take the details and use the IAuthProvider interface to check. To get started we create a view model that we can pass the Login action method:
+
+
+namespace BerniesBlog.WebUI.Models
+{
+    public class LoginViewModel
+    {
+        [Required]
+        public string username { get; set; }
+
+        [Required]
+        public string password { get; set; }
+    }
+}
+
+Our account controller is then created:
+
+namespace BerniesBlog.WebUI.Controllers
+{
+    public class AccountController : Controller
+    {
+        IAuthProvider authProvider;
+
+        public AccountController(IAuthProvider authProviderParam)
+        {
+            authProvider = authProviderParam;
+        }
+
+        public ViewResult Login()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult Login(LoginViewModel loginViewModel, string returnUrl)
+        {
+            if (ModelState.IsValid)
+            {
+                if (authProvider.Authenticate(loginViewModel.username, loginViewModel.password))
+                {
+                    return Redirect(returnUrl ?? Url.Action("Index", "Admin"));
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Incorrect username or password");
+                    return View();
+                }
+            }
+            else
+            {
+                return View();
+            }
+        }
+    }
+}
+
+Finally the cshtml:
+
+@model BerniesBlog.WebUI.Models.LoginViewModel
+
+@{
+    ViewBag.Title = "Admin: Log in";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<div class="panel">
+    <div class="page-heading">
+        <h3>Log in</h3>
+    </div>
+    <div class="panel-body">
+        <p class="lead">Please log in to access the administration area</p>
+        @using (Html.BeginForm())
+        {
+            <div class="form-group">
+                <label>Username:</label>
+                @Html.TextBoxFor(m => m.username)
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                @Html.TextBoxFor(m => m.password, new {@class="form-control"})
+            </div>
+            <input type="submit", value="Log in", class="btn btn-primary"/>
+        }
+    </div>
+</div>

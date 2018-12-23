@@ -1,0 +1,20 @@
+https://docs.oracle.com/javase/tutorial/networking/sockets/definition.html: A socket is one endpoint of a two-way communication link between two programs running on a network. A socket is bound to a port number so that the TCP layer can identify the application that the data is destined to be sent to. 
+
+Wiki:A socket is a representation of this endpoint in the networking software, such as an entry in a table (listing communication protocol, destination, status, etc) and is form of system resource. Like the physical female connectors, communication occurs between two nodes through a channgel (visualised as a cable) with two male connectors plugging into sockets at each node. The term socket is also used for an internal endpoint of local inter-process communication (IPC) (not over a network). However, the analogy is starined, as network communication need not be one-to-one.
+
+Sockets From: http://csharp.net-informations.com/communications/csharp-socket-programming.htm
+
+To communicate a socket application in C#, we need two programs. A C# server socket programming running on your computer that has a socket bound to a Port Number on the same computer and listening to the client's incoming requests. A C# client socket program that knows the IP Address of the computer that the C# server socket program resides and the port number that the server is bound to.
+
+There are two types of communication protocol uses for socket programming in C#. TCP/IP and UDP/IP.
+
+The C# server socket program is done through a C# Console based application. The server listens for the client's request. When the C# server gets a request from the client socket, the server sends a response to the client.
+
+The client socket program is a windows forms based application. Whe the C# client program executes, it will establish
+
+The C# Client Socket Program is the second part of the C# Server Socket Program. The C# client socket program is a windows
+based application. The client is connected to port 8888 of the C# server socket program, and the IP Address we give as
+127.0.0.1, because the server and client are running on the same machine.
+n the C# client program starts, it will connect to the C# server socket program and start to read and write data from the 
+Networkstream. When you start the client program you will get a message from the Server "client started". When you press the 
+button as the bottom of the client window, it will send a message to the Server and also receive a response from the server.

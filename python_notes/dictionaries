@@ -1,0 +1,119 @@
+Dictionaries and structuring data
+
+Like a list, a dictionary is a collection of many values. But unlike indexes for lists, indexes for dictionaries can use many different data types (key value pairs where the key can be a string, list, int, tuple, float...)
+
+>>> myCat = {'size':'fat','color':'black','disposition','loud'}
+
+Values can be accessed by specifying the key:
+
+>>> myCat['size']
+'fat'
+
+Dictionaries can still use integer keys but may use any provided they're not unique. 
+
+DICTIONARIES VS LISTS
+Unlike lists, dictionaries are unordered. There is no first item in a dictionary and it doesn't matter what order key-value pairs are typed in.
+
+Because dictionaries are unordered, they can't be sliced like lists. Trying to access a key that doesn't exist in a dictionary will result in a KeyError message, much like a list's "out-of-range" IndexError. 
+
+
+birthdays = {
+	'Bridget':'March 11th',
+	'Robin':'March 31st',
+	'Granny':'May 14th',
+	'Fynn':'June 8th',
+	'Jonny':'June 19th',
+	'Grandma':'June 22nd',
+	'Suzie':'July 8th',
+	'Lucy':'July 10th',
+	'Izzy':'July 15th',
+	'Dad':'July 28th',
+	'Jim':'August 6th',
+	'Harry':'October 22nd',
+	'Christine':'October 29th',
+	'Mum':'November 11th'
+}
+
+for k, v in birthdays.items():
+	print(k + " : " + v);
+
+
+We can also just iterate through the values() and keys(). 
+
+Checking a value exists:
+
+>>> if "Robin" in birthdays.keys():
+		...code
+
+THE get() METHOD
+
+It's tedious to keeping having to check whether or not a key exists already in the dictionary before accessing that keys value. Fortunately the get() dictionary method allows us to enter a fallback value in case the key doesn't exist:
+
+>>> print(str(birthdays.get('Terry', 'No birthday')))
+'No birthday'
+
+THE setdefault() METHOD
+
+You'll often have to set a value in a dictionary for a certain key only if that key doesn't already have a value. The code looks something like this:
+
+spam = {'name':'Pooka', 'age':5}
+if 'color' not in spam:
+	spam['color'] = 'black'
+
+The setdefault() method can do this in one line:
+
+spam = {'name':'Pooka', 'age':5}
+spam.setdefault('color', 'black')
+
+The first parameter is the key to check for and the second is the value to set the key to if the key doesn't exist. If it does exist it returns the key's value.
+
+message = 'It was a bright cold day in April, and the clocks were striking thirteen'
+count = {}
+
+for character in message:
+	count.setdefault(character, 0)
+	count[character] = count[character] + 1
+
+print(count)
+
+The program loops over each character in the message variable counting how often each character appears. The setdefault() method ensures that the key is in the count dictionary (which a default value of 0)
+
+PRETTY PRINTING
+ Importing the pprint module gives access to the pprint.pprint() and pformat() methods that will 'pretty print' a dictionaries values
+
+$ characterCount.py
+{' ': 13,
+ ',': 1,
+ 'A': 1,
+ 'I': 1,
+ 'a': 4,
+ 'b': 1,
+ 'c': 3,
+ 'd': 3,
+ 'e': 5,
+ 'g': 2,
+ 'h': 3,
+ 'i': 6,
+ 'k': 2,
+ 'l': 3,
+ 'n': 4,
+ 'o': 2,
+ 'p': 1,
+ 'r': 5,
+ 's': 3,
+ 't': 6,
+ 'w': 2,
+ 'y': 1}
+
+This is espicially useful when printing out lists and/or dictionaries.
+pformat returns the text in it's formatted form so:
+
+pprint.print(string)
+
+is equivalent to:
+
+print(pprint.pformat(string))
+
+USING DATA STRUCTURES TO MODEL REAL WORLD THINGS
+
+Tic-Tac-Toe board : we can use a dictionary of strings to represent our board thus

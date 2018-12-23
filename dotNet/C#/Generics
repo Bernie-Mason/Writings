@@ -1,0 +1,32 @@
+Generics
+
+What are the purpose of generics?
+
+How do create a type-safe class using generics?
+
+How can we create instances of a generic class on types specified as type parameters?
+
+How can we implement a generic interface?
+
+How can be define a generic method that implements an algorithm independent of the data type on which it operates?
+
+We already know that we can use the object type to refer to any instance of a class right? 
+	An object type can be used to store a value of any type. 
+	With methods we can set the parameter that the method will accept as an object to allow it accept any type. A method can also return an object type.
+The object type is pretty flexible! Unfortunately it is often a little too flexible. Code that relies on the object type also relies on the programmer to remember what types are actually being passed around. 
+
+Generics are great because:
+	They reduce the amount of boxing and unboxing, reducing the overhead for the program.
+	They improve type safety massively over using the object solution (i.e. passing object variables into a method and accepting variables of a particular type back.)
+
+Very rarely will want our generic class to accept absolutely any type. Usually in fact we want them to accept a subset of types. We can specify a type, or that the generic implement an interface:
+
+	public class DriveableVehicles<T> where T : IDriveable
+
+or
+	
+	public class OperateOnModel<T> where T : class
+
+This is not a requirement but it prevents the coder throwing types into the class that aren't safe for it. 
+
+Mistakes can lead to run-time errors. This is where generics come in!

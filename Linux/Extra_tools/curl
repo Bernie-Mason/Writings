@@ -1,0 +1,31 @@
+curl
+
+Curl is command line tool for doing all sorts of URL manipulations and transfers. Curl is not written to do everything for you. It makes requests, it gets the data, it sends data and it retrieves the information.
+
+The client, curl, sends a HTTP request. The request contains a mthod (like GET, POST, HEAD etc) a number of request headers and sometimes a request body. The HTTP server responds with a status line (indicating if things went well), response headers and most often a response body. The "body" part is the plain data you requested.
+
+Options
+	--verbose (-v)
+		Yep. You want information  about commands sent to the server. Of course you do. Use verbose:
+		$  curl -v debugdump.txt http://www.example.com/
+		* Rebuilt URL to: debugdump.txt/
+		* timeout on name lookup is not supported
+		* getaddrinfo(3) failed for debugdump.txt:80
+		* Couldn't resolve host 'debugdump.txt'
+		* Closing connection 0
+		curl: (6) Couldn't resolve host 'debugdump.txt'
+		* timeout on name lookup is not supported
+		*   Trying 93.184.216.34...
+		* TCP_NODELAY set
+		  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+		                                 Dload  Upload   Total   Spent    Left  Speed
+		  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Connected to www.example.com (93.184.216.34) port 80 (#1)
+		> GET / HTTP/1.1
+	--trace or --trace-ascii
+
+
+ curl --trace-ascii debugdump.txt http://www.example.com/
+		 	$  curl --trace-ascii debugdump.txt http://www.example.com/
+		  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+		                                 Dload  Upload   Total   Spent    Left  Speed
+		  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --100  1270  100  1270    0     0   6256      0 --:--:-- --:--:-- --:--:--  6791<!doctype html>

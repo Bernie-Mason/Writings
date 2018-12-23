@@ -1,0 +1,70 @@
+Methods properties and events
+
+Methods define behavior
+Every method has a return type. Even void.
+Zero or more parameters
+	Use params keyword to accept a variable number of parameters.
+Every method has a signature
+	Name of method + parameters. This helps us understand how we method overload. Note that the return type is not part of the method signature.
+
+
+FIELDS AND PROPERTIES
+Fields are variables of a class.
+e.g.
+
+public class Animal
+{
+	private readonly string _name;
+
+	public Animal(string name) // constructor
+	{
+		_name = name;
+	}
+}
+
+Can be readonly.
+
+A property can define a get and/or set accessors.
+	Often used to expose and control fields.
+
+private string _name;
+
+public string Name
+{
+	get { return _name; }
+	set
+	{
+		if(!String.IsNullOrEmpty(value))
+		{
+			_name = value;
+		}
+	}
+}
+
+We have some set logic. Very common to make sure that we filter what we allow to be set.
+
+
+
+EVENTS
+Allows a class to send notifications to other classes or objects.
+	Publisher raises the event
+	One or more subscribers process the event.
+	I.e. when the user clicks a button an event is raised. Then any number of subscribers process the event by making something flash, saving something to the database etc.
+
+	Here we use delegates
+
+Delegates
+	I need a variable that references a method
+	A delegate is a type that references methods
+
+public delegate void Writer(string message);
+
+From a C background this is a way of calling a type safe function pointer.
+
+SUMMARY
+Members are used to craft an abstraction
+	Fields and properties for state.
+	Methods for behavior.
+	Events for notification.
+
+Could definitely do with learning about events and delegates.

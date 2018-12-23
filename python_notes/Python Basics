@@ -1,0 +1,86 @@
+Python Basics
+
+
+# Expressions can be entered directly into the Python interactive shell (just like a terminal) and consist of values (1,2,3 etc) and operators (+, - etc) that evaluate down to a single value.
+
+# Types are not declared in Python but determined by the interpreter. A decimal point makes a number floating point (1.2) and single quotations makes a string 'string'. String concatenation can be done using the + operator as usual. 
+
+# Although 
+
+'Alice' + 4 
+
+# Will not evaluate with a cast exception,
+
+'Alice' * 4
+->
+'AliceAliceAliceAlice'
+
+# Variables can be declared an initialised as normal. However, the type of the variable is not declared.
+
+# Casting:
+# e.g.
+print('You will be ' + str(int(myAge) + 1) + ' in a year.')
+# The str(), int() and float() functions will evaluate to the forms of the value you pass. Not int(1.99) evaluates to 1 (rounds down).
+
+# My first python program
+
+print('Hello world!')
+print('What is your name?')
+myName = input()
+print('It is good to meet you, ' + myName)
+print('The length of your name is:')
+print(len(myName))
+print('What is your age?')
+myAge = input()
+print('You will be ' + str(int(myAge) + 1) + ' in a year.')
+
+
+# The input() function
+
+# The input() function waits for the user to type some text on the keyboard and press enter. The function call evaluates to a string equal to the user's text, and the previous line of code assigns the myName variable to this string value.
+
+
+# Flow control
+# Boolean values are True and False. You know the rest
+
+# e.g.
+>>> (4 < 5) and (5 < 6)
+True
+
+# Left expression will be evaluated first, and then it will evaluate the right expression. When it knows each expression it will evaluate the whole expression down to one Boolean value.
+
+# Elements of flow control
+# Conditions: these are the boolean expressions
+# Code blocks: These begin and end where indentation occurs. These can contain other blocks
+
+# if statement
+
+if name == 'Alice':		# Note the colon, all flow control statements end with one (like bashs '; then').
+	print ('Hi, Alice.')
+elif name == 'Bernie':
+	print ('Go away!')
+else:
+	print ('Hi, whomever you are.')
+
+# while statement
+
+spam = 0
+while spam < 5:
+	print('Current spam levels are: ' + str(spam))
+	spam++
+
+# break statements
+# To break execution out of loop early. If the execution reaches a break statement, it immediately exits the while loop's clause. 0
+# continue statements
+# Like break statements, continue statements are used inside loops. When the program execution reaches a continue statement, the program execution immediately jumps back to the start of the loop and reevaluates the loop condition.
+
+# for loops and range() function
+print('What\'s your name?')
+name = input()
+print('My name is: ')
+for i in range(5):
+	print (name)
+
+# more range examples
+
+range(0, 10, 2) (start, stop, inc)

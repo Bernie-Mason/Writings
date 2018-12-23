@@ -1,0 +1,42 @@
+Advanced keyboard tricks
+// The Linux Command Line - Chapter 8
+
+I often kiddingly describe Unix as "the operating system for people who like to type". Of course, the fact that it even has a command line is a testement to that. But command line users don't like to type that much. Why else would so many commands have such short names, like cp, ls, mv and rm?
+
+In fact, one of the most cherished goals of the command line is laziness - doing the most work with the fewest keystrokes. Another goal is never having to lift your fingers from the keyboard - never reaching for your mouse. 
+
+Bash has some features to help us achieve this!
+
+clear - clear the screen
+history- display the contents of the history list
+
+Command line editing
+bash uses a library (a shared collection of routines that different programs can use) called Readline to implement command line editing. We have already seen some of this. We know, for example, that the arrow keys move the cursor, but there are many more features. Think of these as additional tools that we can employ in our work. It's not important to learn all of them, but many are very useful!
+
+The Readline documentation uses the terms killing and yanking to refer to what we would commonly call cutting and pasting. Items that are cut are stored in a buffer called the kill-ring.
+
+The meta key
+If you venture into the Readline documentation, which can be found in the "READLINE" section of the bash man page, you will encounter a term meta key. On modern keyboards this maps to the ALT key, but this wasn't always so.
+
+Completion
+Another way that the shell can help you is through a mechanism called completion. Completion occurs when you press the tab key whilst typing a command.
+Completion works on pathnames, variables, usernames, command and hostnames. A number of control and meta key sequences are associated with the completion.
+
+Using History
+As we discovered in Chapter 1, bash maintains a history of commands that have been entered. This list of commands is kept in your home directory in a file called .bash_history. The history facility is a useful resource for reducing the amount of typing that you have to do, especially when combined with other command-line editing.
+
+Searching history
+At any time, we can view the contents of the history file using the command, history
+
+history | less 
+
+pipes our history into the less text viewer. This also gives us a number for each command given. If we saw a command that we liked we could use it's number to call it again:
+
+!88
+
+To call the 88th item in the history! Neat! Bash will expand this !88 directly into the contents at line 88.
+
+bash also provides the ability to search the history list incrementally. This means that we can tell bash to search the history list as we enter characters, with each additional character further refining our search. To start an incremental search, enter CTRL-R followed by the text you are looking for. When you find it, you can either press ENTER to execute the command or pres CTRL-J to copy the line from the history list to the current command line. To find the next occurance of the text (moving "up" the history list), press CTRL-R again. To quit searching, press either CTRL-G or CTRL-C. 
+
+History expansion
+The shell offers a specialised type of expansion for items in the history list by using the ! character. We have already seen how the exclamation point can be followed by a number to insert an entry from the history list. There are a number of other expansion features. I would caution against the !string and !?string  forms unless you're absolutely sure of the contents of the history list items. Many more elements are available in the history. Look at the bash man page for more details.

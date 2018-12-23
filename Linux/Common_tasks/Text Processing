@@ -1,0 +1,734 @@
+Text Processing
+
+All Unix-like operating systems rely heavily on text files for several types of data storage. It makes sense, therefore, that there are tools for text manipulation. For slicing and dicing it we can use any of the following programs:
+
+cat - concatenate files and print on standard output
+The cat program is pretty cool. Many of it's options are used to better visualise text content. One example is the -A option, which is used to display non-printing characters in the text. There are times when we want to know if control characters are embedded in our otherwise visible text. The most common of these are tab characters and carriage returns, often present as end of line characters. 
+
+	[bernie@antergos_vb foo]$ cat > foo.txt
+		The quick brown fox jumped over the lazy dog.
+	[bernie@antergos_vb foo]$ cat -A foo.txt 
+	^The quick brown fox jumped over the lazy dog.$
+
+We can see in the results, the tab character in our text is represented by ^I. This common notation means "CTRL-I" which is the same as  the tab character. We also see that a $ appears at the true end of the line, indicating that our text contains trailing spaces.
+
+cat also has options that are used to modify text. The two most prominant are -n (used to number the lines) and -s, which suppresses the output of multiple blank lines
+
+[bernie@antergos_vb Blog_Posts]$ cat > foo.txt
+The quick brown fox
+
+
+jumped over the lazy dog.
+	[bernie@antergos_vb Blog_Posts]$ cat -ns foo.txt 
+	     1	The quick brown fox
+	     2	
+	     3	jumped over the lazy dog.
+
+
+sort 
+The sort program sorts the contents of standard input, or one or more files specified on the command line, and sends the results to standard output. Using the same technique that we used with cat, we can demonstrate processing of standard input directly from the keyboard.
+
+	[bernie@antergos_vb Blog_Posts]$ sort > foo.txt
+	c 
+	b
+	a
+	[bernie@antergos_vb Blog_Posts]$ cat foo.txt
+	a
+	b
+	c
+
+Since sort can accept multiple files (to replace standard input) as arguments, it is possible to merge multiple files into a single sorted whole. 
+
+sort file1.txt file2.txt file3.txt > final_sorted_list.txt
+
+sort has some good options:
+
+Option 		Description
+-b 			By default, sorting is performed on the entire line, starting with the first character in the line. This option causes sort to ignore leading spaces based on the first non-whitespace character on the line.
+-f 			Makes sorting case insensitive
+-n 			Sorting based on numeric evaluation of the string
+-r 			Sort in reverse order (descending rather than ascending)
+-k 			Sort based on a key field located from field1 to field2 (-k=field1[,field2]) rather than the entire line.
+-m 			Treat each argument as the name of a presorted file. Merge multiple files into a single sorted result without preforming any additional sorting.
+-o 			Send sorted output to a file rather than to standard output
+-t 			Define the field-separator character. By default, fields are separated by spaces or tabs.
+
+Normally the du command lists the results of a summary in pathname order:
+
+	[bernie@antergos_vb ~]$ du -s /usr/share/* | head
+	1004	/usr/share/aclocal
+	160	/usr/share/aclocal-1.15
+	836	/usr/share/alsa
+	5988	/usr/share/antergos
+	1300	/usr/share/antergos-welcome
+
+In this example we limit the output to just the first 10 results. We can produce a numerically sorted list to show the 10 largest consumers of space this way:
+
+	[bernie@antergos_vb ~]$ du -s /usr/share/* | sort -nr  | head
+	du: cannot read directory '/usr/share/polkit-1/rules.d': Permission denied
+	413936	/usr/share/locale
+	232024	/usr/share/doc
+	211764	/usr/share/gtk-doc
+	168440	/usr/share/icons
+	83808	/usr/share/man
+	62672	/usr/share/help
+	60936	/usr/share/gir-1.0
+	36548	/usr/share/ghostscript
+	33608	/usr/share/fonts
+	31184	/usr/share/vim
+
+By using the -nr options we produce a reverse numerically sorted list. This sort works because the numerical values occur at the beginning of each line. But what if we want to sort a list based on some value found within the line? For example, the results of ls -l look like this:
+
+	[bernie@antergos_vb ~]$ ls -l /usr/share/* | head
+	/usr/share/aclocal:
+	total 1000
+	-rw-r--r-- 1 root root   6296 May  5  2016 aalib.m4
+	-rw-r--r-- 1 root root   2188 Dec  2 13:49 ac_check_krb5.m4
+	-rw-r--r-- 1 root root   4392 Dec 21 19:09 alsa.m4
+	-rw-r--r-- 1 root root   3693 Feb 13 06:50 ao.m4
+	-rw-r--r-- 1 root root   1924 Apr 29  2016 bison-i18n.m4
+	-rw-r--r-- 1 root root   1184 Aug  2  2016 cap-ng.m4
+	-rw-r--r-- 1 root root   1463 Jan 13 14:05 cmake.m4
+	-rw-r--r-- 1 root root    842 Jun 12  2016 codeset.m4
+
+Ignoring for one moment that ls can already sort results by size, we could use sort to sort this list by size as well:
+
+	[bernie@antergos_vb ~]$ ls -l /usr/share/* | sort -nr -k 5 | head
+	-rw-r--r-- 1 root root 7086950 Mar 14 08:11 Gtk-3.0.gir
+	-rw-r--r-- 1 root root 5483811 Sep  9  2016 Gtk-2.0.gir
+	-rw-r--r-- 1 root root 5227195 Jan 26 20:49 org.gnome.Weather.Application.data.gresource
+	-rw-r--r-- 1 root root 3617530 Mar  2 01:10 port-numbers.iana
+	-rw-r--r-- 1 root root 3099670 Sep 24  2016 Clutter-1.0.gir
+	-rw-r--r-- 1 root root 2398418 Mar 16 21:15 unicode.pf2
+	-rw-r--r-- 1 root root 2240478 Nov 17 09:46 ModemManager-1.0.gir
+	-rw-r--r-- 1 root root 2210265 Feb 23 19:27 Gst-1.0.gir
+	-rw-r--r-- 1 root root 2112251 Feb  5  2015 TelepathyGLib-0.12.gir
+	-rw-r--r-- 1 root root 1981979 Apr  5 18:44 GeoIPv6.dat
+
+
+Many uses of sort involve the processing of tabular data, such as the results of the ls command above. If we apply database terminology to the table above, we would say that each row is a record and that each record consist of multiple fields, such as file attributes, link count, filename, file size and so on. sort is able to process individual fields. In database terms, we are able to specify one or more key fields to use as sort keys. In the example above we specify -k 5 to make sort use the fifth field (column) as the key for sorting.
+
+The k option is very interesting and has many features, but first we need to talk about how sort defines fields. Let's consider a very simple text file consisting of a single line containing the author's name:
+
+William		Shotts
+
+By default, sort sees this line as having two fields. The first field contains the characters William and the second the characters 	Scotts, meaning that the whitespace characters (tabs and spaces) are used as delimiters between fields and that the delimiters are included in the field when the sorting is performed.
+
+Let's have a look at list of distros that we have in a file called distros.txt
+
+	SUSE  		10.2 	12/07/2006
+	Fedora 		10		11/25/2008
+	SUSE 		11.0 	06/19/2008
+	Ubuntu 		8.04 	04/24/2008
+	Fedora 		10.3	11/08/2008
+	SUSE 		10.3 	10/04/2007
+	Ubuntu 		6.10	10/26/2006
+	Fedora		7		05/31/2007
+	Ubuntu 		7.10 	10/18/2007
+	Ubuntu 		7.04 	04/19/2007
+	SUSE 		10.1 	05/11/2006
+	Fedora		6		10/24/2006
+	Fedora 		9 		05/13/2008
+	Ubuntu 		6.06	06/01/2008
+	Ubuntu		8.01	10/30/2006
+	Fedora 		5 		03/20/2006
+
+If we try to sort them we get:
+
+	[bernie@antergos_vb foo]$ sort distros.txt
+	Fedora 		10	11/25/2008
+	Fedora 		10.3	11/08/2008
+	Fedora 		5 	03/20/2006
+	Fedora		6	10/24/2006
+	Fedora		7	05/31/2007
+	Fedora 		9 	05/13/2008
+	SUSE 		10.1 	05/11/2006
+	SUSE  		10.2 	12/07/2006
+	SUSE 		10.3 	10/04/2007
+	SUSE 		11.0 	06/19/2008
+	Ubuntu 		6.06	06/01/2008
+	Ubuntu 		6.10	10/26/2006
+	Ubuntu 		7.04 	04/19/2007
+	Ubuntu 		7.10 	10/18/2007
+	Ubuntu		8.01	10/30/2006
+	Ubuntu 		8.04 	04/24/2008
+
+Well that mostly worked. The problem occurs in the sorting of the Fedora version numbers. Since a 1 comes before a 5 in the character set, version 10 ends up at the top while version 9 falls to the bottom. 
+To fix this problem, we have to sort on multiple keys. We want to perform  an alphabetical sort on the first key and a numeric sort on the second:
+
+	[bernie@antergos_vb foo]$ sort --key=1,1 --key=2n distros.txt
+	Fedora 		5 	03/20/2006
+	Fedora		6	10/24/2006
+	Fedora		7	05/31/2007
+	Fedora 		9 	05/13/2008
+	Fedora 		10	11/25/2008
+	Fedora 		10.3	11/08/2008
+	SUSE 		10.1 	05/11/2006
+	SUSE  		10.2 	12/07/2006
+	SUSE 		10.3 	10/04/2007
+	SUSE 		11.0 	06/19/2008
+	Ubuntu 		6.06	06/01/2008
+	Ubuntu 		6.10	10/26/2006
+	Ubuntu 		7.04 	04/19/2007
+	Ubuntu 		7.10 	10/18/2007
+	Ubuntu		8.01	10/30/2006
+	Ubuntu 		8.04 	04/24/2008
+
+We've used the long form for clarity but sort -k 1,1 -k 2n distros.txt would have been equally as valid. In the first instance of the key option, we specified a range of fields to include in the first key. Since we wanted to limit the sort  to just the first field, we specified 1,1 which means "start at field 1 and end at field 1". In the second instance, we specfied 2n, which means that field 2 is the sort key and that the sort should be numeric. An option letter may be included at the end of a key specifier to indicate the type of sort to be performed. These option letters are the same as the global options for the sort program: b (ignore leading blanks), n (numeric sort), r (reverse sort) and so on. 
+
+The third field in our list contains a date in an inconvenient format for sorting. On computers dates are usually stored in a YYYY/MM/DD order to make chronological ordering easy. Fortunately sort has an answer!
+
+	[bernie@antergos_vb foo]$ sort -k 3.7nbr -k 3.1nbr -k 3.4nbr distros.txt
+	Fedora 		10		11/25/2008
+	Fedora 		10.3	11/08/2008
+	SUSE 		11.0 	06/19/2008
+	Ubuntu 		6.06	06/01/2008
+	Fedora 		9 		05/13/2008
+	Ubuntu 		8.04 	04/24/2008
+	Ubuntu 		7.10 	10/18/2007
+	SUSE 		10.3 	10/04/2007
+	Fedora		7		05/31/2007
+	Ubuntu 		7.04 	04/19/2007
+	SUSE  		10.2 	12/07/2006
+	Ubuntu		8.01	10/30/2006
+	Ubuntu 		6.10	10/26/2006
+	Fedora		6		10/24/2006
+	SUSE 		10.1 	05/11/2006
+	Fedora 		5 		03/20/2006
+
+The -b is important here as it suppresses leading spaces which vary from line to line.
+
+
+uniq - Report or Omit Repeated Lines
+Compared to sort, the uniq program is a lightweight. uniq performs a seemingly trivial task. When given a sorted file (including standard input), it removes an duplicate lines and sends the results to standard output. It is often used in conjunction with sort to clean the output of duplicates.
+
+	[bernie@antergos_vb foo]$ cat > foo2.txt
+	a 
+	b
+	c
+	a
+	b
+	c
+	[bernie@antergos_vb foo]$ uniq foo2.txt
+	a
+	b
+	c
+	a
+	b
+	c
+	[bernie@antergos_vb foo]$ sort foo2.txt | uniq
+	a
+	b
+	c
+
+We see here that for uniq to actually work the input must first be sorted. This is because uniq only removes duplicate lines that are adjacent to each other.
+
+Commonly used uniq options
+
+Option 	Description
+-c 		Output a list of duplicate lines preceded by the number of times the line occurs
+-d 		Output only repeated lines, rather than unique lines
+-f 		Ignore n leading fields in each line. Fields are separated by whitespace
+-i 		Ignore case during the line comparisons
+-s 		Skip (ignore) the leading n characters of each line
+-u 		Do not output any line that has a duplicate
+
+Slicing and dicing
+cut - Remove sections from each line of files
+
+Option 	Description
+-c 		Extract the portion of the line defined by the char_list. The list may consist of one or more comma-separated numerical ranges
+-d 		Output only repeated lines, rather than unique lines
+-f 		Ignore n leading fields in each line. Fields are separated by whitespace
+--complement Extract the entire line of text, except for those portions specified by -c and/or -f
+
+The way that cut extracts text is rather inflexible, cut is best used to extract text from files that are produced by other programs rather than text typed by humans
+
+Let's have a look at our distros.txt file to see if it's clean enough to be used with cut. 
+
+	[bernie@antergos_vb foo]$ cat -A distros.txt
+	SUSE^I10.2^I12/07/2006$
+	Fedora^I10^I^I11/25/2008$
+	SUSE^I11.0^I06/19/2008$
+	Ubuntu^I8.04^I04/24/2008$
+	Fedora^I10.3^I11/08/2008$
+	SUSE^I10.3^I10/04/2007$
+	Ubuntu^I6.10^I10/26/2006$
+	Fedora^I7^I05/31/2007$
+	Ubuntu^I7.10^I10/18/2007$
+	Ubuntu^I7.04^I04/19/2007$
+	SUSE^I10.1^I05/11/2006$
+	Fedora^I6^I10/24/2006$
+	Fedora^I9^I05/13/2008$
+	Ubuntu^I6.06^I06/01/2008$
+	Ubuntu^I8.01^I10/30/2006$
+	Fedora^I5^I03/20/2006$
+
+
+It looks ok - no embedded spaces, just single tab characters between the fields. Since the file uses tabs rather than spaces, we'll use the -f option to extract a field:
+
+	[bernie@antergos_vb foo]$ cut -f 3 distros.txt
+	12/07/2006
+	11/25/2008
+	06/19/2008
+	04/24/2008
+	11/08/2008
+	10/04/2007
+	10/26/2006
+	05/31/2007
+	10/18/2007
+	04/19/2007
+	05/11/2006
+	10/24/2006
+	05/13/2008
+	06/01/2008
+	10/30/2006
+	03/20/2006
+
+
+Because our distros file is tab delimited, it is best to use cut to extract fields (-f) rather than characters (-c).  This is because when a file is tab delimited, it is unlikely that each line will contain the same number of characters, which makes calculating character positions within the line difficult or even impossible.
+
+We can then run cut a second time in order to extract the year:
+
+[bernie@antergos_vb foo]$ cut -f 3 distros.txt | cut -c 7-10
+2006
+2008
+2008
+2008
+2008
+2007
+2006
+2007
+2007
+2007
+2006
+2006
+2008
+2008
+2006
+2006
+
+When working with fields, it is possible to specifiy a different field delimiter rather than the tab character. Here we will extract the first field from the /etc/passwd file:
+
+	[bernie@antergos_vb foo]$ cut -d ':' -f 1 /etc/passwd | head
+	root
+	bin
+	daemon
+	mail
+	ftp
+	http
+	nobody
+	systemd-journal-gateway
+	systemd-timesync
+	systemd-network
+
+
+Using the -d option we're able to specify the colon character as the field delimiter.
+
+Finally we should note that it's possible to replace tabs with the corresponding number of spaces (and vice versa) that's to the GNU coreutils package. Named expand, this program accepts either one or more arguments or standard input, and it outputs the modified text to standard output.
+
+paste - merge lines of files
+
+The paste command does the opposite of cut. Rather than extracting a column of text from a file, it adds one or more columns of text to a file. It does this by reading multiple files and combining the fields found in each file into a single stream of standard output. Like cut, paste accepts multiple file arguments and/or standard input. To demonstrate how paste operates, we will perform some surgery on our distros.txt file to produce a chronological list of releases:
+
+	[bernie@antergos_vb foo]$ sort -k 3.7nbr -k 3.1nbr -k 3.4nbr distros.txt > distros-by-date.txt
+	[bernie@antergos_vb foo]$ cat distros-by-date.txt 
+	Fedora	10	11/25/2008
+	Fedora	10.3	11/08/2008
+	SUSE	11.0	06/19/2008
+	Ubuntu	6.06	06/01/2008
+	Fedora	9	05/13/2008
+	Ubuntu	8.04	04/24/2008
+	Ubuntu	7.10	10/18/2007
+	SUSE	10.3	10/04/2007
+	Fedora	7	05/31/2007
+	Ubuntu	7.04	04/19/2007
+	SUSE	10.2	12/07/2006
+	Ubuntu	8.01	10/30/2006
+	Ubuntu	6.10	10/26/2006
+	Fedora	6	10/24/2006
+	SUSE	10.1	05/11/2006
+	Fedora	5	03/20/2006
+
+Next, we cut the first two fields from the file and store the result in a new file:
+
+	[bernie@antergos_vb foo]$ cut -f 1,2 distros-by-date.txt > distros-version.txt
+	[bernie@antergos_vb foo]$ cat distros-version.txt 
+	Fedora	10
+	Fedora	10.3
+	SUSE	11.0
+	Ubuntu	6.06
+	Fedora	9
+	Ubuntu	8.04
+	Ubuntu	7.10
+	SUSE	10.3
+	Fedora	7
+	Ubuntu	7.04
+	SUSE	10.2
+	Ubuntu	8.01
+	Ubuntu	6.10
+	Fedora	6
+	SUSE	10.1
+	Fedora	5
+
+The final piece of preparation is to extract the release dates and store them in a file named distro-dates.txt
+
+	[bernie@antergos_vb foo]$ cut -f 3 distros.txt >  distro-dates.txt
+	[bernie@antergos_vb foo]$ cat distro-dates.txt 
+	12/07/2006
+	11/25/2008
+	06/19/2008
+	04/24/2008
+	11/08/2008
+	10/04/2007
+	10/26/2006
+	05/31/2007
+	10/18/2007
+	04/19/2007
+	05/11/2006
+	10/24/2006
+	05/13/2008
+	06/01/2008
+	10/30/2006
+	03/20/2006
+
+
+join
+In some ways, join is like paste in that it adds columns to a file, but  it does so in a unique way. A join is an operation usually associated with relational databases where data from multiple  tables with a shared key field is combined to form a desired result. The join program performs the same operation. It joins data from multiple files based on a shared key field.
+
+To demonstrate the join program, we'll need to make a couple of files with a shared key. To do this, we will use our distros-by-date.txt file. From this file, we will construct two additional files. One contains the release dates (which will be our shared field for this demonstration) and the release names:
+
+
+	[bernie@antergos_vb foo]$ cut -f 1,1 distros-by-date.txt > distros-names.txt
+	[bernie@antergos_vb foo]$ paste distros-dates.txt distros-names.txt > distros-key-names.txt
+	[bernie@antergos_vb foo]$ cat distros-key-names.txt
+	11/25/2008	Fedora
+	10/30/2008	Ubuntu
+	06/19/2008	SUSE
+	....
+
+The second file contains the release dates and version numbers:
+	[bernie@antergos_vb foo]$ cut -f 2,2 distros-by-date.txt > distros-vernums.txt
+	[bernie@antergos_vb foo]$ paste distros-dates.txt distros-vernums.txt > distros-key-vernums.txt
+	[bernie@antergos_vb foo]$ head distros-key-vernums.txt 
+	11/25/2008	10
+	10/30/2008	8.01
+	06/19/2008	11.0
+	...
+
+We now have two files with a shared key (the release date field). It is important to point out that the files must be sorted on the key field for join to work properly.
+
+	[bernie@antergos_vb foo]$ join distros-key-names.txt distros-key-vernums.txt | head
+	11/25/2008 Fedora 10
+	10/30/2008 Ubuntu 8.01
+	06/19/2008 SUSE 11.0
+	05/13/2008 Fedora 9
+	04/24/2008 Ubuntu 8.04
+	11/08/2007 Fedora 8
+	10/18/2007 Ubuntu 7.10
+	10/04/2007 SUSE 10.3
+	05/31/2007 Fedora 7
+	04/19/2007 Ubuntu 7.04
+
+Comparing text
+It is often useful to compare versions of text files. For system administrators and software developers, this is particularly important. A system administrator may, for example need to compare an existing configuration file to a previous version to diagnose a system problem. Likewise, a programmer frequently needs to see what changes have been made to programs over time.
+
+comm - compare two sorted files line by line
+
+The comm program compares two text files, displaying lines that are unique to each one and the lines they have in common. To demonstrate, we will create two nearly identical files:
+
+	[bernie@antergos_vb foo]$ cat > file1.txt
+	a
+	b
+	c
+	d
+	^C
+	[bernie@antergos_vb foo]$ cat > file2.txt
+	b
+	c
+	d
+	e
+	^C
+
+Next we compare the two files
+
+	[bernie@antergos_vb foo]$ comm file1.txt file2.txt 
+	a
+			b
+			c
+			d
+		e
+
+As we can see, comm produces three columns of output. The first column contains lines unique to the first argument; the second column, the lines unique to the second file argument; and the third column, the lines shared by both files. comm supports -n where n is 1,2 or 3 to suppress the output of the respective columns:
+
+	[bernie@antergos_vb foo]$ comm -12 file1.txt file2.txt 
+	b
+	c
+	d
+
+diff - compare files line by line
+Like the comm program, diff is used to detect the differences between files, however, diff is much more complex, supporting many output formats and the ability to process large collections of text files at once, diff is often used by software developers to examine changes between different versions of program source code because it has the ability to recursively examine directories of source code, often referred to as source trees. One common use for diff is the creation of diff files or patches that are used by programs such as patch to convert one version of a file to another.
+
+Using diff to look at our previous example, we see it's default output style; a terse description of the differences between the two files.
+
+	[bernie@antergos_vb foo]$ diff file1.txt file2.txt 
+	1d0
+	< a
+	4a4
+	> e
+
+Each group of changes is preceded by a change command in the form of range operation range to describe the positions and types of changes required to convert the first file to the second file.
+
+When viewed using the context option (-c) the output looks like this:
+
+[bernie@antergos_vb foo]$ diff -c file1.txt file2.txt 
+*** file1.txt	2017-05-22 16:25:31.753922841 +0000
+--- file2.txt	2017-05-22 16:25:51.827551923 +0000
+***************
+*** 1,4 ****
+- a
+  b
+  c
+  d
+--- 1,4 ----
+  b
+  c
+  d
++ e
+
+The output begins with the names of the two files and their timestamps. The first file is marked with asterisks, and the second with dashes. Throughout the remainder of the listing, these markers will signify their respective files. Next, we see groups of changes, including the default number of surrounding  context lines. In the first group, we see *** 1,4 **** which indicates lines 1 through 4 of the first files.
+
+A - indicates a line deleted. This line will appear in the first file but not the second. A + indicates a line added and ! indicates a line changed.
+
+[bernie@antergos_vb foo]$ diff -u file1.txt file2.txt 
+--- file1.txt	2017-05-22 16:25:31.753922841 +0000
++++ file2.txt	2017-05-22 16:25:51.827551923 +0000
+@@ -1,4 +1,4 @@
+-a
+ b
+ c
+ d
++e
+
+The unified command is similar to the context command
+
+The most notable difference between the context and unified formats is the elimination of the duplicated lines of context, making the results of the unified format shorted than those of the context format.
+
+patch - apply a diff to the original
+The patch program is used to apply changes to text files. It accepts output from diff and is generally used to convert older versions of files to newer ones.
+
+Let's consider a famous example. The Linux kernel is developed by a large, loosely organised team of contributors who submit a constant stream of small changes to the source code. The Linux kernel consists of several million lines of code, while the changes that are made by one contributor at one time are quite small. It makes to sense for a contributor to send each developer an entire kernel source tree each time a small change is made. Instead, a diff file is submitted. The diff file contains the change from the previous version of the kernel to the new version with the contributors changes. The receiver then used the patch program to apply the change to their own source tree. Using diff/patch offers two significant advantages:
+
+	The diff file is very small, compared to the full size of the source tree.
+	The diff file concisely shows the change being made, allowing reviewers of the patch to quickly evaluate it.
+ 
+ Of course diff/patch will work on any text file, not just source code. It would be equally applicable to configuration files or any other text. To prepare a diff files for use with patch, the GNU documentation suggests using diff as follows:
+
+ 	diff -Naur old_file new_file > diff_file
+
+ Where old file and new file are  either single files or directories containing files. The r option supports recursion of a directory tree.
+
+ Once the diff file has been created, we can apply it to patch the old file into the new file:
+
+ patch < diff_file
+
+Let's put this into action:
+
+	[bernie@antergos_vb foo]$ diff -Naur file1.txt file2.txt > patchfile.txt
+	[bernie@antergos_vb foo]$ cat patchfile.txt 
+	--- file1.txt	2017-05-22 16:25:31.753922841 +0000
+	+++ file2.txt	2017-05-22 16:25:51.827551923 +0000
+	@@ -1,4 +1,4 @@
+	-a
+	 b
+	 c
+	 d
+	+e
+	[bernie@antergos_vb foo]$ patch < patchfile.txt
+	[bernie@antergos_vb foo]$ cat file1.txt
+	b
+	c
+	d
+	e
+
+The diff file named patchfile.txt is used with the patch program in order to apply the patch. Note that we did not have to specify a target file to patch, as the diff file (in unified format) already contains the filenames in the header. Once the patch is applied we see that file1.txt now matches file2.txt.
+
+patch has a large number of options
+
+Editing on the fly
+Our experience with text editors has been larger interactive, meaning that we manually move a cursor around and then  type our changes. However, there are non-interactive ways to edit text as well. It's possible, for example to apply a set of change to multiple files with a single command.
+
+tr - transliterate or delete characters
+The tr program is used to transliterate characters. We can think of this as a sort of character-based search-and-replace operation. Transliteration is the process of changing characters from one alphabet to another (like upper to lowercase).
+
+	[bernie@antergos_vb foo]$ echo "message in lowercase" | tr a-z A-Z
+	MESSAGE IN LOWERCASE
+
+We can see, tr operates on standard input and outputs its results on standard output. tr accepts two arguments: a set of characters to convert to. Character sets may be expressed in one of three ways:
+
+	An enumerated list; for  example, ABC...Z
+	A character range; for example A-Z
+	POSIC character classes [:upper:]
+
+For example we could convert all characters that meet a certain criteria to a single character instance:
+
+	[bernie@antergos_vb foo]$ echo "message in lowercase" | tr [:lower:] B
+	BBBBBBB BB BBBBBBBBB
+
+In addition to transliteration, tr allows characters to simply be deleted. Earlier in this chapter we discussed the issue of conversion from MSDOS to Unix-style text. To perform this conversion carriage return characters need to be removed from the end of each line. This can be performed with tr as follows:
+
+	tr -d '\r' < dos_file > unix_file
+
+This form of the command uses the escape sequence \r to represent the carriage return character. To see a complete list of sequences and character classes tr supports, try
+
+	tr -help
+
+
+
+sed - stream editor for filtering and transforming text
+The name sed is short for stream editor. It performs text editing on a stream of text, either a set of specified files or standard input. sed is a powerful and complex program.
+
+sed is given either a single editing command (on the command line) or the name of a script file containing multiple commands, and it then performs these commands upon each line in the stream of text. Here is a very simple example of sed in action:
+
+	[bernie@antergos_vb ~]$ echo day | sed s/day/night/
+	night
+
+In this example, we produce a one-word stream of text using echo  and pipe it into sed, sed, in turn carries out the instruction s/front/back/ upon the text in the stream and produces the output as a result. This is subsitution (s)
+
+All commands in sed start with a single letter. The above command, the substitution command is represented by the letter s and the search and replace strings follow after. The choice of delimiter character is arbitrary. By convention, the backslash is used.
+
+Most commands in sed can be preceded with an address, which specifies which line(s) of the input stream will be edited. If the address is omitted, then the editing command is carried out on every line in the input stream,
+
+	[bernie@antergos_vb ~]$ echo day | sed 1s/day/night/
+	night
+
+Adding 1 to our command causes our substitution to be performed on the first line of our one-line input stream. Specifing 2:
+
+[bernie@antergos_vb ~]$ echo day | sed 2s/day/night/
+day
+
+Address notations:
+
+Address 		Description
+n 				A line number (positive integer)
+$ 				Last line
+/regexp/ 		Lines matching a POSIC basic regular expression. Note that the regexp is delimited by slash characters
+addr1,addr2 	Range of lines inclusively
+first~step 		Match the line represented by the number first and then each subsequent line at step intervals. 1~2 represents each odd-numbered line
+
+We'll demonstrate different kinds of address using our beloved distros file. First let's find a range of numbers:
+
+	[bernie@antergos_vb foo]$ sed -n '1,5p' distros.txt
+	SUSE	10.2	12/07/2006
+	Fedora	10	11/25/2008
+	SUSE	11.0	06/19/2008
+	Ubuntu	8.04	04/24/2008
+	Fedora	8	11/08/2007
+
+Here we start with line 1 and continue to line 5. For this to be effective, however, we must include the option -n (the no autoprint option) to cause sed not to print every line by default	
+
+Next, let's try a regular expression, we are able to isolate the lines containing /SUSE/ in much the same manner as grep
+
+	[bernie@antergos_vb foo]$ sed -n '/SUSE/p' distros.txt
+	SUSE	10.2	12/07/2006
+	SUSE	11.0	06/19/2008
+	SUSE	10.3	10/04/2007
+	SUSE	10.1	05/11/2006
+
+We can convert into a NOT regex by using a !:
+
+	[bernie@antergos_vb foo]$ sed -n '/SUSE/!p' distros.txt
+	Fedora	10	11/25/2008
+	Ubuntu	8.04	04/24/2008
+	Fedora	8	11/08/2007
+	Ubuntu	6.10	10/26/2006
+	Fedora	7	05/31/2007
+	Ubuntu	7.10	10/18/2007
+	Ubuntu	7.04	04/19/2007
+	Fedora	6	10/24/2006
+	Fedora	9	05/13/2008
+	Ubuntu	6.06	06/01/2006
+	Ubuntu	8.01	10/30/2008
+
+sec Basic editing commands
+
+Command Description
+= 		Output current line number
+a 		Append text after current line
+d 		Delete the current line
+i 		Insert text in from of the current line
+p 		Print the current line. By default, sed prints every line and edits only lines that match a specified address within the file. The default behavior can be overridden by specifying the -n option.
+q 		Exit sed without processing any more lines.
+Q 		Exit
+s
+y 		Perform transliteration
+
+The s command is by far the most commonly used editing command. We will demonstrate just some of its power by performing an edit on our distros.txt file. We discussed before how the date field in the distros.txt was not in a computer-friendly format. While the dat is formatted MM/DD/YYYY it would be better if the format were YYYY-MM-DD:
+
+	[bernie@antergos_vb foo]$ sed 's/\([0-9]\{2\}\)\/\([0-9]\{2\}\)\/\([0-9]\{4\}\)$/\3-\1-\2/' distros.txt
+	SUSE	10.2	2006-12-07
+	Fedora	10	2008-11-25
+	SUSE	11.0	2008-06-19
+	Ubuntu	8.04	2008-04-24
+	Fedora	8	2007-11-08
+	SUSE	10.3	2007-10-04
+	Ubuntu	6.10	2006-10-26
+	Fedora	7	2007-05-31
+	Ubuntu	7.10	2007-10-18
+	Ubuntu	7.04	2007-04-19
+	SUSE	10.1	2006-05-11
+	Fedora	6	2006-10-24
+	Fedora	9	2008-05-13
+	Ubuntu	6.06	2006-06-01
+	Ubuntu	8.01	2008-10-30
+
+That is one ugly ass command! But it works fine. In just one step we change the date format in our file. It also is a perfect example of why regexp are sometimes referred to as write only. They can be written but are sometimes really hard to read. 
+
+The first part of the command:
+
+/\([0-9]\{2\}\)\/\([0-9]\{2\}\)\/\([0-9]\{4\}\)
+
+is the regular expression. Without the backslashes:
+
+/([0-9]{2})/([0-9]{2})/([0-9]{4})
+
+We have three subexpressions. The first contains the month, the second contains the day of the month, and the third contains the year. Now we can construct replacement as follows:
+
+\3-\1-\2
+
+which gives us the year, a dash, the month, a dash, and the day. The numbers give the locations for the results of our subexpressions. Another feature of the s command is the use of optional flags that may follow the replacement string. The most important of these is the g flag, which instructs sed to apply the search and replace globally to a line, not just the first instance, which is the default
+
+	[bernie@antergos_vb foo]$ echo "aaaaa" | sed 's/a/A/'
+	Aaaaa
+	[bernie@antergos_vb foo]$ echo "aaaaa" | sed 's/a/A/g'
+	AAAAA
+
+We can also produce a script to do all that work for us:
+
+	# sed script to produce Linux distros report
+
+	1 i\
+	\
+	Linux Distributions Report\
+
+	s/\([0-9]\{2\}\)\/\([0-9]\{2\}\)\/\([0-9]\{4\}\)$/\3-\1-\2/
+	y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/
+
+But how does it work? Line 1 of our script is a comment. Many sed commands support line addresses. These are used to specify which lines of the input are to be acted upon. Line addresses may be expressed as line numbers, line-number ranges and special line number $, which indicates the last line.
+
+Lines 3 through 6 contain text to be inserted at the address 1, the first line. The i command is followed by the sequence backslash carriage return to produce an escaped carriage return to be embedded in a stream of text  without signalling the interpreter that the end of the line has been reached. The i command and the commands a (appends text) and c (replaces text) allow multiple lines o ftext, providing each line, except the last, ends with a line-continuation character.
+
+Line 7 is our search and replace command. Line 8 performs transliteration of the lowcase letters into uppercase. As neither line is preceded by an address, they are both applied to every line in the stream.
+
+aspell - interactive spell checker
+The successor to an earlier program (ispell) and is similar.It has the ability to intelligently check various types of text files, including HTML documents, email messages etc. 
+
+To spellcheck a text file containing simple prose, aspell could be used like this:
+
+aspell check textfile
+
+Final note, in this chapter we looked at a few of the many command-line tools that operate on text. 
+
+Also look at split: split files into pieces
+					csplit split files into pieces based on context
+					sdiff to side-by-side merge of file differences

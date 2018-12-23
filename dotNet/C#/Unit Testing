@@ -1,0 +1,19 @@
+Automated testing in C#
+
+Unit testing
+This is a way to specify the behavior of individual classes (or other small units of code) separate from the rest of the application. These are easy to create and run, and are very good when working on back end algorithms or business logic.
+In particular, unit tests are handy when you are writing a feature that you know will be challenging and that are a likely source of bugs in deployment.
+
+A unit test can follow a pattern known as arrange/act/assert. The arrangement is to set up the conditions for the test; creating variables, objects and test databases required to test the method in question. The act refers to performing the test (running the method). Finally, assert is concerned with making sure that the output of the test gave the desired result.
+Having a consistent structure with unit tests makes them easier to read.
+
+Integration testing
+This form of testing is commonly used to test the entire of the application's components. This is very useful alongside unit testing as it let's us simulate the actions of a user and can therefore show issues that come about from the interact between components in your application.
+The downside of this method is that it is very time consuming compared to unit testing.
+
+Test driven development
+Test driven development is unit testing strategy that you can adopt for writing larger projects. This is fairly unintuitive for most coders as it requires you to write your tests BEFORE you write your code. This seems odd but it should force you to think properly about the nature of the method that you want add. You can then write a test, before writing the code. Then you can put in the code until you can green light the test (a test passing in Visual Studio returns a green light).
+
+
+Investigation
+When looking a new library, unit tests can be great for investigating the behavior of that library. As part of learning C#, I learnt about reference types by writing unit tests.

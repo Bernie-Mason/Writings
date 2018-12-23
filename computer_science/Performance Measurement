@@ -1,0 +1,55 @@
+Performance Measurement
+
+What performance tools are available?
+How can we identify bottle necks?
+
+
+APPROACHES TO PERFORMANCE MEASUREMENT
+
+There is more than one right way to measure application performance, and much depends on the context, the application's complexity, the type of information required, and the accuracy of the obtained results. 
+	One approach for testing small programs or library methods is white-box testing: inspecting source code, analyzing its complexity on the whiteboard, modifying the program's source, and inserting measurement code in it. This approach is called microbenchmarking and is very valuable where precise results and absolute understanding of every CPU instruction is required, but rather time-consuming and inflexible where larger applications are concerned. Additionally, if you don't know in advance which small part of the program to measure and reason about, isolating the bottleneck can be extremely difficult without resorting to automatic tool.
+	For larger programs, the more common approach is black-box testing, where a performance metric is identified by a human and then measured automatically by a tool. using this approach, the developer doesn't have to identify the bottle neck or assume the culprit is a certain part of the program. 
+
+VERY IMPORANT: Performance measurement tools can (*UNSURPRISINGLY*) adversely impact the performance of your application. Few tools can provide accurate information and at the same time present no overhead when the application is executing. As we move from one tool to the next, always remember that the accuracy of the tools is often at conflict with the overhead they inflict on your application.
+
+BUILT-IN WINDOWS TOOLS
+
+Free with windows and have minimal overhead. If you look at the full list of performance counters available you'll be able to resolve many performance issues  without ever having to use another tool.
+
+PERFORMANCE COUNTERS
+Window's performance counters are a built-in Windows mechanism for performance and health investigation.
+	Components including the Windows kernel, drivers, databases and CLR provider provide performance counters that users and admins can consume and understand how well the system is functioning. Performance counters are ALWAYS ON.
+	Reading a performance counter is super easy. The built-in tool perfmon.exe can display every performance counter available on the system, as well as log performance counter data to a file for subsequent investigation and provide automatic alerts when performance counter readings breach a defined threshold. Can also monitor remote systems.
+
+Pe
+rformance info is organised:
+	Performance counter catagories (or performance objects)
+		A set of invidual counters related to a certain system component like .NET CLR Memory, Processor info
+	Performance counters
+		Individual numeric data properties in a performance counter category. It's common to specify the performance counter separated by a slash e.g. Process\Private Bytes.
+	Performance counter category instances
+		Used to distinguish several sets of counters from a specific component of which there are several instances. E.g. there may be multiple processors on a system, so there is Processor Information category for each processor.
+
+
+Performance counter logs and alerts
+Configuring performance counter logs is fairly easy, and you can provide an XML template to your system admin to apply performance counter logs automatically without having to specify individual performance counters. You can open the resulting logs on any machine and play them back as if they represent live data.
+You can also use PerfMon to configure a performance counter alter, which will execute a task when a certain threshold is reached - thus creating a simple monitoring system.
+	e.g. you could configure a performance counter alert that would automatically restart your process when it reaches a dangerous amount of memory usage, or when the system as a whole runs out of disk space.
+
+Although the performance monitor is great, you can rad performance counters directly from any .NET application using the System.Diagnostics.PerformanceCounter class. You can even create your own!
+
+Limitations: 
+	Performance counters cannot be used as a high-performance logging and monitoring framework. There are no system components that update read performance counters more often than once a second. If your performance investigation requires following thousands of events per second, performance counters are not great.
+
+EVENT TRACING FOR WINDOWS
+ETW is a high-performance event logging framework built into Windows. As was the case with performance counters, many system components and application frameworks, including the Windows kernel and CLR, define providers, which report events - information on the component's inner workings. Unlike performance counters, that are always on, these can be turned on and off at runtime so that the performance overhead of transferring and collecting them is incurred only when they're needed for a performance investigation.
+	One of the richest sources of ETW information is the kernel provider, which reports events on process and thread creation, DLL loading, memory allocation, network I/O and stack trace accounting (also known as sampling).
+	You can use ETW to investigate overall system behavior, such as what processes are consuming CPU time, to analzye disk I/O and network I/O bottlenecks, to obtain garbage collection statistics and memory usage for managed processes and many more scenarios.
+
+ETW events are tagged with a precise time and can contain custom info, as well as an optional stack trace (to identify sources of performance and correctness issues). E.g.  The CLR provider can report events at the start and end of each GC. Combined with precise stack calls, these events can be used to determine which parts of the program are typically causing garbage collection.
+
+Accessing this info requires an ETW collection tool and an application that can read raw ETW events and perform some basic analysis. 
+
+Windows Performance Toolkit (WPT)
+
+WPT is a set of utilities for controlling ETW sessions, capturing ETW events into log files, and processing them for later display. It can generate graphs and overlays of ETW events, summary tables including call stack information and aggregation, and CSV files for automated processing. 

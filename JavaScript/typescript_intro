@@ -1,0 +1,95 @@
+TypeScript - introduction
+ 
+TypeScdritp implemented features from ES6
+1. Strongly typed variables
+2. Strongly typed function parameters
+3. Classes
+4. Interfaces
+5. Inheritance
+6. Modules (help make building blocks)
+7. Support for code refactoring
+8. Support for libraries like Angular and React
+
+TypeScript is an application-scale programming language that provides early access to proposed new JS features and powerful additional features like static type checking. You can write TS programs to run in web browsers or on servers and re-use code between browser and server applications.
+TS solves a number of issues with JS, but respects the patterns and implementation of the underlying JS language, for example, the ability to have dynamic types and rules on scope.
+
+	TypeScript is a language, compiler and language service
+	You can paste existing JS into TS
+	Compiling from TS to JS is transpiling
+	TS is not the only alternative way of writing JS, but it bears the closest resemblance to JS.
+
+The components of TypeScript: 3 distinct but complementary parts. The language, the compiler and the language service.
+
+	1. The language: this consists of new syntax, keywords and type annotations. As a programmer, the language will be the component you want. Understanding how to supply type information is key because the compiler and language service are most effective when they understand the complex structures you use within your program.
+	2. The compiler performs the type erasure and code transformations that convert your TypeScript code into JS. It will fail at compile time with warnings and errors. It can also perform such tasks as combining the output into a single file, generating source maps etc.
+	3. The language service provides type information that can be used by development tools to supply autocompletion, type hinting, refactoring options and other creative features based on the type information that has been gathered from your program.
+
+Static typing
+Intelligent IDEs and tools that developers have come to depend on in their day-to-day lives heavily rely on static typing. Things like 
+	go to definition
+	find all references
+	refactoring, renaming
+	intellisense
+	statement completion
+Are powered by the ability for the tools to reason about tour code which is in turn, powered by static typing.
+
+Compilation vs transpilation
+Compilation describes the process of taking source code written in one language and converting it into another language. Transpilation is a form of compilation as it involves taking source code written in one language and converting it into code of another language with a similar level of abstraction. So TypeScript is transpiled into JavaScript as they are of a similar level of abstraction.
+
+Issues that TypeScript was written to solve
+
+	Almost every computer in the world has a JS interpreter installed. Javascript has been running on web servers since its inception, supoorted on Netscape Enterprise SErver, IIS (since 1996) and recently on Node. JS can even be used to write native applications on OS's such as Windows and FireFox OS.
+	However, JS has many traps and gotchas that can entangle a large program. If you're a professional programmer working with large apps written in JS, you'll almost certainly have had issues. Naming conflicts, substandard programming tools, complex modularization, unfamiliar prototypal inheritance that makes it hard to re-use common design patterns easily, and difficulty keeping a readable maintainable code base. These are issues that TypeScript solve.
+	
+	prototypal inheritance
+	Prototype-based programming is a style of OOP that is mainly found in interpreted dynamic languages. It's somewhat esoteric: class-based object orientation is far more commonplace. TypeScript solves this issue by adding classes, modules and interfaces. This allows programmers to transfer their existing knowledge of objects and code structure from other languages: especially inheritance and interfaces! 
+
+	Equality and Type Juggling
+	JS has always supported dynamically typed variables and as a result it expends effort at runtime working out types and coercing them into other types on the fly to make statements work that in a statically typed language would cause an error. The most common type of type coercion involve strings, numbers and boolean target types. Whenever you attempt to concatenate a value with a string, the value will be converted to a string, if you perform a mathematical operation an attempt will be made to turn the value into a number  and if you use any value in a logical operation there are special rules to determine whether the result will be true or false. When an automatic type conversion occurs it is commonly referred to as type juggling. 
+	Sometimes this is useful, in particular for creating shorthand logic. But other times, type juggling hides an accidental use of different types and causes unintended behavior.
+	Typescript gracefully handles this by introducing type checking, which can provide warnings at design and compile time to pick up potential unintended juggling. Even in cases where it allows implicit type coercion, the result will be assigned the correct type. THIS PREVENTS DANGEROUS ASSUMPTIONS ABOUT THE TYPE FROM GOING UNDETECTED.
+
+	Management of modules
+	There are dependency issues in JS:
+		Forgetting to add a script tag to a web page
+		Adding scripts to a web page in the wrong order
+		Finding out you have added scripts that aren't actually in use
+
+	There are also issues related to tool to combine your scripts into a single file to reduce network request or if you minify your scripts to lower bandwidth usage.
+		Combining scripts in the wrong order
+		Finding out your chosen minification tool doesn't understand single-line comments
+		Trying to debug combined and minified scripts
+
+	Module loaders are available in the JS community. However, TypeScript makes module loaders the normal way of working and allows your modules to be compiled to suit the two most prevalent module loading styles without requiring changes to your code. See writings on modules!!
+
+	Scope
+	In most modern C-like languages, the curly braces create a new scope context. A variable declared inside a set of curly braces cannot be seen outside of that block. JS bucks this trend by being functionally scoped, which means blocks defined by curly braces have no effect on scope. Instead, variables are scoped to the function they are declared in, OR the global scope if they are not declared within a function. Further complication, if the var keyword is omitted within a function it is then promoted to the global scope.
+	Despite some tricky surprises with scope, JS does provide a powerful mechanism that wraps the current lexical scope around a function declaration to keep values to hand when the function is later executed. These closures are one of the most powerful features in JS. There are also plans to add block level scope in the next version of JS by using the let keyword, rather than the var keyword.
+	TypeScript eases scope problems by warning you about implicit global variables, provided you avoid adding variables to the global scope.
+
+	Lack of Types
+	This isn't an inherent issue with JS. It has types. It's just that they're dynamic. This means that the type can be changed by each assignment. A variable may start off as a string, but an assignment can change it to a number, an object or even a function! The real issue is that the development tools cannot be improved beyond a reasonable guess about the type of a variable. If the dev tools don't know the types, autocompletion or type hinting is often too general to be helpful.
+	By formalizing type information, TypeScript allows development tools to supply specific contextual help that otherwise wouldn't be possible. Once a type is defined for a variable it cannot change and TS is therefore considered to be strongly typed.
+
+	All that said: TYPESCRIPT REMAINS LARGELY FAITHFUL TO JS. The TS spec adds many language features, but doesn't attempt to change the ultimate style and behavior of the JS language. It's just more important for TS programmers to embrace the idiosyncrasies of the runtime as it is for JS programmers. 
+
+	AIM: To make large scale JS programs manageable and maintainable. 
+
+FROM : Anders Hejlsberg: Introducing TypeScript : https://channel9.msdn.com/posts/Anders-Hejlsberg-Introducing-TypeScript
+
+	TypeScript has optional static types, classes, modules
+		Enable scalable application development and excellent tooling
+		Zero cost: Static types completely disappear at runtime
+
+
+We can create variables that are functions:
+x: () => string
+
+function process(x: { a: number; b: string; }){
+	return x.a;
+}
+
+TypeScript Type system
+
+Type inference and structural typing. 
+Not provably type safe. Types reflect intent but do not guarantee.

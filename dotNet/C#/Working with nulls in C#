@@ -1,0 +1,73 @@
+Working with nulls in C#
+Null values types and strings
+
+Fundamentals of why we get null values
+Checking for and manipulating nulls
+
+Course Outline
+	1. Working with nullable value types and strings
+	2. Accessing and checking for null values
+	3. Eliminating null reference exceptions: Null object pattern
+
+Module 1. References vs values types
+	Value types: Can create values types by declaring custom structs, independent instances/copies. The value on the stack is the information itself. No reference so can't be null because can't be null by default.
+	Reference types: can create then using classes. Have single shared instances. The references is a pointer to an area in memory with the information itself. Reference can point to nothing (null) so we made need to check
+
+	In C# value types may need to represent a null value: a null value boolean that comes from the database.
+		How do we solve this?
+
+	Nullable value types
+		Definition: Nullable types are instances of the system.Nullable<T> struct. It can represent a correct rang eof values for it's underlying value type, plus an additional null value.
+		E.g. bool can normally only be true or false. making it Nullable<bool> instead means it can have True False and null.
+
+Module 2. Using Nullable<T> types
+	Convenience methods and propreties
+		.HasValue // false if null
+		.Value // gets the underlying value. Will NullRefenceException is !.HasValue
+		.GetValueOrDefault // underlying value or default (i.e. 0 for int)
+		.GetValueOrDefault(default) // value or specified 
+	When we need to cast from the nullable<T> to the underlying types
+	C# operators for working with nulls
+		General purpose conditional operator
+			?: Not specific for null values. Ternary
+		Null-coalescing operator
+			?? Designed specifically for use with null values. Allows us to say if our object is null let me specify a default value
+		Null-conditional operator from c# 7
+			?. ?[  - works with properties and arrays
+	Thread-safe delegation invocation
+		Another way of using the null conditional operator. Delegate invocation
+
+	Summary 
+		HasValue, Value and GetValueOrDefault
+		Comparing Nullable<T> instances. 
+		Implicit and explicit conversions to/form Nullable<T>
+		C# operators for working with nulls
+		Conditional operator ? :
+		Null-coalescing operator ??
+		Null-conditional operator ?. ?[
+
+Module 3. Eliminating null reference exceptions - null object pattern
+	The null object design pattern
+		Definition: A software design pattern that uses object orientation to remove or reduce the amount of null references and thus reduce the burden of repetitive null checking and handling code in specific parts of the codebase.
+		Why use it?
+			Happier users: Reduces the incidents of runtime null reference exceptions
+			Happier devs: Reduce the amount of repetitive and boring null checking code
+			Simplify our production and test code
+			Fewer branches in program control code. Reduces the overall complexity.
+			Reduces maintenance overheads. "do nothing" code exists in one centralized place.
+	Overview of the pattern
+		Common abstraction: 
+			An interface or base class.
+			Client code that makes use of this abstraction
+			We may have implementations of this abstraction
+			We can also have a null object implementation with "do nothing behavior"
+			Important things is that the client code can treat null objects and real objects in the same way. 
+			Code:
+				PlayerCharacter class
+					ISpecialDefence (has CalculateDamageReduction())
+					property: health
+
+				Implementations such as IronBonesDefence, DiamondSkinDefence and NullDefence for ISpecialDefence					
+
+	Example code without the null object pattern
+	Refactor it to use the pattern

@@ -1,0 +1,27 @@
+Every request that your application gets is handled by a controller which it will do any way it sees fit. Ideally though, it's areas of responsibility won't stray into those of the model and view. They do not store data, nor do they generate user interfaces.
+
+Controllers are .NET that contain the logic required to handle a request. Typically:
+Request comes in. Controller gets it. Processes it. Performs operations on a domain model. Select a view to render.
+However controllers can do much more than that!
+
+Controller classes must implement the IController interface which has a sole Execute method that takes a RequestContext object which has HttpContext and RouteData objects:
+HttpContext: Returns a HttpContextBase object provides access to a set of objects that describe the current request, known as the context objects.
+RouteData: Returns a RouteData object that describes the route that matched the request. Contains the following properties:
+  1. Route: Returns the RouteBase implementation that matched the route
+  2. RouteHandler: Returns the IRouteHandler that handled the route
+  3. Values: Returns a collection of segment values, index by name.
+
+System.Web.Mvc.Controller is the class that provides the request handling support that most MVC developers will be familiar with. The controller class provides 3 key features:
+  1. Action method: A controller's behavior is partitioned into multiple methods. Each action method is exposed on a different URL and is invoked with parameters extracted from the incoming request.
+  2. Action results: You can return an object describing the result of an action (like rendering a view or redirecting to a different  URL or action method), which is then carried out on your behalf. The separation between specifying results and executing them simplifies the testing.
+  3. Filters: You can encapsulate reusable behaviors (e.g. authentication) as filters, and then tag each behavior into one or more controllers or action methods by putting an attribute in your source code.
+
+Controllers often need to access data from the incoming request, such as query string values, form values and parameters parsed from the URL by the routing system. There are three main ways to access that data
+  1. Extract it from a set of context objects. These are a set of properties to access information about the request and include the following: Request, Response, RouteData, HttpContext and Server.
+  2. Have the data passed as parameters to your action method.
+  3. Explicitly invoke the framework's model binding feature.
+
+Action Results
+The MVC Framework uses action results to separate stating intentions from executing intentions. Instead of working directly with the Response object, action methods return an object derived from the ActionResult class that describes what the response from the controller will be, such as rendering a view or redirecting to another URL or action method.
+The system of action results is an example of the command pattern, which describes scenarios where you store and pass around objects that describe operations to be performed.
+ When the MVC framework receives an ActionResult object from an action method, it calls the ExecuteResult method defined by that object. The action result implementation then deals with the Response object for you, generating the output that corresponds to your intention.

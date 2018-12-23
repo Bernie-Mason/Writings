@@ -1,0 +1,226 @@
+C# language principles
+
+One of the many .NET languages. Syntax is similar to Java, C++.
+
+2001 : C# 1.0
+	Inherited many of the best features of C++ and VB but with fewer inconsistencies and anachronisms resulting in a cleaner and more logical language
+2005 : C# 2.0
+	More features! Generics, iterators, anonymous methods
+2008 : C# 3.0
+	Release with VS 2008, added extensions methods, lambda expressions and LINQ
+2010 : C# 4.0
+	Further enhancements that improved it's interoperability with other languages. Enhancements included support for named and optional arguments, the dynamic type, which indicates that the language should implement late binding for an object.
+2012 : C# : 5.0
+	Native support for asynchronous task-based processing through the async method modifier and await operator
+
+RUNTIME
+All C# applications execute by using the Common Language Runtime (CLR) of the .NET Framework (or .NET Core). The CLR is responsible for providing a safe and secure environment for your application code in the form of a virtual machine.
+	When you compile a C# app, the compiler	converts your C# code into a set of instructions using a pseudo-machine code called the Common Intermediate Language (CIL). When run, the CLR takes responsibility for converting the C# instructions into real machine code that processor can understand and execute.
+
+c# code 									Common Intermediate Language 									Machine code
+	---------> C# (i.e. Rosyln) Compiler ------->					---------> Common Language Runtime -------->
+
+OBJECT ORIENTED
+Classes provide a convenient mechanism for modeling the entities manipulated by applications. Making classes is classification of the things we want to model. Such things have properties (fields, variables, properties) and behaviors (methods). 
+ENCAPSULATION means that the class only exposes the behaviors and properties that it wants to. HOW a class actually works is left up to the class. It has two purposes
+	1. To combine methods and data within a class; in other words, to support classification
+	2. To control the accessibility of such methods and data. Control the use of the class.
+		private, public accessibility modifiers are straightforward
+
+STATIC CLASSES METHODS AND FIELDS
+If a method or field doesn't belong to a particular instance of a class but should be shared by all instances of the class then we can use the static modifier.
+A static class can contain only static members. It's purpose is purely to act as a holder of utility methods and fields. 
+
+ANONYMOUS CLASSES
+This is a class that doesn't have a name:
+
+	var myAnonymousObject = new { Name "John", Age = 17}
+
+FIELDS AND PROPERTIES
+Properties vs. Public Variables
+	Reflection works differently on variables vs. properties, so if you rely on reflection, it's easier to use all properties.
+	You can't databind against a variable.
+	Changing a variable to a property is a breaking change. For example:
+	TryGetTitle(out book.Title); // requires a variable
+
+Properties can be used to provide a very finely controlled access to data in an object. 
+
+VALUES AND REFERENCES
+
+Value types : int, double, float, structs and char
+	Have a fixed size, when you declare a variable as a value type, the compiler generates code that allocates a block of stack memory big enough to hold a corresponding value. E.g. declaring an int variable causes the compiler to allocate 4 bytes of memory (32 bits). The default stack size for a .NET application is 1 MB
+Reference types : string, objects
+	When declared, compiler allocates enough stack memory to hold an address (reference). The memory for the actual object is allocated on the heap when it's instantiated (new object). 
+	A string is a class in C#, therefore instances of strings are objects (although everything in C# inherits from Object including int).
+
+NULLABLE TYPES
+A nullable type exposes a pair of properties that you can use to determine whether the type actually has a non-null value, and what that value is. The HasValue property
+
+ref AND out PARAMETERS
+Normally, when a parameter is passed as an argument to a method, the corresponding parameter is initialized with a copy of the argument. This is true whether the parameter is a value or reference type. 
+
+Keywords
+C# have a number of  keywords that allow certain types to be accessed in shorthand. For example, the int keyword is shorthand for the Int32 type. The string keyword represents the String type and has all the static methods on it that the String type has. The convention when using these static methods is to use the type definition rather than the keyword.
+
+The ref keyword allows a reference to the actual argument to be passed rather than a copy of the original argument.
+The out keyword is similar to ref int that a reference to the actual argument is passed. The difference is that the parameter passed doesn't have to initialised (although it can be). However, the method HAS TO initialise it.
+
+BOXING AND UNBOXING
+Variables of type object can refer to any item of any reference or value type.
+
+int i = 42; // sets a value of 42 on the stack
+object 0 = i; // sets a value of 42 on the heap
+
+The automatic copying of an item from the stack to the heap is called boxing. Boxing is implicit as all value types can be stored in an object without having to specify the type.
+Unboxing is the reverse of boxing. Unboxing is explicit, the type must be specified for conversion with a cast.
+
+i = (int)o;
+
+The cast operation checks that it's safe to convert an item of one type to another before it makes the copy.
+
+By using a cast, you specify that IN YOUR OPINION, the data referenced by an object has a specific type and that it is safe to reference the object by using that type. The compiler will not check that is the case but the runtime will. We can check that the type is what we expect using the is operator:
+
+if(i is int){
+	...
+}
+
+Alternatively we can use the as operator to cast. If this fails it'll return null rather than throwing an exception:
+
+Int temp = o as int;
+if(temp != null){
+	... Successful cast
+}
+
+ARRAYS
+All items in an array have to have the same type. Arrays are reference types regardless of their elements.
+int[] pins = new int[4]{2,3,4,5}
+
+INHERITANCE
+Inheritance is used as a tool to avoid repetition when defining different classes that have a number of features in common and are quite clearly related to one another. 
+Inheritance is about the relationship between classes. It's about creating succinct a classification tree. Mammal opposed to horse. 
+
+The System.Object class is the root of all classes. All classes implicitly derive from System.Object. Any class you write:
+
+public class MyAwesomeClass
+{
+	public CancerCure CureCancer(string formula)
+	{
+		// DOWORK
+	}
+}
+
+is automatically rewritten by the compiler to:
+
+public class MyAwesomeClass : System.Object
+{
+	...
+}
+
+Thus all methods on System.Object are inherited by your class.
+	ToString
+	GetHashCode
+	Equals
+	Type
+
+CALLING A BASE CONSTRUCTOR
+
+class Bernie : Mammal
+{
+	public Bernie(string name) : base(name) // calls Mammal(name)
+}
+If you don't explicitly call a base constructor in a derived-class constructor, the compiler attempts to silently insert a call to the base class's default constructor before executing the code in the derived-class constructor.
+
+Bernie myBernie = new Bernie(...);
+Mammal myMammal = myBernie; // Legal, may not have the extra methods, properties that Bernie has but still fine.
+
+It's important to realise that no data is lost here! It's just that the exposed methods of the base class are limited. If we were to:
+
+Bernie secondBernie = (Bernie)myMammal;
+
+We can access properties and methods of Bernie again, as well as any data that was stored in the Bernie object that Mammal couldn't access.
+
+Mammal myMammal = new Mammal(...);
+Bernie myBernie = myMammal; // Illegal. Mammal might not be a Bernie but a Jim instead!
+
+This looks like a weird restriction but not all Mammals are Bernies so we need to cast.
+
+Bernie myBernie = myMammal as Bernie; // Illegal. Mammal might not be a Bernie but a Jim instead!
+
+KEYWORDS: virtual AND override
+If we want to hide the way a method of a base class is implemented we can use virtual and override. The virtual keyword sits in the method of the base class the the override keyword in the method of the inheriting class.
+
+	A virtual method cannot be private; it is intended to be exposed to other classes through inheritance. Similarly, override methods cannot be private because a class cannot change the protection level of a method it inherits.
+		The protected keyword account for the fact that public and private offer two pretty large extremes in accessibility. The protected access modifier makes a field/method private to the outside world BUT accessible to any classes that inherit from that class.
+	The signatures of the virtual and override methods must be identical. Same parameters and return type,
+	Can only override a virtual method.
+	An override method is implicitly virtual and can be further overridden by further inheriting classes.
+
+INTERFACES
+We don't have to just inherit classes. We can also inherit from interfaces (also known as implementing interfaces).
+An interface doesn't contain any code or data; it just specifies the methods and properties that a class that inherits from the interface must provide. Using an interface makes it possible for you to completely separate the names and signatures of the methods of a class from the method's implementation. 
+
+A class can have at most one base class but it implement an unlimited number of interfaces. A class must implement all the methods declared by these interfaces.
+
+Restrictions:
+	Can't define any fields, not even static.
+	No constructors or destructors
+	Cannot specific access modifiers to any methods. All methods in an interface are implicitly public.
+	Cannot inherit from a class or struct but can inherit from another interface.
+
+ABSTRACT CLASSES
+These are similar in many ways to interfaces except that they contain code and data. Abstract classes are for when you want a class that you wouldn't create an object for but has common behavior of other classes.
+
+An abstract method is like a virtual method except that it MUST be overridden. The syntax is therefore for the same as a interface method contract.
+	
+	abstract void DoWork();
+
+GARBAGE COLLECTION
+The garbage collector (GC) of the .NET Framework disposes of objects to reclaim memory used by them. We can use destructors to clean up resources used by an object when memory is recycled by the GC. The using statement can be used to implement exception safe disposal of resources.
+
+The garbage collector runs in its own thread and can execute only at certain times - typically when the application reaches the end of its method. While it runs, other threads in your app temporarily halt. 
+	Remember: A thread is a path of execution in an application. Windows uses threads to facilitate an application performing multiple operations concurrently.
+The garbage collector is a complex piece of software that is self-tuning and implements a number of optimizations to try to balance the need to keep memory available against the requirement  to maintain the performance of the application. The details of the internal algorithms and structures that the garbage collector use are complicated, but at the high level, the steps it takes are
+	1. It builds a map of all reachable objects. It does this by repeatedly following reference fields inside objects. The garbage collector builds this map very carefully and ensures that circular references do not cause an infinite recursion. Any object not in this map is deemed unreachable.
+	2. It checks whether any of the unreachable objects have a destructor that needs to be run. Any unreachable object that requires finalization is placed in a special queue called the freachable queue.
+	3. It deallocate the remaining unreachable objects (those that don't require finalization) by moving reachable objects down the heap, thus defragmenting the heap and freeing memory at its top. When the garbage collector moves a reachable object, it also updates any references to it.
+	4. At this point all other threads are allowed to resume
+	5. It finalizes unreachable objects that require it.
+Some resources are not release by destructors. They are too valuable to be left around waiting for garbage collection to happen and should be release by the user. All such classes, like StreamReader, DbConnection implement the IDisposable interface and have the Dispose() method. However a better solution is to use the using statement:
+
+using( type variable - initialization)
+{
+	StatementBlock
+}
+
+For example:
+
+using (DbConnection connection = _connectionProvider.Connect()) // or = new MySqlConnection(...)
+{
+    connection.Open();
+    var command = _commandProvider.Update(model);
+    command.Connection = connection;
+    return Convert.ToInt32(command.ExecuteScalar());
+}
+
+The using statement provides a clean mechanism for controlling the lifetimes of resources. You can create an object, and this object will be destroyed (using a hidden implementation of Dispose()) once the statement block has finished executing. 
+
+
+Thread safety and the Dispose method. 
+The issue of using a finaliser to dispose your object works in most cases but bare in mind that you have no control over when the finaliser runs (destructors are run purely by the GC) so you could hit a situation where your finaliser is invoked by the GC on its own thread at the same time as the Dispose method is being run, espicially if Dispose has to do a lot of work. 
+To completely eliminate the chance of two concurrent threads disposing the same resources in the same object simultaneously, we can write code in a thread safe manner:
+
+public void Dispose()
+{
+	lock(this)
+	{
+		if(!disposed){
+			ReleaseUnmanagedResources();
+		}
+		disposed = true;
+        GC.SuppressFinalize(this);
+	}
+}
+
+The lock statement prevents the same block of code from being run at the same time on different threads. The argument to the lock statement should be an object reference. The code between the curly braces defines the scope of the lock statement. When execution reaches the lock statement, if the specified object is currently locked, the thread requesting the lock is blocked and the code is suspended at this point. When the thread that currently holds the lock reaches the closing curly brace of the lock statement, the lock is released, enabling the blocked thread to acquire the lock itself and continue. By this time however, the disposed field has been set to true. 
+Using locks in this way is safe but can impair performance. An alternative approach is to usee the strategy described earlier in the chapter, whereby only the repeated disposal of managed resources is suppression.
+

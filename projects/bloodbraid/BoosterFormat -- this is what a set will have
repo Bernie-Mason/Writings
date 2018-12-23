@@ -1,0 +1,56 @@
+BoosterFormat -- this is what a set will have
+=====================
+- Id
+- name - Not sure what's going here
+
+BoosterFormatItem
+=====================
+- Id
+- BoosterFormatId
+- IncidenceRate
+- BoosterFormatTypeId
+- OrderBy
+	
+BoosterFormatType
+=====================
+- id
+- value (i.e. 	- Mythic	
+				- Rare
+				- Uncommon
+				- Common
+				- Land
+				- Marketing
+				- Foil
+				- Flip)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Alternative to BoosterFormatItem
+
+BoosterFormatSlot
+=================
+- Id
+- BoosterFormatId
+- OrderBy
+
+BoosterFormatSlotItem
+=====================
+- Id
+- BoosterFormatSlotId
+- BoosterFormatTypeId
+- Chance

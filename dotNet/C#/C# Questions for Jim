@@ -1,0 +1,20 @@
+Questions for Jim
+
+1. What's the difference between:
+
+	int[] numArray = new int[3] {....};
+
+and
+
+	Array numArray = Array.CreateInstance(typeof(int), 3)
+
+There appears to be a difference in how they are talked to in the intermediate language? I also read that the first is usually desirable
+
+2. Whenever we make changes to a string it creates a new string (thus the stringbuilder class) but why does it do this? Is it that difficult to modify a field on the heap? Does this happen for every object on the heap?
+
+3. Why do value types inherit from the Object class?
+
+List of terms to clarify:
+
+Framework
+Endpoint: As in, "This document contains information such as the location of various endpoints (e.g. the token endpoint and the end session endpoint)" - in relation to OpenID Connect. 

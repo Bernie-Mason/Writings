@@ -1,0 +1,127 @@
+Branching with if
+
+How can we make our report generator script adapt to the privileges of the user running the script? The solution to this problem will require us to find a way to change directions.	
+
+The if statement has the following syntax:
+if commands: then
+	commands
+[elif commands; then
+	commands...]
+[else
+	commands]
+fi
+
+Before we look in more detail let's consider how the shell evaluates the success or failure of a command.
+
+Exit status
+Commands (including the scripts and shell functions we write) issue a value to the system when they terminate, called an exit status. This value, which is an integer in the range of 0 to 255, indicates the success or failure of the command's execution. 
+The shell provides a parameter that we can use to examine the exit status:
+
+[bernie@antergos_vb Documents]$ ls -d /usr/bin
+/usr/bin
+[bernie@antergos_vb Documents]$ echo $?
+0
+[bernie@antergos_vb Documents]$ ls -d /bin/usr
+ls: cannot access '/bin/usr': No such file or directory
+[bernie@antergos_vb Documents]$ echo $?
+2
+
+In this example, we execute the ls command twice. The first time, the command executes successfully. If we display the value of the parameter $? we get a 0. The second time (after the error) it is 2. Many commands simply exit with a value of 1 when they fail.
+
+[bernie@antergos_vb Documents]$ true
+[bernie@antergos_vb Documents]$ echo $?
+0
+[bernie@antergos_vb Documents]$ false
+[bernie@antergos_vb Documents]$ echo $?
+1
+
+The shell provides this commands simply to set the exit status.
+
+Such commands can be used to see how the if statement works. The if statement really is evaulating the success or failure of commands:
+
+[bernie@antergos_vb Documents]$ if false; then echo "It's true"; fi
+[bernie@antergos_vb Documents]$ if true; then echo "It's true"; fi
+It's true
+
+By far the most frequent command with if is test. The test command performs a variety of checks and comparisons. It has two equivalent forms:
+
+	test expression
+
+and more popular
+
+	[ expression ]
+
+where expression is an expression that is evaluated as either true or false. 0 for true and 1 for false as the exit status.
+
+
+#!/bin/bash
+
+# test file: Evaluate the status of a file
+
+FILE=~/.bashrc
+
+if [ -e "$FILE" ]; then
+	if [ -f "$FILE" ]; then
+		echo "$FILE is a regular file"
+	fi
+	if [ -d "$FILE" ]; then
+		echo "$FILE is a directory"
+	fi
+	if [ -r "$FILE" ]; then
+		echo "$FILE is readable"
+	fi
+	if [ -w "$FILE" ]; then
+		echo "$FILE is writable"
+	fi
+	if [ -x "$FILE" ]; then
+		echo "$FILE is executable"
+	fi
+else
+	echo "$FILE does not exist"
+	exit 1
+fi
+
+exit
+
+The script evaluates the file assigned to the constant FILE and displayrs its results as the evaluation is performed. There are two interesting things to not. First, the parameter $FILE is quoted. This is not necessary but protects against the variable being empty. This ensures that the operator is always followed by a string, even if the string is empty. Second, notice the presence of the exit command appearing on the last line. When no argument is passed the exit status defaults to 0. Using exit in this way allows the script to indicate failure if $FILE expands to the name of a non-existant file.
+
+More recent versions of bash include a compound command  that acts as an an enchanced version for text. It uses the following syntax:
+
+	[[ expression ]]
+
+where expression evaluates to either true or false. This is very similar to test (it supports all it's expressions) but adds an important string expresion:
+
+	string1 =~ regex
+
+This opens up a lot of possibilities for performing such tasks as data validation:
+
+
+#!/bin/bash
+
+# test_integer: evaluate the value of an integer
+
+INT=-5
+
+if [[ "$INT" =~ ^-?[0-9]+$ ]]; then
+	if (( INT == 0)); then
+		echo "INT is zero"
+	else
+		if ((INT < 0)); then
+			echo "INT is negative"
+		else 
+			echo "INT is positive"
+		fi
+		if (( ((INT % 2)) == 0 )); then
+			echo "INT is even"
+		else
+			echo "INT is odd"
+		fi
+	fi
+else
+	echo "INT is not an integer" >&2
+	exit 1
+fi
+
+By applying the regular expression, we are able to limit the value of INT to only strings that being with optional minus sign, followed by one or more numerals. This expression also eliminates the possibility of empty values (because of the '+' after the [0-9]).
+
+We've also included some (( expression )) which are deisgned for integers. These are used to peform arithmetic truth tests. These result in true if they evaluate to non-zero.

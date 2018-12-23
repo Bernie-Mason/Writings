@@ -1,0 +1,118 @@
+Redirection of input and output
+//The Linux command line	
+
+I/O redirection might be the coolest feature of the command line. I/O stands for input/output and with this facility you can redirect the input and output of commands to and from files, as well as connect multiple commands to make powerful pipelines. 
+
+To show this off we'll need to following commands
+
+cat - to concatenate files
+sort - to sort lines of text
+uniq - to report or omit repeated lines
+wc - print newline, word and byte counts for each file
+grep - print lines matching a pattern
+head - output the first part of the file
+tee - Read from standard input and write to standard output files
+
+Standard Input, Output and Error
+ Many programs have some kind of output and this output often consists of two types. First, we have the program's results; that is, the data that the program is designed to produce. Second, we have status and error messages that tell us how the program is getting along. If we look at a command like ls, we can see that it displays its results and its error messages on the screen. Keeping with the Unix theme of "everything is a file", programs such as ls actually send their results to a special file called standard output (often expressed as stdout) and their status messages to another file calleed standard error (stderr). By default, both standard output and standard error are linked to the screen and not saved into a disk file. In addition, many programs take input from a facility called standard input (stdin), which is, by default, attached to the keyboard.
+ I/O redirection allows us to change where output goes where input comes from. Normally, output goes to the screen and input comes from the keyboard, but with I/O we can change that.
+
+ To redirect standard output to another file instead of the screen, we use the > redirection operator followed by the name of the file.
+ It's often useful to store the output of a command in a file. For example, we could tell the shell to send output of the ls command to the ls-output.txt instead of the screen:
+
+ [me@linuxbox ~]$ ls -l /usr/bin > ls-output.txt
+
+ Here we created a long listing of the /usr/bin directory and sent the results to the file ls-output.txt. It will create this file if it doesn't already exist and overwrite its contents.
+
+ [me@linuxbox ~]$ ls -l /bin/usr > ls-output.txt
+This produces an error which makes sense because we are specifying a non-existent address. This is still going to the screen as error messages aren't sent to standard output. Instead, like most well-written Unix programs, it sends its error messages to standard error. Since we redirected only the standard input this didn't affect the error message.
+
+Since our ls command generated no results and only an error message, the redirection operation started to rewrite the file and then stopped because of the error, resulting in its truncation. In fact, if we ever need to truncate the file or create a new empty file we can use:
+
+ [me@linuxbox ~]$ > ls-output.txt
+
+ To append redirected output to a file instead of overwriting:
+
+ [me@linuxbox ~]$ ls -l /bin/usr >> ls-output.txt
+
+ 2> to redirect an error message.
+
+
+Disposing of Unwanted Output
+Sometimes silence is golden. To suppress unwanted output we can send it to /dev/null
+
+ [me@linuxbox ~]$ ls -l /bin/usr 2> /dev/null
+
+Redirecting Standard Input 
+The cat (concatenate) command reads one or more files and copies them to standard output:
+
+cat ls-output.txt
+
+Since cat can accept more than one file as an argument, it can also be used to join files together and display then in the standard output (below the prompt). Say we have downloaded a large file that has been split into multiple parts (multimedia files are often split this way on Usenet), and we want to join  them back together. If the files were named movie.mpeg.001, movie.mpeg.002 ... etc then we could use
+
+
+ [me@linuxbox ~]$ cat movie.mpeg.* > movie.mpeg
+
+ Since wildcards always  expand in sorted order, the arguments will be arranged in the correct order. Great! But what does this have to do with standard input? Well, what happens if just enter cat?
+
+ [me@linuxbox ~]$ cat
+
+ Nothing happens and it sits there like it's hung. It may seem that way but it's actually  doing exactly what it's supposed to.
+
+ If cat is not given any arguments, it reads from standard input, and since standard input is, by  default attached to the keyboard, it is waiting for us to type something!
+
+We can use this behavior to create short text files. 
+
+[me@linuxbox ~]$ cat > lazy_dog.txt
+The quick brown fox jumped over the lazy dog.
+
+The press ctrl-D to return to the command line. Using the command line, we have implemented the world's dumbest processor.
+
+Now that we know how cat accepts standard input in addition to file-name arguments, let's try redirecting standard input
+
+[me@linuxbox ~]$ cat < lazy_dog.txt
+
+Using the < redirection operator, we change the source of standard input  from the keyboard to the file lazy_dog.txt. We see the result is the same as passing a single filename argument, but it serves to demonstrate using a file as a source of standard input.
+
+Pipelines
+The ability of commands to read data from standard input and send to standard output is utilized by a shell feature called pipelines. Using the pipe operator |, the standard output of one command can be piped into the standard input of another
+
+command1 | command2
+
+To fully demonstrate this, we are going to need some commands. We already know a command that accepts standard input: less. We can use less to display, page  by page, the output of any command that sends its results to standard output
+
+[me@linuxbox ~]$ ls -l /usr/bin | less
+
+Here we're piping the standard input from command1 into less.
+
+This is extremely powerful!
+
+Filters
+Pipelines are often used to perform complex operations on data. It is possible to put several commands together into a pipeline. Frequently, the commands used this way are referred to as filters. Filters take input, change it somehow, and then output it. The first one we will try is sort. Imagine we want to make a combined list of all of the executable programs in /bin and /usr/bin, put them in sorted order, and then view the list
+
+[me@linuxbox ~]$ ls /bin ls /usr/bin | sort | less
+
+Here we first make a list of two directories, sort them and output a list.
+
+We can use | uniq to pipe only unique entries and ignore duplicates. We  can use the -d option with it to instead see a list of duplicates.
+
+grep - matching lines patterns
+
+grep is a powerful program used to fine text patterns in files. When grep encounters a pattern in the file, it prints out the lines containing it. The patterns that grep can match can be very complex, but for now we will concentrate on simple text matches:
+
+[bernie@antergos-vbox ~]$ ls /bin /usr/bin | sort | uniq | grep zip
+
+Here we return all files containing an instance of the word zip in the name. Another useful option for grep is -i, which causes grep to ignore the case when it performs the search and -v which tells grep to print only lines that do not match the pattern.
+
+head/tail - print first/last parts of the files
+
+Sometimes you don't want to output from a command. You may want only the first few lines or the last few lines. The head comand prints the first 10 lines of a file, and tail command prints the last 10 lines. By default, both commands print 10 lines of text, but this can be adjusted using the -n option.
+
+Tail has the option that allows you to view files in real time. This is useful for watching the progress of log files as they are being written. In the following example, we will use the -f option to monitor the file and when new lines are appended they immediately appear. This continues until you type Ctrl-C
+
+tail -f /var/log/messages
+
+tee - read from Stdin and Ouput to Stout and Files
+In keeping with the plumbing analogy, Linux provides a command called tee which creates a "T" fitting in our pipe. The tee program reads standard input and copies it both to standard output (allowing the data to continue down the pipeline) and to one or more files. This is usefull for capturing a pipeline's contents at an intermediate stage of processing.
+
+[bernie@antergos.vbox ~]$ ls /usr/bin | tee ls.txt | grep zip

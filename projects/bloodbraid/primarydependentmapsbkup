@@ -1,0 +1,583 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using AutoMapper;
+using Bloodbraid.CardParser.Concrete;
+using Bloodbraid.CardParser.Models.Containers;
+using Bloodbraid.CardParser.Models.Intermediate;
+using Bloodbraid.DataAccessLayer.Models;
+using Bloodbraid.DataAccessLayer.Abstract;
+using Type = Bloodbraid.DataAccessLayer.Models.Type;
+
+namespace Bloodbraid.CardParser.Maps.Domain
+{
+    public class PrimaryDependentModelMaps
+    {
+        private List<SetIntermediateModel> _setModels;
+        private IMapper _mapper;
+        private DatabaseService _databaseService;
+        private DomainModelListContainer _container;
+
+        public PrimaryDependentModelMaps(List<SetIntermediateModel> setModels, DomainModelListContainer domainModelListContainer, IMapper mapper, DatabaseService databaseService)
+        {
+            _setModels = setModels;
+            _mapper = mapper;
+            _databaseService = databaseService;
+            _container = domainModelListContainer;
+        }
+
+        public static void Configure()
+        {
+            Mapper.CreateMap<BoosterIntermediateItem, BoosterFormatItem>()
+                .ForMember(dst => dst.Id, opts => opts.Ignore())
+                .ForMember(dst => dst.BoosterFormatTypeId, opts => opts.Ignore());
+        }
+
+        public void PopulateAllPrimaryDependentModels()
+        {
+            PopulateBoosterFormatItemList();
+            PopulateCardColorIdentityList();
+            PopulateCardColorList();
+            PopulateCardName();
+            PopulateCardSubtypeList();
+            PopulateCardSupertypeList();
+            PopulateCardTypeList();
+            PopulateSetBoosterFormatList();
+            PopulateSetTranslationList();
+        }
+
+        
+        public void PopulateCardName()
+        {
+            var languageList = _databaseService.LanguageGetAll();
+            var cardList = _databaseService.CardGetAll();
+
+            var cardIntermediateModelListAll = _setModels
+                .SelectMany(s => s.CardModels).ToList();
+
+            foreach (var card in _container.CardList)
+            {
+                // get a list of all intermediate models that have the english name in card.
+                // We need all of them because some have translations that others might not.
+                // TODO : Needs altering! We need all the most common elements from each duplicated language entry
+
+                var languageIntermediateList =
+                    cardIntermediateModelListAll.Where(
+                            c => c.CardId == card.Id)
+                            .SelectMany(c => c.LanguageIntermediateList)
+                            .GroupBy(l => l.Language)
+                            .ToList();
+
+                List<LanguageIntermediate> languageIntermediateDistinctList = new List<LanguageIntermediate>();
+                foreach (var language in languageIntermediateList)
+                {
+                    List<string> LanguageList = new List<string>();
+                    List<string> NameList = new List<string>();
+                    LanguageIntermediate languageIntermediateDistinct = new LanguageIntermediate();
+
+                    foreach (var languageIntermediate in language)
+                    {
+                        if(!String.IsNullOrWhiteSpace(languageIntermediate.Language)) LanguageList.Add(languageIntermediate.Language);
+                        if(!String.IsNullOrWhiteSpace(languageIntermediate.Name)) NameList.Add(languageIntermediate.Name);
+                    }
+
+                    if (LanguageList.Count > 0)
+                    {
+                        var languageGroup = LanguageList.GroupBy(x => x);
+                        languageIntermediateDistinct.Language =
+                            languageGroup.Where(s => s.Count() == languageGroup.Max(g => g.Count())).Select(x => x.Key).First();
+                    }
+
+
+                    if (NameList.Count > 0)
+                    {
+                        var nameGroup = NameList.GroupBy(x => x);
+                        languageIntermediateDistinct.Name = nameGroup.Where(s => s.Count() == nameGroup.Max(g => g.Count())).Select(x => x.Key).First();
+                    }
+
+                    languageIntermediateDistinctList.Add(languageIntermediateDistinct);
+                }
+               
+                foreach (var languageIntermediate in languageIntermediateDistinctList)
+                {
+                    _databaseService.CardNameCreateSingle(new CardName
+                    {
+                        CardId = card.Id,
+                        LanguageId = languageList.Where(l => l.Value.Equals(languageIntermediate.Language, StringComparison.Ordinal)).Select(l => l.Id).Single(),
+                        Name = languageIntermediate.Name
+                    });
+                }
+            }
+        }
+
+
+        public void PopulateSetBoosterFormatList()
+        {
+            var boosterFormatlist = _databaseService.BoosterFormatGetAll();
+            var setList = _databaseService.SetGetAll();
+            List<SetBoosterFormat> setBoosterFormatList = new List<SetBoosterFormat>();
+
+            foreach (var set in setList)
+            {
+                int boosterFormatId = _setModels.Where(s => s.EnglishName.Equals(set.EnglishName, StringComparison.Ordinal)).Select(s => s.BoosterFormatId).Single();
+
+                _databaseService.SetBoosterFormatCreateSingle(new SetBoosterFormat
+                {
+                    SetId = set.Id,
+                    BoosterFormatId = boosterFormatId
+                });
+            }
+
+            
+        }
+
+        public void PopulateCardColorList()
+        {
+            var colorList = _databaseService.ColorGetAll();
+            var cardList = _databaseService.CardGetAll();
+
+            var cardIntermediateModelList = _setModels
+                .SelectMany(s => s.CardModels).GroupBy(c => c.CardEnglishName).Select(c => c.First()).ToList();
+
+            foreach (var card in cardList)
+            {
+                var colorListIntermediate =
+                    cardIntermediateModelList.Where(
+                            c => c.CardEnglishName.Equals(card.EnglishName, StringComparison.Ordinal))
+                        .SelectMany(c => c.Colors).ToList();
+                foreach (var color in colorListIntermediate)
+                {
+                    _databaseService.CardColorCreateSingle(new CardColor
+                    {
+                        CardId = card.Id,
+                        ColorId = colorList.Where(c => c.Value.Equals(color, StringComparison.Ordinal)).Select(c => c.Id).Single()
+                    });
+                }
+            }
+            
+        }
+
+        public void PopulateCardColorIdentityList()
+        {
+            var colorList = _databaseService.ColorGetAll();
+            var cardList = _databaseService.CardGetAll();
+
+            var cardIntermediateModelList = _setModels
+                .SelectMany(s => s.CardModels).GroupBy(c => c.CardEnglishName).Select(c => c.First()).ToList();
+
+            foreach (var card in cardList)
+            {
+                var colorListIntermediate =
+                    cardIntermediateModelList.Where(
+                            c => c.CardEnglishName.Equals(card.EnglishName, StringComparison.Ordinal))
+                        .SelectMany(c => c.Colors).ToList();
+                foreach (var color in colorListIntermediate)
+                {
+                    _databaseService.CardColorIdentityCreateSingle(new CardColorIdentity
+                    {
+                        CardId = card.Id,
+                        ColorIdentityId = colorList.Where(c => c.Value.Equals(color, StringComparison.Ordinal)).Select(c => c.Id).Single()
+                    });
+                }
+            }
+            
+        }
+
+        public void PopulateCardTypeList()
+        {
+            var typeList = _databaseService.TypeGetAll();
+            var cardList = _databaseService.CardGetAll();
+
+            var cardIntermediateModelList = _setModels
+                .SelectMany(s => s.CardModels).GroupBy(c => c.CardEnglishName).Select(c => c.First()).ToList();
+
+            foreach (var card in cardList)
+            {
+                var typeListIntermediate =
+                    cardIntermediateModelList.Where(
+                            c => c.CardEnglishName.Equals(card.EnglishName, StringComparison.Ordinal))
+                        .SelectMany(c => c.Types).ToList();
+                foreach (var type in typeListIntermediate)
+                {
+                    _databaseService.CardTypeCreateSingle(new CardType
+                    {
+                        CardId = card.Id,
+                        TypeId = typeList.Where(c => c.Value.Equals(type, StringComparison.Ordinal)).Select(c => c.Id).Single()
+                    });
+                }
+            }
+            
+        }
+
+        public void PopulateCardSubtypeList()
+        {
+            var subTypeList = _databaseService.SubtypeGetAll();
+            var cardList = _databaseService.CardGetAll();
+
+            var cardIntermediateModelList = _setModels
+                .SelectMany(s => s.CardModels).GroupBy(c => c.CardEnglishName).Select(c => c.First()).ToList();
+
+            foreach (var card in cardList)
+            {
+                var subTypeListIntermediate =
+                    cardIntermediateModelList.Where(
+                            c => c.CardEnglishName.Equals(card.EnglishName, StringComparison.Ordinal))
+                        .SelectMany(c => c.Subtypes).ToList();
+                foreach (var subType in subTypeListIntermediate)
+                {
+                    _databaseService.CardSubtypeCreateSingle(new CardSubtype
+                    {
+                        CardId = card.Id,
+                        SubtypeId = subTypeList.Where(c => c.Value.Equals(subType, StringComparison.Ordinal)).Select(c => c.Id).Single()
+                    });
+                }
+            }
+        }
+
+        public void PopulateCardSupertypeList()
+        {
+            var superTypeList = _databaseService.SupertypeGetAll();
+            var cardList = _databaseService.CardGetAll();
+
+            var cardIntermediateModelList = _setModels
+                .SelectMany(s => s.CardModels).GroupBy(c => c.CardEnglishName).Select(c => c.First()).ToList();
+
+            foreach (var card in cardList)
+            {
+                var superTypeListIntermediate =
+                    cardIntermediateModelList.Where(
+                            c => c.CardEnglishName.Equals(card.EnglishName, StringComparison.Ordinal))
+                        .SelectMany(c => c.Supertypes).ToList();
+                foreach (var superType in superTypeListIntermediate)
+                {
+                    _databaseService.CardSupertypeCreateSingle(new CardSupertype
+                    {
+                        CardId = card.Id,
+                        SupertypeId = superTypeList.Where(c => c.Value.Equals(superType, StringComparison.Ordinal)).Select(c => c.Id).Single()
+                    });
+                }
+            }
+            
+        }
+
+        public void PopulateSetTranslationList()
+        {
+            var languageList = _databaseService.LanguageGetAll();
+            var setList = _databaseService.SetGetAll();
+
+            var setIntermediateModelList = _setModels.ToList();
+
+            foreach (var set in setList)
+            {
+                var setTranslationListIntermediate =
+                    setIntermediateModelList.Where(
+                            c => c.EnglishName.Equals(set.EnglishName, StringComparison.Ordinal))
+                            .SelectMany(s => s.SetLanguage).ToList();
+
+                foreach (var setTranslation in setTranslationListIntermediate)
+                {
+                    _databaseService.SetTranslationCreateSingle(new SetTranslation
+                    {
+                        SetId = set.Id,
+                        LanguageId = languageList.Where(c => c.Value.Equals(setTranslation.Language, StringComparison.Ordinal)).Select(c => c.Id).Single(),
+                        Name = setTranslation.Name
+
+                    });
+                }
+            }
+            
+        }
+        
+        public void PopulateBoosterFormatItemList()
+        {
+            var boosterFormatTypeList = _databaseService.BoosterFormatTypeGetAll();
+            // Get all formats that have a booster format. We don't just want distinct models at this stage
+            List<BoosterIntermediate> boosterIntermediateList = _setModels.Where(s => s.BoosterIntermediateModel.BoosterFormatItemList.Count > 0).Select(c => c.BoosterIntermediateModel).ToList();
+            List<BoosterFormat> boosterFormatList = new List<BoosterFormat>();
+
+            int i = 0;
+            foreach (var boosterIntermediate in boosterIntermediateList)
+            {
+                if (boosterFormatList.All(b => b.Id != boosterIntermediate.Id))
+                {
+                    BoosterFormat model = new BoosterFormat();
+                    model.Id = boosterIntermediate.Id;
+                    model.Name = boosterIntermediate.Name;
+                    boosterFormatList.Add(model);
+                    // TODO Could change this to also populate the BoosterFormatTypeList using if statements. Would mean that I wouldn't need the string comparison
+
+                    // Populate the BoosterFormatItem list
+                    foreach (var boosterFormat in boosterIntermediate.BoosterFormatItemList)
+                    {
+                        BoosterFormatItem boosterFormatItem = new BoosterFormatItem();
+                        boosterFormatItem = _mapper.Map<BoosterIntermediateItem, BoosterFormatItem>(boosterFormat);
+                        boosterFormatItem.Id = i;
+                        boosterFormatItem.BoosterFormatTypeId =
+                            boosterFormatTypeList.Where(
+                                    t => t.Value.Equals(boosterFormat.BoosterFormatType, StringComparison.Ordinal))
+                                .Select(c => c.Id)
+                                .Single();
+
+                        _databaseService.BoosterFormatItemCreateSingle(boosterFormatItem);
+                        i++;
+                    }
+                }
+                else
+                {
+                    int index = boosterFormatList.FindIndex(b => b.Id == boosterIntermediate.Id);
+                    boosterFormatList[index].Name += "_" + boosterIntermediate.Name;
+                }
+            }
+        }
+
+
+        #region Old methods
+
+        public List<SetBoosterFormat> SetBoosterFormatList(List<BoosterFormat> boosterFormatlist, List<Set> setList)
+        {
+            List<SetBoosterFormat> setBoosterFormatList = new List<SetBoosterFormat>();
+
+            foreach (var set in setList)
+            {
+                int boosterFormatId = _setModels.Where(s => s.EnglishName.Equals(set.EnglishName, StringComparison.Ordinal)).Select(s => s.BoosterFormatId).Single();
+
+                setBoosterFormatList.Add(new SetBoosterFormat
+                {
+                    SetId = set.Id,
+                    BoosterFormatId = boosterFormatId
+                });
+            }
+
+            return setBoosterFormatList;
+        }
+
+        public List<CardColor> CardColorList(List<Color> colorList, List<Card> cardList)
+        {
+            List<CardColor> cardColorList = new List<CardColor>();
+            var cardIntermediateModelList = _setModels
+                .SelectMany(s => s.CardModels).GroupBy(c => c.CardEnglishName).Select(c => c.First()).ToList();
+
+            foreach (var card in cardList)
+            {
+                var colorListIntermediate =
+                    cardIntermediateModelList.Where(
+                            c => c.CardEnglishName.Equals(card.EnglishName, StringComparison.Ordinal))
+                        .SelectMany(c => c.Colors).ToList();
+                foreach (var color in colorListIntermediate)
+                {
+                    cardColorList.Add(new CardColor
+                    {
+                        CardId = card.Id,
+                        ColorId = colorList.Where(c => c.Value.Equals(color, StringComparison.Ordinal)).Select(c => c.Id).Single()
+                    });
+                }
+            }
+            return cardColorList;
+        }
+
+        public List<CardColorIdentity> CardColorIdentityList(List<Color> colorList, List<Card> cardList)
+        {
+            List<CardColorIdentity> cardColorIdentityList = new List<CardColorIdentity>();
+            var cardIntermediateModelList = _setModels
+                .SelectMany(s => s.CardModels).GroupBy(c => c.CardEnglishName).Select(c => c.First()).ToList();
+
+            foreach (var card in cardList)
+            {
+                var colorListIntermediate =
+                    cardIntermediateModelList.Where(
+                            c => c.CardEnglishName.Equals(card.EnglishName, StringComparison.Ordinal))
+                        .SelectMany(c => c.Colors).ToList();
+                foreach (var color in colorListIntermediate)
+                {
+                    cardColorIdentityList.Add(new CardColorIdentity
+                    {
+                        CardId = card.Id,
+                        ColorIdentityId = colorList.Where(c => c.Value.Equals(color, StringComparison.Ordinal)).Select(c => c.Id).Single()
+                    });
+                }
+            }
+            return cardColorIdentityList;
+        }
+
+        public List<CardType> CardTypeList(List<Type> typeList, List<Card> cardList)
+        {
+            List<CardType> cardTypeList = new List<CardType>();
+            var cardIntermediateModelList = _setModels
+                .SelectMany(s => s.CardModels).GroupBy(c => c.CardEnglishName).Select(c => c.First()).ToList();
+
+            foreach (var card in cardList)
+            {
+                var typeListIntermediate =
+                    cardIntermediateModelList.Where(
+                            c => c.CardEnglishName.Equals(card.EnglishName, StringComparison.Ordinal))
+                        .SelectMany(c => c.Types).ToList();
+                foreach (var type in typeListIntermediate)
+                {
+                    cardTypeList.Add(new CardType
+                    {
+                        CardId = card.Id,
+                        TypeId = typeList.Where(c => c.Value.Equals(type, StringComparison.Ordinal)).Select(c => c.Id).Single()
+                    });
+                }
+            }
+            return cardTypeList;
+        }
+
+        public List<CardSubtype> CardSubtypeList(List<Subtype> subTypeList, List<Card> cardList)
+        {
+            List<CardSubtype> cardSubtypeList = new List<CardSubtype>();
+            var cardIntermediateModelList = _setModels
+                .SelectMany(s => s.CardModels).GroupBy(c => c.CardEnglishName).Select(c => c.First()).ToList();
+
+            foreach (var card in cardList)
+            {
+                var subTypeListIntermediate =
+                    cardIntermediateModelList.Where(
+                            c => c.CardEnglishName.Equals(card.EnglishName, StringComparison.Ordinal))
+                        .SelectMany(c => c.Subtypes).ToList();
+                foreach (var subType in subTypeListIntermediate)
+                {
+                    cardSubtypeList.Add(new CardSubtype
+                    {
+                        CardId = card.Id,
+                        SubtypeId = subTypeList.Where(c => c.Value.Equals(subType, StringComparison.Ordinal)).Select(c => c.Id).Single()
+                    });
+                }
+            }
+            return cardSubtypeList;
+        }
+
+        public List<CardSupertype> CardSupertypeList(List<Supertype> superTypeList, List<Card> cardList)
+        {
+            List<CardSupertype> cardSupertypeList = new List<CardSupertype>();
+            var cardIntermediateModelList = _setModels
+                .SelectMany(s => s.CardModels).GroupBy(c => c.CardEnglishName).Select(c => c.First()).ToList();
+
+            foreach (var card in cardList)
+            {
+                var superTypeListIntermediate =
+                    cardIntermediateModelList.Where(
+                            c => c.CardEnglishName.Equals(card.EnglishName, StringComparison.Ordinal))
+                        .SelectMany(c => c.Supertypes).ToList();
+                foreach (var superType in superTypeListIntermediate)
+                {
+                    cardSupertypeList.Add(new CardSupertype
+                    {
+                        CardId = card.Id,
+                        SupertypeId = superTypeList.Where(c => c.Value.Equals(superType, StringComparison.Ordinal)).Select(c => c.Id).Single()
+                    });
+                }
+            }
+            return cardSupertypeList;
+        }
+
+        public List<SetTranslation> SetTranslationList(List<Language> languageList, List<Set> setList)
+        {
+            List<SetTranslation> setTranslationList = new List<SetTranslation>();
+            var setIntermediateModelList = _setModels.ToList();
+
+            foreach (var set in setList)
+            {
+                var setTranslationListIntermediate =
+                    setIntermediateModelList.Where(
+                            c => c.EnglishName.Equals(set.EnglishName, StringComparison.Ordinal))
+                            .SelectMany(s => s.SetLanguage).ToList();
+
+                foreach (var setTranslation in setTranslationListIntermediate)
+                {
+                    setTranslationList.Add(new SetTranslation
+                    {
+                        SetId = set.Id,
+                        LanguageId = languageList.Where(c => c.Value.Equals(setTranslation.Language, StringComparison.Ordinal)).Select(c => c.Id).Single(),
+                        Name = setTranslation.Name
+
+                    });
+                }
+            }
+            return setTranslationList;
+        }
+
+        public List<CardName> CardNameList(List<Language> languageList, List<Card> cardList)
+        {
+            List<CardName> cardNameList = new List<CardName>();
+            var cardIntermediateModelListAll = _setModels
+                .SelectMany(s => s.CardModels).ToList();
+
+            foreach (var card in cardList)
+            {
+                // get a list of all intermediate models that have the english name in card.
+                // We need all of them because some have translations that others might not.
+                // TODO : Needs altering! We need all the most common elements from each duplicated language entry
+
+                var languageIntermediateList =
+                    cardIntermediateModelListAll.Where(
+                            c => c.CardEnglishName
+                            .Equals(card.EnglishName, StringComparison.Ordinal))
+                            .SelectMany(c => c.LanguageIntermediateList)
+                            .GroupBy(l => l.Language)
+                            .Select(l => l.First())
+                            .ToList();
+
+
+                foreach (var languageIntermediate in languageIntermediateList)
+                {
+
+                    cardNameList.Add(new CardName
+                    {
+                        CardId = card.Id,
+                        LanguageId = languageList.Where(l => l.Value.Equals(languageIntermediate.Language, StringComparison.Ordinal)).Select(l => l.Id).Single(),
+                        Name = languageIntermediate.Name
+                    });
+                }
+            }
+            return cardNameList;
+        }
+
+        public List<BoosterFormatItem> BoosterFormatItemList(List<BoosterFormatType> boosterFormatTypeList)
+        {
+            // Get all formats that have a booster format. We don't just want distinct models at this stage
+            List<BoosterIntermediate> boosterIntermediateList = _setModels.Where(s => s.BoosterIntermediateModel.BoosterFormatItemList.Count > 0).Select(c => c.BoosterIntermediateModel).ToList();
+            List<BoosterFormat> boosterFormatList = new List<BoosterFormat>();
+            List<BoosterFormatItem> output = new List<BoosterFormatItem>();
+
+            int i = 0;
+            foreach (var boosterIntermediate in boosterIntermediateList)
+            {
+                if (boosterFormatList.All(b => b.Id != boosterIntermediate.Id))
+                {
+                    BoosterFormat model = new BoosterFormat();
+                    model.Id = boosterIntermediate.Id;
+                    model.Name = boosterIntermediate.Name;
+                    boosterFormatList.Add(model);
+                    // TODO Could change this to also populate the BoosterFormatTypeList using if statements. Would mean that I wouldn't need the string comparison
+
+                    // Populate the BoosterFormatItem list
+                    foreach (var boosterFormat in boosterIntermediate.BoosterFormatItemList)
+                    {
+                        BoosterFormatItem boosterFormatItem = new BoosterFormatItem();
+                        boosterFormatItem = _mapper.Map<BoosterIntermediateItem, BoosterFormatItem>(boosterFormat);
+                        boosterFormatItem.Id = i;
+                        boosterFormatItem.BoosterFormatTypeId =
+                            boosterFormatTypeList.Where(
+                                    t => t.Value.Equals(boosterFormat.BoosterFormatType, StringComparison.Ordinal))
+                                .Select(c => c.Id)
+                                .Single();
+
+                        output.Add(boosterFormatItem);
+                        i++;
+                    }
+                }
+                else
+                {
+                    int index = boosterFormatList.FindIndex(b => b.Id == boosterIntermediate.Id);
+                    boosterFormatList[index].Name += "_" + boosterIntermediate.Name;
+                }
+            }
+            return output;
+
+        }
+
+
+        #endregion
+    }
+}

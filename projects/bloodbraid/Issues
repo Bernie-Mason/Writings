@@ -1,0 +1,12 @@
+Issues
+
+Card db issues
+
+Some of the chinese cards have english card names. Only a few but some.
+
+Card searching issues
+-----------------------------
+
+Split cards are currently two fetched as two seperate db entries. They are stored as seperate english entries even though they have the same multiverse id. 
+
+Need to write a cache clear up that gets rid of the oldest downloaded cards. On application startup or closing.

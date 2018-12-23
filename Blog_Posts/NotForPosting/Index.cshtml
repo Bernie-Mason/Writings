@@ -1,0 +1,29 @@
+﻿
+@{
+    ViewBag.DefaultPageHeader = "Programming";
+    ViewBag.DefaultPageSubHeader = "Yep";
+}
+
+
+<p>Bernie loves to program. If you love to read about what Bernie knows about programming, clicking the links below will help facilitate your love of reading about what Bernie knows about programming. </p>
+<p>If you got past that last sentence then you're ready:</p>
+<div>
+    <a href="@Url.Action("CSharpIntro","Programming")" class="BBLink">
+        <div class="containerBB">C#</div>
+    </a>
+    <hr />
+    <a href="@Url.Action("MVCIntro","Programming")" class="BBLink">
+        <div class="containerBB">MVC</div>
+    </a>
+    <hr/>
+
+    <a href="@Url.Action("JavaScriptIntro","Programming")" class="BBLink">
+        <div class="containerBB">JavaScript</div>
+    </a>
+</div>
+@*<%= Html.ActionLink("JavaScript", "JavaScriptIntro", "Programming", new { @class="containerBB" }) %>*@
+
+
+@*<p>Part 1: Introduction to Microsoft Visual C# and MS Visual studio: An introduction to the core syntax of the C# language and the Visual Studio programming environment</p>
+    <p>Part 2: Understanding the C# object model: Goes i</p>*@
+

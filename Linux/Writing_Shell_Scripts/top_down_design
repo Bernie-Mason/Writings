@@ -1,0 +1,44 @@
+As programs get larger and more complex, they become more difficult to design, code and maintain. As with any large project, it is often a good idea to break large, complex tasks down into a series of small, somple ones.
+
+The process of identifying the top-level steps and developing increasingly detailed  views of those steps is known as top-down design. The technique allows us to break large, complex tasks into many small simple ones.
+
+Funtions. Below gives the two syntactic forms of a function in a script:
+
+#! /bin/bash
+
+# Program to output a system information page
+
+TITLE="System Information Report For $HOSTNAME"
+CURRENT_TIME=$(date +"%x %r %Z")
+TIME_STAMP="Generated $CURRENT_TIME, by $USER"
+
+function report_uptime {
+    return
+}
+
+function report_disk_space {
+    return
+}
+
+report_home_space() {
+    return
+}
+
+
+cat << _EOF_
+<!DOCTYPE html>
+<html lang="en">
+
+TITLE etc are global variables. Variables scoped within a function are only local to that function. Like other programming languages these variables will cease to exist once the function terminates.
+
+function report_disk_space {
+    local foo=1;
+    return
+}
+
+As we can see local variables are defined by preceding the variable with word local. This feature allows shell functions to be written so that they remain independent of each other and of the script in which they appear.
+
+Keep scripts Running
+While developing our program, it is useful to keep the program in a runnable state. By doing this, and testing frequently, we can detect errors early in the development process. This will make debugging problems much easier
+
+

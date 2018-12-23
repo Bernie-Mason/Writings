@@ -1,0 +1,108 @@
+Divest task list (local)
+Go to Trello task list for more complete task list.
+
+sql readers
+sql command
+sql connection
+stored procedures
+
+05/05/2017
+First task for today to really get started is to chat with Jim:
+	Stuff to cover:
+		1. Can't get JSON parser to work for ONSI data set
+			Fixed! Just needed the right property for the coordinates
+		2. Can't get automapper to work properly
+			Fixed! Jim showed me how to map properties more easily
+		3. Can't get mock to make a good source model object 
+			Fixed! Didn't really need to use Mock for this.
+
+While I'm waiting on that I will read automapper documentation. What we need is to go:
+	GovConstituencyGb (source model) -> GovConstituency (common source model)
+	GovConstituencyNi (source model) -> GovConstituency (common source model)
+
+These will require separate methods to perform the conversion as the input models are different. We need to assign separate mapping schemes for them.
+
+Jam feedback for writing the domain layer etc:
+
+the idea being
+that this DAL i've designed can be switched between db technologies with ease
+you just change the connection provider and the variable provider by db tech
+but thats current grand designs
+so you'd have
+Project.Data.Core
+Project.Data.PostgreSQL
+Project.Data.MySQL
+Project.Data.MSSQL
+and you can use IoC to switch which one you are using
+but for now
+we can probably get away  with less
+you will need to include a reference to Mysql.Data in your domain lib
+for the record
+this is reasonably daunting
+i know this
+just lay the groundwork in terms of what operations are required
+there are bits of code i need to give you for you to finish this
+
+04/05/2017
+Nothing written
+
+03/05/2017
+
+Beginning of day, hit a wall and will need to talk it through with Boss man before I can proceed. Chat with Jim. Started on the Json parser. 
+
+Task: Work through Git branching chapter whenever you get stuck
+	Progress: Did a little bit of this in  the morning
+
+Task: Create divest json parser
+	Progress: 
+	Future work 
+	Issues
+
+02/05/2017
+
+Working on the following Trello tasks:
+General issues:
+	1. Cannot build the Umbraco CMS. Can't find Microsoft.CSharp.Core.targets.
+	2. I need it clarifying what we are doing in SQL and what is going to be done in C#
+
+Task: Create tables for mp data source
+	Progress: Basically done. Will need to add to it.
+	Future work: Will need to rearrange some of the table and table values
+	Issues: None
+
+Task: Refactor all database work  (*.sql) into a migration script
+	Progress: Created a basic migration script that will create the schema.
+	Furture work: 
+	Issues: Struggling to automatically import data into a SQL format. Need to be able to automatically download a .JSON file from a source and then map it onto the divestparliament schema.
+
+Task: Create basic stored procedures for getting out table data
+	Progress: None beyond looking at this
+	Future work: 
+	Issues: Struggling to find out how to implement this. Examples use C# but Jim said that this will all be done in MySQL?
+
+Task: Create umbraco datatypes for all mentioned components in the cms guide
+
+20/04/2017
+Jim chat in the evening to get Umbraco set up with Octopus for continuous deployment/integration
+
+Figure out the following stuff before chat.
+	What does continuous deployment/integration mean beyond obvious
+		1. Continuous integration is the practice of merging all developer working copies to a shared mainline several times a day. Extreme programming (XP, see next)  adopted the concept of CI and advocated integration as many times as ten per day. 
+		2. The main aim of CI is to prevent integration problems referred to as integration hell in early descriptions of XP. CI is not universally accepted as an improvement over frequent integration, so it is important to distinguish between the two as there is disagreement about the virtues of each. 
+		3. In XP, CI was intended to be used in combination with automated unit tests written through the practices of test-driven development. Initially this was conceived of as running all unit tests in the developer's local environment and verifying they all passed before committing to the mainline. This helps avoid one developer's work-in-progress breaking another developer's copy.
+			a. Extreme programming (XP) is a software development methodology which is intended to improve software quality and responsiveness to changing customer requirements. It is a type of agile software development, it advocates frequent "releases" in short development cycles, which is intended to improve productivity and introduce checkpoints at which new customer requirements can be adopted
+	What does reverse proxy mean?
+		1. In computer networks, a reverse proxy is type of proxy server that retrieves resources on behalf of a client from one or more servers. These resources are then returned to the client like they originated from the proxy server itself. Contrary to a forward proxy, which is an intermediary for its associated clients to contact any server, a reverse proxy is an intermediary for its associated servers to be contacted by any client.
+		2. By doing this the reverse proxy can hide the origin of the resources from the client. They can hide the existance and characteristics of an origin g server or servers. Application firewall features can protect against common web-based attacks, like DoS or DDoS, Without reverse proxy, removing malware
+			a. A computer network or data network is a telecommunications network which allows nodes to share resources. In computer networks, networked computing devices exchange data with each other using a data link. The connections between nodes are established using either a cable media or wireless media. The Internet is the best-known computer network.	
+			b. A proxy server (also known as a forward proxy) is a server that acts as an intermediary for requests from clients seeking resources (like files, web pages, images etc) from other servers. A client connects to the proxy server, requesting some service, such as a file, connection, web page, or other resource available from a different server and the proxy server evaluates the request as a way to simplify and control its complexity. Proxies were invented to add structure and encapsulation to distributed systems. Today, most proxies are web procies, facilitating access to content on the World Wide Web, providing anonymity and may by used to bypass IP address blocking.
+
+Also
+
+dns provisioning
+	The domain name system (DNS) is the way that internet domain names are located and translated into internet protocol address. The domai name system maps the name people use to locate a the IP address that a computer uses to locate a website. 
+	Web browsing and most other internet activity rely on DNS to quickly provide the information necessary to connect users to remote hosts. DNS mapping is distributed throughout the internet in a hierarchy of authority. Access providers and enterprises, as well as governments, universities and other organizations
+ssl cert
+
+add this somewhere: James Stow (jim@gnupp-ltd.com, hr@gnupp-ltd.com, finance@gnupp-ltd.com, contact@gnupp-ltd.com)
+gnupp-cluster-1.cluster-cptvdgizcvs4.eu-west-1.rds.amazonaws.com

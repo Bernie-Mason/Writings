@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+
+<h2>Exception handling</h2>
+
+<p>It's challenging to make sure that a piece of code <em>always</em> works as expected. The person responsible for writing the code often does not have complete control over whether or not the code will fail. Handling of such errors must be performed either by taking appropriate action to correct the situation or, if not possible, to log and indicate the failure to the user in the clearest way possible.</p>
+
+<h3>The try block</h3>
+<p>The C# language gives us the try block for exception handling. If any code in the block fails during runtime it is caught by a catch block. try and catch are both C# keywords</p>
+
+<pre>
+	<code>
+try
+{
+	// code
+}
+catch (Exception e)
+{
+	// Handle the exception
+}
+	</code>
+</pre>
+
+<p>The purpose of the catch handler is to match the exception to issue that arose thereby giving a meaningful response to the consumer of the application. In the above, generic, example, the catch block is catching the most senior of exceptions, Exception, which all other exceptions inherit from. Although this means that any issue with the code will be caught, it won't tell us (or the user) what specifically went wrong. Therefore, if certain errors are expected, it's better to catch the corresponding expected exceptions.</p>
+
+<p>For example, what if our user is filling out an address form and there is a box for their house number:</p>
+<pre>
+	<code>
+try
+{
+    int houseNumber = Int32.Parse(userHouseNumberInput.Text);
+}
+catch (FormatException fEx)
+{
+    // handle exception. 
+    // Return message to the user with the error "Your house number be a number"
+}
+	</code>
+</pre>
+<p>If they enter an non integer value in the textbox our FormatException exception will be thrown by Int32.Parse and caught by our catch block. Note that the exception is not thrown by the catch block, that is done by the object that encounters the problem, instead the catch block handles the error and dictates what the program must do next. This is the distinction between the throwing and the handling of errors.</p>
+
+<p>We can include multiple catch blocks to handle different errors. If the integer returned by our user is larger than valid range supported by C# (2147483648), then we can handle the exception using the OverFlowException:</p>
+
+<pre>
+	<code>
+try
+{
+    int input = Int32.Parse(userInput.Text);
+}
+catch (FormatException fEx)
+{
+    // handle exception. 
+    // Return message to the user with the error "This field has be a number"
+}
+catch (OverflowException fEx)
+{
+    // handle exception. 
+    // Return message to the user with the error "Your input is too large"
+}
+	</code>
+</pre>
+
+<p>If the appropriate catch handler doesn't exist, then execution returns to whatever method called the try block. If this method is also within try block it will look for the appropriate catch handler and so on. We should also note that if an exception is thrown, it will be handled by the first catch block it encounters that matches the exception type. Therefore, in the following code, our second catch handler will never catch an exception as the first catch block will catch all exceptions:</p>
+
+<pre>
+	<code>
+try
+{
+    int input = Int32.Parse(userInput.Text);
+}
+catch (Exception ex)
+{
+    // handle exception. 
+}
+catch (OverflowException fEx)
+{
+    // This catch handler will never be used
+}
+	</code>
+</pre>
+
+<p>Using a catch-all Exception is useful but should really be used hand in hand with specific exception handling. The more specific you are with your exception handling, the easier it will be to spot issues in your code. However, handling every single exception that could arise can be cumbersome in some applications. Figuring what the common exceptions is part intuition and part experience.</p>
+
+<h3>The finally block</h3>
+<p>Remember that when an exception is thrown, the execution flow changes. If the exception is handled by a catch block then execution moves here before moving out of the try/catch block. This means that any code in the try block after the point where the exception was thrown will not be executed.</p>
+<p>Often this isn't an issue, in fact usually it is desirable. However, sometimes there is code that you will always want to run, like disposing resources created in the try block. For this there is the finally block. Whether or not an exception occur, the finally block will run.</p>

@@ -1,0 +1,28 @@
+# Derived from Python Programming: An Introduction to Computer Science, 3rd ed
+
+#When you open the IDLE command prompt you see this:
+
+Python 3.6.1 (v3.6.1:69c0db5, Mar 21 2017, 18:41:36) [MSC v.1900 64 bit (AMD64)] on win32
+Type "copyright", "credits" or "license()" for more information.
+>>> 
+
+#This last >>> is a Python prompt indicating that our interpreter is waiting for you to give it a command. A complete command is called a statement!
+
+>>> print("Hello, World!")
+Hello, World!
+>>> print(2+3)
+5
+>>> print("2 + 3 = ", 2+3)
+5
+
+#Defining a function in Python
+
+>>> def hello(): 
+	print("Hello")
+	print("Computers are fun")
+
+	
+>>> hello()
+Hello
+Computers are fun
+>>> 
