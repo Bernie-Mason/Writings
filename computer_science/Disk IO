@@ -1,0 +1,37 @@
+DISK I/O
+
+Disk latency is around 13ms, but it depends on the quality and rotational speed of the hard drive. RAM latency is around 83 nanoseconds. How big is the difference? If RAM was an F-18 Hornet with a max speed of 1,190 mph (more than 1.5x the speed of sound), disk access speed is a banana slug with a top speed of 0.007 mph.
+
+This is why caching data in memory is so important for performance – the difference in latency between RAM and a hard drive is enormous.
+
+Your I/O wait measurement is the canary for an I/O bottleneck. I/O wait is the percentage of time your processors are waiting on the disk.
+
+	For example, lets say it takes 1 second to grab 10,000 rows from MySQL and perform some operations on those rows.
+
+	The disk is being accessed while the rows are retreived. During this time the processor is idle. It’s waiting on the disk. In the example above, disk access took 700 ms, so I/O wait is 70%.
+
+	You can check your I/O wait percentage via top, a command available on every flavor of Linux:
+
+	If your I/O wait percentage is greater than (1/# of CPU cores) then your CPUs are waiting a significant amount of time for the disk subsystem to catch up.
+
+	In the output above, I/O wait is 12.1%. This server has 8 cores (via cat /proc/cpuinfo). This is very close to (1/8 cores = 0.125). Disk access may be slowing the application down if I/O wait is consistently around this threshold.
+
+What impacts I/O performance
+
+For random disk access (database, mail server, file server), you should focus on how many Input/output Ops can be performed Per-Second (IOPS)
+
+Four primary factors impact IOPS:
+
+	Multidisk Arrays – More disks in the array mean greater IOPS. If one disk can perform 150 IOPS, two disks can perform 300 IOPS.
+
+	Average IOPS per-drive – The greater the number of IOPS each drive can handle, the greater the the total IOPS capacity. This is largely determined by the rotational speed of the drive.
+
+	RAID Factor – Your application is likely using a RAID configuration for storage, which means you’re using multiple disks for reliability and redundancy. Some RAID configurations have a significant penalty for write operations. For RAID 6, every write request requires 6 disk operations. For RAID 1 and RAID 10, a write request requires only 2 disk operations. The lower the number of disk operations, the higher the IOPS capacity. This article (http://www.techrepublic.com/blog/datacenter/calculate-iops-in-a-storage-array/2182) has a great breakdown on RAID and IOPS performance.
+
+	Read and Write Workload – If you have a high percentage of write operations and a RAID setup that performs many operations for each write request (like RAID 5 or RAID 6), your IOPS will be significantly lower.
+
+
+CALCULATING YOUR MAXIMUM IOPS
+I/O Operations Per-Sec = ((number of disks) * (Average I/O Operations on 1 disk per-sec)) /
+((% of read workload) + (Raid Factor * % of write workload))
+

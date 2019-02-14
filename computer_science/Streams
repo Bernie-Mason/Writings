@@ -1,0 +1,52 @@
+Streams
+
+From the Wiki page
+
+A stream is a sequence of data elements made available over time and can be thought of as a conveyor belt that makes items available one by one rather than in batches.
+
+Streams are processed in a different way to batch data. You cannot operate on a stream as a whole as it potentially has unlimited data (codata rather than data). Functions that operate on a stream, producing another stream, are know as filters and can be connection in pipelines, analogously to function composition. Filters may operate on one item of a stream at a time, or may base an item of output on multiple items of input, such as a moving average.
+
+The term stream is used in a number of different ways:
+Stream editing: as with sed, awk and perl. Stream editing processes a file or files, in-place, without having to load the file(s) into a user interface. 
+I/O devices can be interpreted as streams, as they produce or consume potentially unlimited data over time.
+In OOP, input streams are generally implemented as iterators.
+
+In .NET
+
+FileStream: reads and writes to a file. 
+MemoryStream: reads and writes to memory. 
+	Represents a pure, in-memory stream of data. It is found in the System.IO namespace and is derived from the Stream abstract type. 
+	First, let's examine this program from a higher level. The program physically reads in the bytes of specified file into the computer's memory. No more disk accesses occur after this.
+	A MemoryStream is constructed from this byte array containing the file's data. Then, the MemoryStream is used as a backing store for the BinaryReader type, which acts upon the in-memory representation.
+
+	using System;
+	using System.IO;
+
+	class Program
+	{
+	    static void Main()
+	    {
+	        // Read all bytes in from a file on the disk.
+	        byte[] file = File.ReadAllBytes("C:\\ICON1.png");
+
+	        // Create a memory stream from those bytes.
+	        using (MemoryStream memory = new MemoryStream(file))
+	        {
+	            // Use the memory stream in a binary reader.
+	            using (BinaryReader reader = new BinaryReader(memory))
+	            {
+	                // Read in each byte from memory.
+	                for (int i = 0; i < file.Length; i++)
+	                {
+	                    byte result = reader.ReadByte();
+	                    Console.WriteLine(result);
+	                }
+	            }
+	        }
+	    }
+	}
+
+	Discussion. It sometimes helps to put data into memory and simply leave it there. Memory is much faster than disk or network accesses. With MemoryStream, we can act upon the byte array stored in memory rather than a file or other resource.
+	Note: This consolidates resource acquisitions. It also gives you the ability to reliably use multiple streams on a single piece of data.
+	Also, you can sometimes reuse a single MemoryStream. Store the MemoryStream instance as a field. Then call the SetLength(0) method on the MemoryStream instance to reset it. This will reduce allocations during the algorithm.
+	Summary. MemoryStream allows you to use in-memory byte arrays or other data as though they are streams. Instead of storing data in files, you can store data in-memory for additional performance and control over the behavior of your program.

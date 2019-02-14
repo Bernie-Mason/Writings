@@ -1,7 +1,5 @@
 C# language principles
 
-One of the many .NET languages. Syntax is similar to Java, C++.
-
 2001 : C# 1.0
 	Inherited many of the best features of C++ and VB but with fewer inconsistencies and anachronisms resulting in a cleaner and more logical language
 2005 : C# 2.0
@@ -58,9 +56,6 @@ A nullable type exposes a pair of properties that you can use to determine wheth
 
 ref AND out PARAMETERS
 Normally, when a parameter is passed as an argument to a method, the corresponding parameter is initialized with a copy of the argument. This is true whether the parameter is a value or reference type. 
-
-Keywords
-C# have a number of  keywords that allow certain types to be accessed in shorthand. For example, the int keyword is shorthand for the Int32 type. The string keyword represents the String type and has all the static methods on it that the String type has. The convention when using these static methods is to use the type definition rather than the keyword.
 
 The ref keyword allows a reference to the actual argument to be passed rather than a copy of the original argument.
 The out keyword is similar to ref int that a reference to the actual argument is passed. The difference is that the parameter passed doesn't have to initialised (although it can be). However, the method HAS TO initialise it.

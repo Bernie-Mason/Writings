@@ -1,0 +1,3 @@
+
+ATOMIC TRANSACTION: ALL OR NOTHING - NO PARTIAL UPDATE
+An atomic transaction is an indivisible and irreducible series of database operations such that either all occur, or nothing occurs. A guarantee of atomicity prevents updates to the database occurring only partially, which can cause greater problems than rejecting the whole series outright.

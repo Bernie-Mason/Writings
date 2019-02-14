@@ -1,0 +1,16 @@
+Indexing
+
+An index is used to speed up searching in the database.
+
+There's some good docs of this here: http://dev.mysql.com/doc/refman/5.0/en/mysql-indexes.html
+
+An index can be used to efficiently find all rows matching some column in your query and then walk through only that subset of the table to find exact matches. If you don't have indexes on any column in the Where clause, the SQL server has to walk through the whole table and check every row to see if it matches, which may be a slow op on big tables.
+
+UNIQUE INDEX
+The index can also be a unique index, which means you cannot have duplicate values in that column, or a primary key which in some storage engines defines where in the database file the value is stored. 
+
+
+CLUSTERED INDEX
+A clustered index is like the contents of a phone book. You can open the book at Hilditch, David and find all the of the "Hilditch"s right next to one another. Here the keys for the clustered index are (lastname, firstname). 
+
+This makes clustered indexes great for retrieving lots of data based on range based queries since all the data is located next to each other. Since the clustered index is actually related to how the data is stored, there is only one of them possible per table.
