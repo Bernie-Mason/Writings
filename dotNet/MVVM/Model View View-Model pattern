@@ -1,0 +1,68 @@
+Model View View-Model pattern
+
+MVVM is a good way of separating concerns. 
+	Maintainability
+	Testability. Granular code makes it easier to test.
+	Extensibility. Again because code is granular it's easier to modify and extend your code.
+
+History
+	MVVM is an evolution of the MVC pattern. MVC is a good fit for the modern web. With MVC here is typically a disconnect between the lifetime of the controller and view. The controller produces a view but may not stick around until after another view request comes in.
+	However modern apps needed coupling between the presenter and the view.
+
+	View  <--Data binding-->  ViewModel [ Model Object  Model Object  Model Object ]
+
+	MVVM Across client platforms
+		Initially defined in WPF
+			XAML can be used to write WPF but it extends much further that WPF. YOu can create visible UI elements in the declarative XAML markup, and then separate the UI definition from the run-time logic by using code-behind files, joined to the markup through partial class definitions.  XAML directly represents the instantiation of objects in a specific set of backing types defined in assemblies. 
+		Can be used in Silverlight (another XAML platform)
+		Windows 8 / WinRT
+		HTML 5 (Knockout / Angular)
+
+Models
+	Model Entities.
+	Contain the client data.
+	Expose relationships between model object 
+	Contains computed properties
+	Should change property change notifications
+	Validation
+		INotify
+
+
+View Models
+	View Interaction Logic
+	Expose data to the view for presentation and manipulation
+	Encapsulate interaction logic
+		 Calls to business/data layer/service based on the user input
+		 Navigation Logic like deciding when we need to navigate to a different view
+		 State transformation logic
+	ViewModel Data
+		Three kinds
+			Exposing model objects
+				public Customer Customer { get; set; }
+			Wrapped objects. Derived information or collections of models
+			Client application state. Is the user logged in etc. 
+
+Views
+	UI Element Access
+	Structural definition of what the user sees on the screen
+	GOAL: "No code behind the view"
+	Reality: Sometimes need some code behind.
+		Always try and put the logic in the view model if we can
+
+Client Services
+	We often have this as well
+	Shared functionality or data access
+		Insulates a ViewModel from the data access strateges. Something like a WebAPI can also use this Data Access layer if needed.
+	Consumed by one or more ViewModels
+	Decouples ViewModels from external dependencies
+
+
+Key concepts
+Main reason is for well structured and organised code. Each part has key responsibility.
+The View.DataContext property needs to be set to a reference to a ViewModel. This is known as marrying the View to the ViewModel.
+View-First vs ViewModel-First. We'll typically choose one other the in different parts of the application. 
+	If the View is constructed first, the ViewModel gets constructed and attached to the DataContext via View.
+	If the ViewModel is constructed fist the View is constructed as a consequence of ViewModel being added to the UI.
+
+Separate space for business logic. Models can go in the data access layer.
+
