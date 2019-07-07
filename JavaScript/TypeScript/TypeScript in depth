@@ -225,6 +225,25 @@ class ElementarySchoolLibrarian implements Librarian {
 	}
 }
 
+CLASSES
+
+How are classes similar to classes in other languages?
+
+What is a class? It's a template for creating objects. They provide state storage and behavior. They encapsulate reusable functionality in terms of an entity. They help us think about our programs in simpler terms.
+
+Defines types
+Properties and methods
+Constructors - only allowed one per class
+Access Modifiers
+Inheritance
+Abstract Classes
+
+
+
+
+
+
+
 
 
 
