@@ -1,0 +1,67 @@
+Getting started
+
+Entity framework is an object relational mapper (ORM). Simplifies the effort going from objects to relational data in the database.
+
+Typical ORM
+
+Domain classes -> DB
+
+Entity framework allows you override the mappings between domain classes and database schema tables/columns.
+
+How EF Works
+
+Domain classes <-> EF DBContext api <-> data in database
+
+	Define model
+	Express and execute a query (users.where(user => user.Id == id).ToList())
+	EF generates and executes SQL
+	EF transforms the results into your types
+	Modify data
+	EF Save changes
+	EF update database
+
+Can map to views instead of tables or use stored procedures.
+
+Number of ways of defining a model
+	Designer in visual studio. EDMX
+	Use straight code models
+
+	Both methods give the same result at runtime.
+	If you go with the "code first" approach you can let EF create the DB.
+		EF will try and work out exactly what the database should look like but you can override the mappings if you want.
+
+EF HISTORY
+
+First version in 2008 - EF1
+Second version in 2010 - EF4
+	Removed need for domain classes to be tightly coupled to EF. 
+	Use of POCOs instead
+	Shortly after we got the DbContext and Code First apis add-ons.
+Third version 2012 - EF5
+Forth version 2013 - EF6
+	Open source. DbContext moved into EF package.	
+
+We use EF's DbContext API to allow your classes to interact with a relational DB in the following ways
+	Map classes to database schema
+	Translate and execute queries
+	Track changes
+	Infer and execute updates
+
+Another critical class is the DbSet. This is a repository that is responsible for maintaining an in memory collection of entities (like users).
+Queries are performed through DbSets, asking the DbContext to query by way of the DbSet of Users. In turn, EF interprets that into a database query.
+
+For example: 
+
+public class DatabaseContext : DbContext
+{
+    public DbSet<User> Users { get; set; }
+}
+
+At runtime when EF sees the DbContext class it'll look at the User Entity and infer a database schema.
+
+By default when you set up EF it'll use SQL Server Express LocalDB which is a lightweight SQL server platform for developers.
+
+Migrations
+	Define/Change the model
+	Create a migration file
+	Apply migration to the database
