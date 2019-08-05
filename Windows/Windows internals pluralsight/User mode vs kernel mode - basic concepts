@@ -1,0 +1,25 @@
+User mode vs kernel mode - basic concepts
+
+Whenever code executes it has one mode associated with it. This will either be in user mode or kernel mode
+	This is associated with a thread. 
+		User mode is less powerful and allows access to non-operating system code and data only
+			No access to hardware
+			Protects applications from crashing the system
+				Any exception that is unhandled from the application will only cause the process running it to crash and not the operating system
+
+		Kernel mode
+			Privileged mode for use by the kernel and device drivers only
+			Allows access to all system resources
+			Any exception that is unhandled in kernel mode causes the system to crash. BSOD ensues.
+			Even user mode threads enter kernel mode from time to time to perform some operation: like opening a file. We might access this through a user mode api but the function that actually opens the file operates in kernel mode. So the thread will switch modes from user mode to kernel mode to do the operation and then switch back when it's done.
+
+PROCESSES
+	A process is a management object that provides set of resources used to execute a program. Processes do not run. Threads run. A process is a manager.
+	A process consists of 
+		1. Virtual address space where memory is allocated
+		2. An executable program, referred to as an image file on disk. This contains the initial code and data to be executed.
+		3. A private table of handles to various kernel objects. E.g. if I'm opening a file I use an api such as a createfile function. This, if successful, returns a handle (which is a number) and is stored in a private table in the process. This means that the handle can't be used in another process. A process is a kind of boundary that prevents bad things happening to other processes.
+		4. A security context (access token), used for security checks when accessing shared resources
+		5. One or more threads that execute code. The first thread is always created within the process.
+
+	A process is a container of data structures that allow the thread to execute code.

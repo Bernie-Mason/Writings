@@ -1,0 +1,43 @@
+Windows internals 
+
+Objectives
+	Understand windows features and architecture
+	Uncover internal mechanisms relevant for developers
+	Enhance our ability to write better software for windows
+
+
+Windows Versions
+	First version was Windows NT (New Technology) in July 1993
+	September 1994 NT 3.5
+	May 1995 NT 3.51
+	July 1996 NT 4.0
+	December 1999 - Windows 2000
+		Last operating system with client and server version at the same time 
+	Windows XP - August 2001
+	March 2003 - Windows Server 2003
+	January 200 - Windows Vista
+	Feb 2008 - Windows Server
+	Oct 2009 - Windows 7 and server 2008 R2
+	October 2012 - Windows 8 and Server 2012
+
+	Overall architecture is the same for all windows NT versions.
+
+
+Tools
+	We want to look at the OS from an internals perspective. We need tools!
+
+	3 types
+		Built in tools like
+			Task manager
+			Resource monitor
+			Perf monitor
+		SysInternals
+			Obtained from https://docs.microsoft.com/en-us/sysinternals/
+			These are free tools by Mark Russinovich
+			No installation needed. Can therefore be put on a USB key and run on any system!
+			Free
+		Debugging tools for windows. 
+			Part of the Windows SDK
+			No installation needed
+			Free
+
