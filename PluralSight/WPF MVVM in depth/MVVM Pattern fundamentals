@@ -1,0 +1,109 @@
+MVVM Pattern fundamentals:
+
+======== INTRODUCTION ==========
+
+Model-View-ViewModel (MVVM) is mostly about trying to achieve good separation of concerns.
+
+Buisness logic in a separate layer.
+Data access kept separate.
+Model entities are kept separate. 
+Views for UI element access. 
+ViewModel for view interaction logic. 
+
+Having well defined places for particular types of code is important.
+
+
+This gives you:
+	Maintainability
+	Testability. Granular code is more testable. Duh.
+	Extensibility. Clean separation boundaries makes code more pluggable.
+
+HISTORY
+MVVM is an evolution of MVC. Dates back to the 1970s. About rendering a screen of information, collecting input and then rendering a new screen. This is still a good fit. 
+	Limitation of MVC: there is commonly a decoupled between the controller and the view. The controller produces a view but may not stick around after that.
+However, with rich desktop client applications we have views that have state that sticks around for longer interactions with the user.
+In MVVM there are no explicit calls between the view and it's counterpart view model. Instead they are linked via two way data (and communications) binding.
+
+======== MVVM ==========
+
+MODEL
+	Contains the client side data model that supports the views.
+	Expose relationships between model objects.
+	Might also have computed properties.
+	Raise change notifications.
+	Optionally have validation
+
+VIEW
+	Define the structure of what the user sees on the screen
+		Static (XAML hierarchy) and dynamic parts (animations and state changes)
+	Goal to have no code behind the view. No event handling code. 
+	Reality is that sometimes need to have code behind.
+		Code that references a control reference
+		Some controls have parts of their API that aren't conducive to data binding.
+	Data binding, commands and behaviors can all be used to minimise the code in the code behind.
+
+VIEWMODEL
+	The focal point of the MVVM application
+	Expose data to the view for presentation and manipulation
+	Encapsulate interaction logic.
+	- Calls to business/data layer/service
+	- Navigation logic
+	- State transformation logic
+
+	Data: 
+	Expose - Exposing model objects
+			i.e. a Customer property on the ViewModel that exposes a reference to a customer object reference
+	Wrapping - simplify/extract data of model objects to drive particular aspects of the view
+			i.e. combining  several types of model objects to create a collection with the specific information needed by a control
+			i.e. inspecting an enum to set a boolean on the ViewModel that will show an alert.
+	Client state - will often come from .NET apis about the client execution context.
+			i.e. is the application on or offline 
+			i.e. is the user logged in.
+
+CLIENT SERVICES / REPOSITORIES
+	Not strictly a part of MVVM but often needed.
+	Sits logically under the ViewModel
+	Gives:
+		1. Shared functionality across more than one ViewModel. 
+		2. Decouples ViewModels by allowing access to external dependencies
+			Data storage
+			Service access
+			client environment
+		3. Caching container
+
+======== HIGH LEVEL CONCEPTS ==========
+
+FUNDAMENTAL EQUATION OF MVVM
+
+		View.DataContext = ViewModel
+
+The view's DataContext property needs to be set to a reference to the ViewModel instance for that view. This allows DataBinding to light up and expose all the public properties of the ViewModel so that any element in the view can easily data bind to them. This is also known as marrying the view and view model.
+
+In XAML the dataContext for the root element also becomes the data context for each child element unless it has explicitly had the data context set to something else or is being rendered out as part of an items control which sets the data context to the item.
+	
+
+VIEW-VIEWMODEL INSTANTIATION
+
+View-First and ViewModel-First
+
+View-First, the view is constructed first. This is often the case for a view that is window or that is nested within a window. The XAML parsing process is really what kicks off construction of the view. ViewModel gets constructed and attached to DataContext via the View.
+
+ViewModel is constructed first. View is constructed as a consequence of attaching the ViewModel being added to the UI.
+
+
+=========== ASYNC =============
+Client apps live in an async world
+Task based async and async/await are the norm in .NET
+ViewModels often need to wait for async completion of external work or calls.
+Client Services / Repositories often expose async methods.
+
+========== SUMMARY ===========
+
+MVVM helps you build better structured apps.
+Each part has a specific responsibility.
+View.DataContext = ViewModel
+
+View-Frist MVVM hookup can be achieved several ways
+Data binding forms the communication pathways between View and ViewModel
+DataTemplates allow dynamic selection and hookup of ViewModels and Views
+

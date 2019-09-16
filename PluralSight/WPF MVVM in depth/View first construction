@@ -1,0 +1,15 @@
+View first construction patterns
+
+XAML parsing happens when you're view is being constructed, initiated by the initialiseComponent call in the views constructor.  Parser works top to bottom and left to right as it works it's way through your XAML. It calls the default constructor for each element in the view as it encounters it and then sets any properties for the constructed object based on the attributes of that element. It also wires up event handlers. Properties can be set using nested elements when the value of the property is an object that needs to be constructed as well.
+
+Can also construct the ViewModel ourselves in the code behind the view in the constructed method of the View. One reasons to do this is that construction via XAML can only be done with default constructors. If your ViewModel has a constructor that takes parameters we'll need to construct it explicitly in the View constructor in the code behind. Another reason would be if we're using a dependency injection for the construction.
+
+VIEW-FIRST ViewModelLocator
+
+Is a meta-pattern for automatically locating and hooking up the right ViewModel. There are a number of different approaches to this. This provides a standard consistent declarative and more loosely coupled way to do view-first construction. 
+
+The viewModelLocator does the following
+	Asks what view is being constructed
+	Asks when ViewModel is needed constructed
+	Constructs ViewModel (possible using DI container)
+	Sets the DataContext.

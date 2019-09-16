@@ -1,0 +1,7 @@
+No ones first
+
+May have other code in control of constructing both View and ViewModel
+Order does not matter
+Set DataContext after constructing both.
+
+Generally if there's a static relationship between the view and ViewModel we want to do View-first whereas if there's a more dynamic relationship then we can use ViewModel first to selectively figure out which View/ViewModel we actually want.

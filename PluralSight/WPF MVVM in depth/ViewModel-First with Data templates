@@ -1,0 +1,54 @@
+ViewModel-First with Data templates
+
+Primary way of resolving data-binding
+
+Implicit data templates can automatically select an appropriate template from the current resource dictionary for an element that's using data binding. This is done based on the type of the data object that is being rendered by the data binding.
+
+We have some element that is being bound to a data object:
+
+<ContentControl Content="{Binding CurrentViewModel}" /> // Or an ItemsControl ItemSource property for example
+
+If the object produced by the binding is not a UI element, such as a ViewModel instance, then the control will go look at the current resource dictionary in order that's in scope for the element.
+
+<DataTemplate DataType="{x:Type vm:MyViewModel}"> // Important: Remember to use the x:Type markup extension to specify the type you're mapping to.
+	<vw:MyView />
+</DataTemplate>
+
+If it finds a match, it creates an instance of the root element found in the DataTemplate (here MyView) which implicitly causes the construction of any child elements. It then renders that element as the child content after having set the dataContext property of the root element to the appropriate ViewModel as defined by the DataTemplate. 
+
+Note that although we have a large resources file (C:\Dev\grid\Source\SensorySoftware.Grids.Grid3.Desktop\Modules\CommandEditor\Views\Resources.xaml) I only see 2 usages of CurrentViewModel in XAML so perhaps we do hookup in some other way too?
+
+OTHER USAGES
+
+DataTemplate elements/views can be accessed by key:
+
+<DataTemplate x:key:"MyElementKey">
+	<StackPanel>
+        <TextBlock Text="{Binding FirstName}" />
+        <TextBlock Text="{Binding LastName}" />
+        <TextBlock Text="{Binding Phone}" />
+    </StackPanel>
+</DataTemplate>
+
+Which can then be accessed in the following way:
+
+<ListBox Grid.Row="1"
+                ItemsSource="{Binding Customers}" ItemTemplate="{StaticResource CustomerTemplate}"/>
+
+IN FULL
+
+<Window.DataContext>
+    <local:MainWindowViewModel/> // In the constructor of the viewModel we new up a CustomerListViewModel and assign to the dataContext of the View
+</Window.DataContext>
+
+<Window.Resources> // without this we can't connect the view to the ViewModel
+    <DataTemplate DataType="{x:Type cust:CustomerListViewModel}">
+        <cust:CustomerListView/>
+    </DataTemplate>
+</Window.Resources>
+
+<Grid>
+    <ContentControl Content="{ Binding CurrentViewModel }"/> // Our current view model is a CustomerListViewModel as that's 
+</Grid>
+
+As part of trying to render the content in ContentControl it goes out to the resource and locate the DataTemplate that's mapped to the appropriate type and then render the content, setting the DataContext of the root element to the CustomerListViewModel thereby satisfying MVVM

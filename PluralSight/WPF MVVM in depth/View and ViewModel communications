@@ -1,0 +1,21 @@
+View and ViewModel communications
+
+Commands, behaviors and attached properties
+
+Commands
+	These a methods that are bound to controls.
+	Based on classic Command design pattern
+	Invoker
+		View control. Typically this is a UI element. Or a chunk of logic code
+	Receiver
+		ViewModel typically. Logic intended for execution. Typically a method in your ViewModel.
+	Use delegating command implementation that sits in between these two to make sure that the invoker and receiver don't need to know about each other. 
+		ICommand
+		Supports a decoupled way of handling invocation
+		Supports enabling/disabling of control
+
+Attached properties and behaviors
+	Relationship between them
+Property changed notifications
+
+

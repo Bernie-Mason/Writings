@@ -1,0 +1,82 @@
+DATA-BINDING
+Data binding lays the groudwork for MVVM (get's hookup between code and data and allows you to move code out of the code behind). MVVM moves the data management and interaction logic into the ViewModel. 
+View-First construction from XAML works great for static child views. Serveral forms of communication exist between View and ViewModel.
+
+There is nothing special about Model objects and data binding can be done without adhering to MVVM. We can bind to a the View dataContext thus: 
+
+<TextBox x:Name="phoneTextBox"
+     Grid.Column="1"
+     HorizontalAlignment="Left"
+     Height="23"
+     Margin="3"
+     Grid.Row="2"
+     Text="{Binding Phone}"
+     VerticalAlignment="Center"
+     Width="120" />
+
+To actually bind the viewModel to the dataContext on the view we need the following type of markup in the XAML
+    <UserControl.DataContext> // Where UserControl is our View 
+        <local:CustomerEditViewModel CustomerId="11DA4696-CEA3-4A6D-8E83-013F1C479618" /> // Where CustomerEditViewModel is our viewModel
+    </UserControl.DataContext>
+
+Now our databindings look like this:
+
+<TextBox x:Name="lastNameTextBox"
+                     Grid.Column="1"
+                     HorizontalAlignment="Left"
+                     Height="23"
+                     Margin="3"
+                     Grid.Row="1"
+                     Text="{Binding Customer.LastName}"
+                     VerticalAlignment="Center"
+                     Width="120" />
+
+So we expect that our viewModel has a property called Customer, the model of which has a property of LastName. 
+
+We can bind ICommand objects thus:
+
+<Button x:Name="saveButton"
+    Content="Save"
+    Width="75"
+    Command="{Binding SaveCommand}" />
+
+We expect an SaveCommmand : ICommand object on the ViewModel.
+
+Finally
+
+<i:Interaction.Triggers>
+    <i:EventTrigger EventName="Loaded">
+        <ei:CallMethodAction TargetObject="{Binding}"
+                             MethodName="LoadCustomer" />
+    </i:EventTrigger>
+</i:Interaction.Triggers>
+
+This binds a method on the ViewModel to an event on View and circumvents the need to explicitly handle the event in the code behind like this:
+
+		private async void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            if (DesignerProperties.GetIsInDesignMode(this)) return;
+            
+            _customer = await _repository.GetCustomerAsync(CustomerId);
+            if (_customer == null) return;
+            firstNameTextBox.Text = _customer.FirstName;
+            lastNameTextBox.Text = _customer.LastName;
+            phoneTextBox.Text = _customer.Phone;
+        }
+
+In the ViewModel (which should implement INotifyPropertyChanged) if the customer is changed/loaded we can have a property like this:
+
+public Customer Customer
+{
+    get { return _customer; }
+    set
+    {
+        if (value != _customer)
+        {
+            _customer = value;
+            PropertyChanged(this, new PropertyChangedEventArgs(nameof(Customer)));
+        }
+    }
+}
+
+When the customer property is changed we raise the PropertyChanged event which signals the view that it needs to refresh the data binding.
