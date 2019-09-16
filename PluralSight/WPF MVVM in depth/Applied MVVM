@@ -1,0 +1,43 @@
+Applied MVVM
+
+Naming and location of components
+	Good to have a pattern that's used consistently
+	Views are typically named NameView (for UserControls and the like)
+	May have other suffixes i.e. Window, Page, Dialog
+		Most of our XAML files in Grid have the View suffix however there are some ResourceDictionary files (C:\Dev\grid\Source\SensorySoftware.Grids.Grid3.Desktop\Modules\GridEditor\Views\Resources.xaml, C:\Dev\grid\Source\SensorySoftware.Grids.Grid3.Desktop\Modules\GridEditor\Views\EditableGridContextMenu.xaml). We have a bunch of such resource dictionaries in the Themes folder (e.g. C:\Dev\grid\Source\SensorySoftware.Grids.Grid3.Desktop\Themes\BuiltIn\Colours.xaml). Note that Window.Resources is also of type ResourceDictationary
+	Don't call it a View unless it has a viewModel
+	Model objects are mostly data objects or POCOS aka Entities. 
+		Name them for the data or state they contain. Noun based
+		If you have wrapped models (i.e. objects that are more semantically correct for your ViewModel to consume) then don't call these ViewModels directly. Keep them as POCOs but keep them separate to your Model types
+	Component location. 
+		Folders by type
+			This is what we do in Grid. Folder for Views and folders for ViewModels. Disadvantage is that there can be many items in these folders.
+		Folders by feature
+			Folder for each view/viewmodel/model (or a grouping)
+		Models are often in a separate project
+	Views are commonly nested
+		Nested content may or may not need to be Views with ViewModels. If no encapsulated data management or interaction logic, no need for a ViewModel.
+	Parent ViewModels can construct child ViewModels
+		And cause navigation, or view switching through DataTemplates.
+	Parent ViewModels can supervise and mediate between children
+
+
+Hierarchical MVVM / Navigation
+
+MVVM application building
+	Pizza order
+		List customers
+		Place orders for a customer
+		Add/edit customers
+		monitor order preparation
+
+	Visual studio data sources designer
+		Can use it to quickly scaffold data bound forms.
+		Unfortunately it also generates non-MVVM structured data binding hook-up
+		However, it can be fairly quickly morphed into an MVVM structure.
+
+	Validation
+		Data entry forms can still leverage WPF datea binding validation features
+		Validation logic belongs in the model or ViewModel, not the view.
+		Can use Exceptions, IDataErrorInfo, INotifyDataErrorInfo, ValidationRules
+			But favour INotifyDataErrorInfo: async and allows more than one type of error to be associated with a field 

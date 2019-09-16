@@ -97,6 +97,21 @@ Task based async and async/await are the norm in .NET
 ViewModels often need to wait for async completion of external work or calls.
 Client Services / Repositories often expose async methods.
 
+============== MVVM Toolkits / Frameworks ==============
+
+Prism framework. Originally microsoft now open source
+	BindableBase class
+	Flexible ViewModel locator.
+	Modularity. Break up your code
+	UI Composition and regions. 
+	Navigation stack.
+	Commands. Very similar to a RelayCommand we used in this course
+	Pub/Sub events. 
+
+MVVM Light. 
+
+Caliburn Micro. We're using this one in Grid!
+
 ========== SUMMARY ===========
 
 MVVM helps you build better structured apps.
@@ -107,3 +122,5 @@ View-Frist MVVM hookup can be achieved several ways
 Data binding forms the communication pathways between View and ViewModel
 DataTemplates allow dynamic selection and hookup of ViewModels and Views
 
+Validation logic belongs in Model and/or ViewModel
+Dependency injection lets you keep ViewModels loosely coupled with client services.

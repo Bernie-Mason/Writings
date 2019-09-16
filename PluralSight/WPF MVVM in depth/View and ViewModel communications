@@ -14,8 +14,81 @@ Commands
 		Supports a decoupled way of handling invocation
 		Supports enabling/disabling of control
 
-Attached properties and behaviors
-	Relationship between them
+
+
+	private ObservableCollection<Customer> _customers;
+    private ICustomersRepository _repository = new CustomersRepository();
+    private ICommand _deleteCommand;
+
+    public CustomerListViewModel()
+    {
+        if (DesignerProperties.GetIsInDesignMode(
+            new System.Windows.DependencyObject())) return;
+        _deleteCommand = new RelayCommand(OnDelete, CanDelete);
+        Customers = new ObservableCollection<Customer>(_repository.GetCustomersAsync().Result);
+    }
+
+    private bool CanDelete()
+    {
+        return true;
+    }
+
+    private void OnDelete()
+    {
+        _repository.DeleteCustomerAsync(SelectedCustomer.Id);
+    }
+
+    public Customer SelectedCustomer { get; set; }
+
+    public ObservableCollection<Customer> Customers
+    {
+        get
+        {
+            return _customers;
+        }
+        set
+        {
+            _customers = value;
+        }
+    }
+
+    public ICommand DeleteCommand
+    {
+        get;
+        private set;
+    }
+
+ATTACHED PROPERTIES AND BEHAVIORS
+    Attached properties form the basis for behaviors although don't need behaviours to be useful.
+
+	These perform a communication path between Views and ViewModels when commands and propertychangedNotifications are not possible. 
+	Attached properties are special kind of dependency property. Can be defined in any class and then applied to any object that derives from DependencyObject which all UI elements do. They are used for a lot of things in XAML. Form the basis for custom behaviors.
+	Subscribing to events or setting properties on the control.
+
+    Attached properties have the form: 
+    public static readonly DependencyProperty FinishedEditingCommandProperty = DependencyProperty.Register("FinishedEditingCommand", 
+        typeof(ICommand), typeof(FinishedEditingTextBoxBehavior), new PropertyMetadata(null));
+
+
+	Behaviors can be defined directly with Attached Properties or with Blend SDK
+	Blend SDK is the preferred way
+		- uses Attached Properties itself to attach Blend SDK-based behaviors to elements
+	Behaviors can form a communication bridge between View and ViewModel
+		- A behavior can subscribe to events / property changes in View Trigger commands or method calls into ViewModel.
+		- In the other direction, behavior in the view can listen for events / property changes from ViewModel and modify UI accordingly.
+
+    Note that Andy doesn't really like behaviors, he says that their lifetime can be really unclear. 
+
 Property changed notifications
+    Need to trigger bindings to refresh as properties change. Can also be used to signal the view or some behavior in the view such as changing visibility of some element, triggering an animation etc
+    Two options
+        DependencyProperties: Has own internal NotifyOfPropertyChange notifications
+        INotifyPropertyChanged: NotifyOfPropertyChange event is fired in the set block of the appropriate property.
+            We've already done this! When we set a bool in Grid to show the web browser side bar we need to fire NotifyOfPropertyChange() in the setter of the boolean. 
+            INotifyPropertyChanged is appropriate for ViewModels and Models
 
 
+SUMMARY
+    Variety of ways to communicate. Commands are primary form of View -> ViewModel communication
+    Behaviors make it easy to bridge the gap between View events and changes and ViewModel logic
+    PropertyChange notifications keep your views in sync.
