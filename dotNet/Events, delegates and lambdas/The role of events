@@ -1,0 +1,44 @@
+The role of events, event handlers and delegates
+
+Events essentially are notifications. Events signal the occurance of an action/notification.
+
+Event: Sends the event (Event args) ->
+Delegate: The pipeline between the raiser and the handler
+(Event args) -> Event listener/handler: Listens for events. 
+
+It's possible to have any number of things that subscribe to a particular event.
+Important: Objects that raise events don't need to explicitly know the object that will handle the event
+
+Events pass EventArgs (event data) that gets passed from point A to point B.
+
+Delegates are a specialised class often called a function pointers. Based on MulticastDelegate base case.
+Without them events wouldn't be useful at all as there wouldn't be a way to raise our events.
+
+Event handlers processes events. Method that's responsible for receiving and processing data from a delegate.
+
+Normally has two parameters
+	- sender
+	- Event args
+
+EventArgs responsible for encapsulating data
+
+
+// Handlers -> The thing we invoke
+public static event EventHandler CurrentGridSetChanging;
+public event EventHandler<CustomEventArgs> ButtonClicked;
+
+// Handler invocation
+ButtonClicked(null, new CustomEventArgs(param1, param2))
+CurrentGridSetChanging(this, new CustomEventArgs(param1, param2))
+
+// We attach stuff we want to invoke to the handler (shorthand)
+GridApp.CurrentGridSetChanging += OnCurrentGridSetChanging
+Application.ButtonPress += OnButtonClicked
+
+// Methods we attach. The 
+public void OnCurrentGridSetChanging(object sender, EventArgs args){
+	// .. do work
+}
+public void OnCurrentGridSetChanging(object sender, EventArgs args){
+	// .. do work
+}

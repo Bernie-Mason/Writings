@@ -1,0 +1,73 @@
+# WinDbb
+
+Use x86 WinDbg for x86 program crashes. Also can be helpful to ensure that the endianness of the crash dump is x86. https://superuser.com/questions/358434/how-to-check-if-a-binary-is-32-or-64-bit-on-windows
+
+
+# Useful documenation
+What is mscordacwks.dll and why does it fail to load sometimes? https://docs.microsoft.com/en-us/archive/blogs/dougste/failed-to-load-data-access-dll-0x80004005-or-what-is-mscordacwks-dll
+
+## SOS dll extension
+
+The SOS Debugging Extension lets you view information about code that is running inside the CLR. For example, you can use the SOS Debugging Extension to display information about the managed heap, look for heap corruptions, display internal data types used by the runtime, and view information about all managed code running inside the runtime. 
+
+To load the SOS Debugging Extension into the WinDbg.exe debugger, run the following command in the tool:
+
+```
+.loadby sos clr
+```
+
+Note that the first operation that you make will not work. Try again. :(
+
+To view help on a given command run:
+```
+!help
+```
+
+To analyze the whole dump run
+```
+!analyze -v
+```
+
+To view the clr stack
+```
+!CLRStack
+```
+For the full stack
+```
+!dumpstack
+```
+
+To dump the heap for a specific object. This will tell us how many live objects there are in the heap
+```
+!dumpheap -stat -live -type WeakReference
+```
+
+This will give us the method table of the object. To view the addresses of all the objects we can click on the method table id or run:
+```
+!DumpHeap /d -mt 167f307c
+```
+
+Now we have all our addresses we could look the object information by clicking on one or running
+```
+!DumpObj /d 04463d10
+```
+
+Alternatively we could look at the gcroot of the object
+
+To view the gc root of a particular object 
+!gcroot 29a1c764
+
+Input manager is also getting duplicated.
+
+
+# Issues
+
+## What is mscordacwks.dll and why does it fail to load sometimes? 
+Reading: https://docs.microsoft.com/en-us/archive/blogs/dougste/failed-to-load-data-access-dll-0x80004005-or-what-is-mscordacwks-dll
+
+So how do I fix it?
+Most of the time, if you have your symbol path set up correctly (which you will need to anyway to make any headway at all with debugging anything, let alone managed applications) then the debugger should be able to get the correct mscordacwks.dll from the symbol server automatically:
+
+!sym noisy
+.symfix c:mylocalsymcache
+.cordll -ve -u -l
